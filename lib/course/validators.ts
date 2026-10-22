@@ -81,9 +81,14 @@ export function validateSources(
     module: ts.ModuleKind.ESNext,
     moduleResolution: ts.ModuleResolutionKind.Bundler,
     types: ["react", "react-dom"],
+    typeRoots: [path.join(process.cwd(), "node_modules/@types")],
     lib: ["lib.es2020.d.ts", "lib.dom.d.ts"],
   };
   const host = ts.createCompilerHost(options);
+  // The bundled compiler lives in a server chunk; its declarations keep their package path.
+  const libDirectory = path.join(process.cwd(), "node_modules/typescript/lib");
+  host.getDefaultLibLocation = () => libDirectory;
+  host.getDefaultLibFileName = () => path.join(libDirectory, "lib.es2020.d.ts");
   const originalSource = host.getSourceFile.bind(host);
   const originalFile = host.fileExists.bind(host);
   const originalDirectory = host.directoryExists?.bind(host);

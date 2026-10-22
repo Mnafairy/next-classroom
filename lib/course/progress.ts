@@ -1,3 +1,5 @@
+import { createCloudProgress, messages } from "../student/cloud";
+import { normalizeStudentId } from "../student/identity";
 import { BUTTON, exercises, findExercise, initialExercise } from "./lessons";
 import type { Draft, Exercise, Progress } from "./types";
 
@@ -9,7 +11,42 @@ const initial: Progress = {
   drafts: {},
 };
 let snapshot = initial;
-let loaded = false;
+let studentId = "";
+let cloudStatus = "";
+let statusVersion = 0;
+const cloud = createCloudProgress("nextjs", (status) => {
+  cloudStatus = messages[status];
+  statusVersion++;
+  listeners.forEach((listener) => listener());
+});
+export const recoverCloudProgress = () => cloud.recover();
+export const getCloudVersion = () => statusVersion;
+export const getCloudStatus = () => cloudStatus;
+const studentKey = () => `${STORAGE_KEY}:${studentId}`;
+export async function loginStudent(value: string) {
+  const id = normalizeStudentId(value);
+  let local = initial;
+  try {
+    local = sanitizeProgress(
+      JSON.parse(localStorage.getItem(`${STORAGE_KEY}:${id}`) || "null"),
+    );
+  } catch {}
+  const remote = await cloud.load(id, local);
+  studentId = id;
+  snapshot = sanitizeProgress(remote);
+  listeners.forEach((listener) => listener());
+  return id;
+}
+export function logoutStudent() {
+  cloud.stop();
+  studentId = "";
+  snapshot = initial;
+  listeners.forEach((listener) => listener());
+}
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", () => void cloud.flush());
+  window.addEventListener("online", () => void cloud.flush());
+}
 let savingAvailable = true;
 const listeners = new Set<() => void>();
 
@@ -68,46 +105,27 @@ export function sanitizeProgress(value: unknown): Progress {
 
 export function getProgress(): Progress {
   if (typeof window === "undefined") return initial;
-  if (!loaded) {
-    loaded = true;
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) snapshot = sanitizeProgress(JSON.parse(raw));
-    } catch {
-      savingAvailable = false;
-    }
-  }
+  if (!studentId) return initial;
   return snapshot;
 }
 export const getServerProgress = () => initial;
 export const canSave = () => savingAvailable;
 export function subscribeProgress(listener: () => void) {
   listeners.add(listener);
-  const onStorage = (event: StorageEvent) => {
-    if (event.key !== STORAGE_KEY) return;
-    try {
-      snapshot = event.newValue
-        ? sanitizeProgress(JSON.parse(event.newValue))
-        : initial;
-    } catch {
-      snapshot = initial;
-    }
-    listeners.forEach((callback) => callback());
-  };
-  window.addEventListener("storage", onStorage);
   return () => {
     listeners.delete(listener);
-    window.removeEventListener("storage", onStorage);
   };
 }
 export function updateProgress(updater: (current: Progress) => Progress) {
+  if (!studentId) return;
   snapshot = updater(getProgress());
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+    localStorage.setItem(studentKey(), JSON.stringify(snapshot));
     savingAvailable = true;
   } catch {
     savingAvailable = false;
   }
+  cloud.save(snapshot);
   listeners.forEach((listener) => listener());
 }
 export function getDraft(progress: Progress, exercise: Exercise): Draft {

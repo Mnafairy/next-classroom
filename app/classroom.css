@@ -1,0 +1,707 @@
+/* Shared classroom surfaces used by the React and JavaScript courses. */
+:root {
+  --lab-bg: #f4f7fc;
+  --lab-ink: #192e4b;
+  --lab-muted: #5e708a;
+  --lab-line: #dfe7f2;
+  --lab-blue: #315be8;
+  --lab-teal: #147d73;
+}
+.classroom-entry {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--lab-bg);
+  color: var(--lab-ink);
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+}
+.classroom-entry :is(h1, h2, p, pre, ul) {
+  margin: 0;
+}
+.classroom-entry :is(button, input) {
+  font: inherit;
+}
+.classroom-entry :is(a, button, input):focus-visible {
+  outline: 3px solid #84a6fa;
+  outline-offset: 4px;
+}
+.classroom-entry-header,
+.classroom-entry-footer {
+  width: min(1240px, 100%);
+  margin-inline: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 40px;
+}
+.classroom-wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--lab-ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.classroom-wordmark > span:last-child > span {
+  color: var(--lab-blue);
+}
+.classroom-logo {
+  width: 41px;
+  height: 41px;
+  display: grid;
+  place-items: center;
+  background: var(--lab-blue);
+  color: white;
+  border-radius: 12px 12px 12px 4px;
+}
+.classroom-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lab-muted);
+  text-decoration: none;
+}
+.classroom-back:hover {
+  color: var(--lab-blue);
+}
+.classroom-entry-main {
+  width: min(1160px, 100%);
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: clamp(40px, 7vw, 100px);
+  align-items: center;
+  margin: auto;
+  padding: 44px 40px 60px;
+}
+.classroom-course-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--lab-muted);
+  margin-bottom: 24px;
+}
+.classroom-course-label > span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  color: var(--lab-blue);
+  background: #e4ebfc;
+  font:
+    700 16px var(--font-geist-mono),
+    monospace;
+}
+.entry-nextjs .classroom-course-label > span {
+  background: #203b53;
+  color: white;
+}
+.entry-javascript .classroom-course-label > span {
+  background: #f3d24f;
+  color: #3d330d;
+}
+.classroom-course-label strong {
+  font-size: 14px;
+  color: var(--lab-ink);
+}
+.classroom-course-label i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #a8b6ca;
+  margin-inline: 3px;
+}
+.classroom-story h1 {
+  white-space: pre-line;
+  font-size: clamp(32px, 3.6vw, 46px);
+  font-weight: 780;
+  line-height: 1.24;
+  letter-spacing: -1.6px;
+  color: var(--lab-ink);
+}
+.classroom-story > p {
+  font-size: 14px;
+  line-height: 1.95;
+  color: var(--lab-muted);
+  max-width: 45ch;
+  margin-top: 20px;
+}
+.classroom-code {
+  border: 1px solid #dbe4f2;
+  border-radius: 13px;
+  overflow: hidden;
+  background: white;
+  margin-top: 30px;
+  max-width: 490px;
+  box-shadow: 0 8px 24px #19345c04;
+}
+.classroom-code-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 17px;
+  border-bottom: 1px solid #e5ebf4;
+  background: #f9fbfe;
+  color: #627592;
+  font:
+    11px var(--font-geist-mono),
+    monospace;
+}
+.classroom-code-file > span:last-child {
+  margin-left: auto;
+  font:
+    10px Arial,
+    sans-serif;
+  color: #7385a0;
+}
+.classroom-code > pre {
+  padding: 22px 20px;
+  color: #3459b6;
+  font:
+    12px/1.9 var(--font-geist-mono),
+    Menlo,
+    monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.classroom-code-output {
+  position: relative;
+  padding: 15px 20px;
+  border-top: 1px solid #e5ebf4;
+  background: #f4f9f8;
+}
+.classroom-code-output > span {
+  display: block;
+  margin-bottom: 7px;
+  color: #557e77;
+  font:
+    700 9px Arial,
+    sans-serif;
+  letter-spacing: 1px;
+}
+.classroom-code-output > pre {
+  padding: 0;
+  font:
+    12px/1.8 var(--font-geist-mono),
+    Menlo,
+    monospace;
+  color: #246b5e;
+  white-space: pre-wrap;
+}
+.classroom-code-output > svg {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  color: #26846b;
+}
+.classroom-features {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 0;
+  margin-top: 22px !important;
+}
+.classroom-features li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--lab-muted);
+  font-size: 11px;
+}
+.classroom-features svg {
+  color: var(--lab-teal);
+}
+.classroom-entry-card {
+  background: white;
+  border: 1px solid var(--lab-line);
+  border-radius: 20px;
+  padding: 34px;
+  box-shadow: 0 14px 50px #1d3c6e07;
+}
+.classroom-entry-icon {
+  width: 47px;
+  height: 47px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dce6fc;
+  background: #eff4ff;
+  color: var(--lab-blue);
+  border-radius: 13px;
+  margin-bottom: 23px;
+}
+.classroom-eyebrow {
+  color: #647999;
+  letter-spacing: 1.3px;
+  font-size: 9px;
+  font-weight: 750;
+}
+.classroom-entry-card h2 {
+  font-size: 24px;
+  line-height: 1.4;
+  font-weight: 750;
+  letter-spacing: -0.8px;
+  color: var(--lab-ink);
+  margin: 9px 0 11px;
+}
+.classroom-entry-description {
+  color: var(--lab-muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.classroom-entry-card form {
+  margin-top: 27px;
+}
+.classroom-entry-card label {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--lab-ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+.classroom-entry-card input {
+  width: 100%;
+  min-height: 52px;
+  padding: 13px 15px;
+  border: 1px solid #bdcce3;
+  border-radius: 9px;
+  background: #fcfdff;
+  color: var(--lab-ink);
+  font-size: 16px;
+  letter-spacing: 0.3px;
+}
+.classroom-entry-card input::placeholder {
+  color: #8b9bb1;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+.classroom-entry-card input[aria-invalid="true"] {
+  border-color: #c64b54;
+  background: #fffafb;
+}
+.classroom-field-help {
+  color: #667b97;
+  font-size: 10px;
+  line-height: 1.8;
+  margin-top: 9px !important;
+}
+.classroom-entry-error {
+  color: #b52d40;
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 10px !important;
+}
+.classroom-entry-error:empty {
+  display: none;
+}
+.classroom-enter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 49px;
+  padding: 13px 17px;
+  margin-top: 21px;
+  border: 1px solid var(--lab-blue);
+  border-radius: 9px;
+  background: var(--lab-blue);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.classroom-enter:hover:not(:disabled) {
+  background: #224bd1;
+}
+.classroom-enter:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.classroom-enter svg {
+  width: 18px;
+  height: 18px;
+}
+.classroom-save-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 27px;
+  padding-top: 24px;
+  border-top: 1px solid #e5ebf4;
+}
+.classroom-save-note > svg {
+  flex-shrink: 0;
+  color: #4e78bb;
+  margin-top: 2px;
+}
+.classroom-save-note strong {
+  display: block;
+  color: #385471;
+  font-size: 11px;
+  font-weight: 700;
+}
+.classroom-save-note p {
+  color: #657993;
+  font-size: 11px;
+  line-height: 1.85;
+  margin-top: 5px;
+}
+.classroom-id-note {
+  text-align: center;
+  margin-top: 19px !important;
+  color: #7c8da6;
+  font-size: 10px;
+}
+.classroom-entry-footer {
+  border-top: 1px solid var(--lab-line);
+  color: #6e819e;
+  font-size: 10px;
+  padding-block: 22px;
+}
+.classroom-spinner {
+  animation: classroom-spin 1s linear infinite;
+}
+@keyframes classroom-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Course chrome: preserve editor colors while making reading and navigation clearer. */
+.learning-app {
+  --purple: var(--lab-blue);
+  --purple-light: #edf2ff;
+  --foreground: var(--lab-ink);
+  --muted: var(--lab-muted);
+  --border: var(--lab-line);
+  background: var(--lab-bg);
+}
+.learning-app .app-header {
+  height: 72px;
+  padding-inline: 24px;
+}
+.learning-app .course-sidebar {
+  background: white;
+  top: 72px;
+  height: calc(100dvh - 72px);
+  width: 260px;
+}
+.learning-app .sidebar-intro {
+  padding-top: 25px;
+}
+.learning-app .sidebar-intro h2 {
+  color: #667b97;
+  font-size: 12px;
+  font-weight: 700;
+}
+.learning-app .module-button {
+  min-height: 48px;
+  border-radius: 9px;
+}
+.learning-app .nav-exercise {
+  min-height: 43px;
+  border-radius: 7px;
+  line-height: 1.6;
+}
+.learning-app .nav-exercise.selected {
+  background: #edf2ff;
+  color: #294dc7;
+}
+.learning-app .course-main {
+  padding: 32px 36px 0;
+}
+.learning-app .lesson-title-row h1 {
+  font-size: clamp(27px, 2.4vw, 36px);
+  font-weight: 750;
+  letter-spacing: -1px;
+}
+.learning-app .lesson-reading {
+  font-size: 14px;
+  line-height: 1.9;
+}
+.learning-app :is(.button-primary, .button-secondary) {
+  min-height: 43px;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-size: 12px;
+}
+.learning-app .local-save {
+  font-size: 10px;
+  max-width: 250px;
+  line-height: 1.6;
+}
+.learning-app .brand-symbol {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #203b53;
+}
+.classroom-student {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 180px;
+  border: 1px solid var(--lab-line);
+  border-radius: 9px;
+  background: white;
+  padding: 8px 10px;
+  color: var(--lab-muted);
+  font-size: 11px;
+}
+.classroom-student span {
+  min-width: 0;
+  text-align: left;
+}
+.classroom-student small {
+  display: block;
+  color: #69809f;
+  font-size: 8px;
+  margin-bottom: 2px;
+}
+.classroom-student strong {
+  display: block;
+  color: var(--lab-blue);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+}
+.py-app {
+  --py-blue: var(--lab-blue);
+  --py-ink: var(--lab-ink);
+  --py-muted: var(--lab-muted);
+  --py-line: var(--lab-line);
+  --py-bg: var(--lab-bg);
+}
+.py-app .py-task-card {
+  padding: 25px;
+  border-radius: 13px;
+}
+.py-app .py-task-card p,
+.py-app .py-task-card li {
+  font-size: 13px;
+  line-height: 1.9;
+}
+.py-app :is(.py-primary, .py-secondary) {
+  min-height: 43px;
+  border-radius: 8px;
+}
+.py-app .py-exercise-links a {
+  min-height: 41px;
+}
+.py-app .py-storage-warning[data-attention="false"] {
+  background: #edf5f3;
+  color: #377466;
+  padding: 7px 20px;
+  font-size: 10px;
+  border-bottom: 1px solid #deece7;
+}
+.py-app .py-storage-warning button {
+  text-decoration: underline;
+  margin-left: 10px;
+}
+@media (max-width: 1050px) {
+  .classroom-entry-main {
+    gap: 35px;
+  }
+  .classroom-entry-card {
+    padding: 28px;
+  }
+  .learning-app .local-save {
+    max-width: 180px;
+  }
+}
+@media (max-width: 800px) {
+  .classroom-entry-main {
+    grid-template-columns: 1fr;
+    max-width: 510px;
+    gap: 26px;
+    padding: 24px 24px 40px;
+  }
+  .classroom-entry-header {
+    padding: 22px 24px;
+  }
+  .classroom-story h1 {
+    font-size: 32px;
+    letter-spacing: -1px;
+  }
+  .classroom-story > p {
+    font-size: 13px;
+    margin-top: 12px;
+  }
+  .classroom-course-label {
+    margin-bottom: 16px;
+  }
+  .classroom-code,
+  .classroom-features {
+    display: none;
+  }
+  .classroom-entry-card {
+    padding: 26px;
+  }
+  .classroom-entry-icon {
+    display: none;
+  }
+  .classroom-entry-card h2 {
+    font-size: 24px;
+  }
+  .classroom-entry-footer {
+    padding: 20px 24px;
+    font-size: 9px;
+  }
+  .learning-app .course-sidebar {
+    width: 230px;
+  }
+  .learning-app .header-meta {
+    gap: 9px;
+  }
+  .learning-app .local-save {
+    display: none;
+  }
+  .learning-app .course-main {
+    padding: 26px 22px 0;
+  }
+}
+@media (max-width: 680px) {
+  .learning-app .app-header {
+    padding-inline: 15px;
+    height: 68px;
+  }
+  .learning-app .course-sidebar {
+    top: 68px;
+    height: calc(100dvh - 68px);
+    width: min(290px, 88vw);
+  }
+  .learning-app .course-sidebar.sidebar-open {
+    left: 0;
+  }
+  .learning-app .brand {
+    font-size: 17px;
+  }
+  .learning-app .header-meta > .lesson-chooser-link {
+    display: none;
+  }
+  .classroom-student {
+    max-width: 130px;
+  }
+  .learning-app .course-topline {
+    flex-wrap: wrap;
+  }
+  .learning-app .course-main {
+    padding: 23px 18px 0;
+  }
+}
+@media (max-width: 420px) {
+  .classroom-wordmark {
+    font-size: 21px;
+    gap: 8px;
+  }
+  .classroom-logo {
+    width: 35px;
+    height: 35px;
+  }
+  .classroom-back {
+    font-size: 10px;
+    gap: 5px;
+  }
+  .classroom-entry-card {
+    padding: 24px;
+  }
+  .classroom-entry-header {
+    padding: 19px 21px;
+  }
+  .classroom-entry-main {
+    padding-inline: 21px;
+  }
+  .classroom-entry-footer > span:last-child {
+    display: none;
+  }
+  .classroom-story h1 {
+    font-size: 29px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .classroom-spinner {
+    animation: none;
+  }
+}
+
+.classroom-mobile-save {
+  display: none;
+}
+.classroom-sync-alert {
+  background: #fff5df;
+  color: #885b13;
+  padding: 12px 24px;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.classroom-sync-alert p {
+  margin: 0;
+}
+.classroom-sync-alert button {
+  padding: 5px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+}
+.local-save[data-attention="true"] .save-dot {
+  background: #c79438;
+}
+@media (max-width: 800px) {
+  .classroom-mobile-save {
+    display: block;
+    padding: 8px 18px;
+    font-size: 10px;
+    color: #377466;
+    background: #edf5f3;
+  }
+  .classroom-mobile-save[data-attention="true"] {
+    color: #885b13;
+    background: #fff5df;
+  }
+}
+.classroom-entry .classroom-enter {
+  font-size: 13px;
+  font-weight: 700;
+}
+@media (max-width: 760px) {
+  .py-app .py-header {
+    flex-wrap: nowrap;
+  }
+  .py-app .py-header-brand {
+    min-width: 0;
+    flex: 1;
+  }
+  .py-app .py-student-button {
+    max-width: 105px;
+  }
+  .py-app .py-student-button > span {
+    min-width: 0;
+  }
+  .py-app .py-student-button strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .py-app .py-sidebar:not(.open) {
+    visibility: hidden;
+  }
+  .py-app .py-sidebar.open {
+    visibility: visible;
+  }
+}
+@media (max-width: 480px) {
+  .py-header-brand .py-brand > span:last-child {
+    display: none;
+  }
+}

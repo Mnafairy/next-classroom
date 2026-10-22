@@ -34,9 +34,9 @@ export default function ExerciseFeedback({
             {passed ? <Check size={18} /> : <CircleAlert size={18} />}
             {passed
               ? viewedSolution
-                ? "Solution checked. Reset to try it yourself."
-                : "Exercise complete"
-              : "A few things to fix"}
+                ? "Жишээ хариуг шалгалаа. Эхнээс нь өөрөө бодоорой."
+                : "Дасгал дууссан"
+              : "Дараах зүйлсийг засаад дахин шалгаарай"}
           </strong>
           {failures.map((check, index) => (
             <div className="check-row" key={index}>
@@ -47,7 +47,7 @@ export default function ExerciseFeedback({
             </div>
           ))}
           <details className="check-details">
-            <summary>View {checks.length} checks</summary>
+            <summary>{checks.length} шалгалтын дэлгэрэнгүй</summary>
             {checks.map((check, index) => (
               <div className="check-row" key={index}>
                 {check.passed ? (

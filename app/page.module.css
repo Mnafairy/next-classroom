@@ -1,0 +1,476 @@
+.page {
+  min-height: 100dvh;
+  color: var(--lab-ink);
+  background: var(--lab-bg);
+}
+.header,
+.main,
+.footer {
+  width: min(1240px, 100%);
+  margin-inline: auto;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 40px;
+  gap: 20px;
+}
+.headerNote {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  color: var(--lab-muted);
+  font-size: 12px;
+}
+.main {
+  padding: 32px 40px 24px;
+}
+.intro {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 64px;
+  align-items: center;
+  margin-bottom: 55px;
+}
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  font-weight: 750;
+  color: var(--lab-blue);
+  margin: 0 0 18px;
+}
+.eyebrow > span {
+  width: 7px;
+  height: 7px;
+  background: var(--lab-blue);
+  border-radius: 50%;
+}
+.intro h1 {
+  font-size: clamp(34px, 3.7vw, 50px);
+  font-weight: 780;
+  line-height: 1.2;
+  letter-spacing: -1.9px;
+  margin: 0;
+}
+.introText {
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--lab-muted);
+  margin: 20px 0 0;
+}
+.saveNote {
+  padding: 25px 28px;
+  background: #eaf0fd;
+  border: 1px solid #dce5f9;
+  border-radius: 18px;
+  position: relative;
+}
+.saveIcon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  background: white;
+  border-radius: 13px;
+  color: var(--lab-blue);
+  margin-bottom: 15px;
+}
+.saveNote h2 {
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.5px;
+  margin: 0 0 9px;
+}
+.saveNote p {
+  font-size: 13px;
+  color: #526684;
+  line-height: 1.9;
+  margin: 0;
+  max-width: 34ch;
+}
+.saveNote > span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 17px;
+  color: #315589;
+  font-size: 11px;
+  font-weight: 600;
+}
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 19px;
+}
+.sectionHeading h2 {
+  font-size: 19px;
+  font-weight: 750;
+  margin: 0;
+  letter-spacing: -0.4px;
+}
+.sectionHeading > span {
+  font-size: 12px;
+  color: var(--lab-muted);
+}
+.lessons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.card {
+  --accent: var(--lab-blue);
+  --soft: #edf2ff;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border: 1px solid var(--lab-line);
+  border-radius: 18px;
+  padding: 24px;
+  transition:
+    box-shadow 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
+}
+.card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 10px 28px #17346b0b;
+  transform: translateY(-3px);
+}
+.card:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+.python {
+  --accent: #315be8;
+  --soft: #edf2ff;
+}
+.javascript {
+  --accent: #795600;
+  --soft: #fff6d9;
+}
+.next {
+  --accent: #203b53;
+  --soft: #edf2f5;
+}
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.lessonMark {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  font:
+    750 23px var(--font-geist-mono),
+    monospace;
+  letter-spacing: -1.5px;
+}
+.javascript .lessonMark {
+  background: #f3d24f;
+  color: #3d330d;
+}
+.next .lessonMark {
+  background: #203b53;
+  color: white;
+}
+.grade {
+  color: #596a80;
+  font-size: 11px;
+}
+.cardTitle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 23px 0 10px;
+}
+.cardTitle h2 {
+  font-size: 26px;
+  font-weight: 750;
+  letter-spacing: -0.8px;
+  margin: 0;
+}
+.cardTitle > span {
+  font-size: 11px;
+  color: var(--lab-muted);
+}
+.description {
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--lab-muted);
+  margin: 0 0 17px;
+  min-height: 48px;
+}
+.topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.topics > span {
+  font-size: 10px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  color: #596c87;
+  background: #f3f6fa;
+}
+.code {
+  background: #f7f9fd;
+  border: 1px solid #e7edf5;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.code > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+  color: #687b97;
+  font:
+    10px var(--font-geist-mono),
+    monospace;
+  border-bottom: 1px solid #e7edf5;
+}
+.codeDot {
+  margin-left: auto;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #a6bbd8;
+}
+.code pre {
+  font:
+    11px/1.8 var(--font-geist-mono),
+    monospace;
+  color: var(--accent);
+  padding: 17px 12px;
+  min-height: 93px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+.outcome {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  line-height: 1.8;
+  color: #60728b;
+  margin: 17px 0 22px;
+}
+.outcome svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--accent);
+}
+.enter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  background: var(--soft);
+  color: var(--accent);
+  min-height: 46px;
+  padding: 12px 14px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 750;
+}
+.python .enter {
+  background: var(--accent);
+  color: white;
+}
+.howTo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 17px;
+  margin: 31px 0 13px;
+  font-size: 11px;
+  color: #64758e;
+}
+.howTo > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.howTo strong {
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border: 1px solid #dce4f0;
+  border-radius: 50%;
+  color: #566d8e;
+  font-size: 10px;
+  background: white;
+}
+.howTo > svg {
+  color: #acb9cc;
+}
+.footer {
+  padding: 23px 40px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 10px;
+  color: #697d98;
+}
+@media (max-width: 1000px) {
+  .intro {
+    gap: 32px;
+  }
+  .header,
+  .main,
+  .footer {
+    padding-inline: 28px;
+  }
+  .card {
+    padding: 20px;
+  }
+  .lessons {
+    gap: 14px;
+  }
+}
+@media (max-width: 800px) {
+  .intro {
+    grid-template-columns: 1fr;
+    margin-bottom: 34px;
+  }
+  .saveNote {
+    display: none;
+  }
+  .lessons {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 28px;
+    padding: 24px;
+  }
+  .cardTop,
+  .cardTitle,
+  .description,
+  .topics {
+    grid-column: 1;
+  }
+  .cardTitle {
+    margin-top: 17px;
+  }
+  .description {
+    min-height: 0;
+    margin-bottom: 12px;
+  }
+  .topics {
+    margin: 0;
+  }
+  .code {
+    grid-column: 2;
+    grid-row: 1 / 5;
+    align-self: start;
+  }
+  .code pre {
+    font-size: 12px;
+    min-height: 100px;
+  }
+  .outcome {
+    grid-column: 1;
+    margin-bottom: 0;
+  }
+  .enter {
+    grid-column: 2;
+    grid-row: 5;
+    align-self: end;
+  }
+  .main {
+    padding-top: 24px;
+  }
+  .intro h1 {
+    font-size: 40px;
+  }
+}
+@media (max-width: 520px) {
+  .header {
+    padding: 22px;
+  }
+  .headerNote {
+    display: none;
+  }
+  .main {
+    padding: 22px 22px 8px;
+  }
+  .intro h1 {
+    font-size: 35px;
+    letter-spacing: -1.2px;
+  }
+  .introText {
+    font-size: 13px;
+  }
+  .sectionHeading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .sectionHeading h2 {
+    font-size: 18px;
+  }
+  .card {
+    display: flex;
+    padding: 22px;
+  }
+  .enter {
+    align-self: stretch;
+  }
+  .code {
+    display: none;
+  }
+  .cardTitle {
+    margin-top: 18px;
+  }
+  .description {
+    margin-bottom: 14px;
+  }
+  .outcome {
+    margin: 17px 0 20px;
+  }
+  .howTo {
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  .howTo > svg {
+    display: none;
+  }
+  .howTo > span {
+    flex: 1 1 100%;
+  }
+  .footer {
+    padding: 20px 22px;
+  }
+  .footer > span:last-child {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+  .card:hover {
+    transform: none;
+  }
+}

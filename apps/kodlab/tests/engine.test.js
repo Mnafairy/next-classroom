@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {exercises,questions,quizzes} from '../src/content.js';
+import {withInputs,checkStructure,sameOutput,scoreQuiz} from '../src/engine.js';
+const capture=code=>{const logs=[];vm.runInNewContext(code,{console:{log:(...args)=>logs.push(args.map(String).join(' '))}},{timeout:300});return logs;};
+for(const ex of exercises)test(`${ex.id}: example solution passes all boundary inputs`,()=>{assert.ok(checkStructure(ex.solution,ex.requirements).every(c=>c.passed));for(const t of ex.tests)assert.deepEqual(capture(withInputs(ex.solution,t.vars)),t.output);});
+test('input overrides respect strings, comments, multiline and comma declarations',()=>{const source='// let age = 123;\nlet age\n = 13, height = 150;\nconsole.log("let age = 123", age, height);';assert.deepEqual(capture(withInputs(source,{age:12,height:140})),['let age = 123 12 140']);});
+test('missing input variable produces useful error',()=>assert.throws(()=>withInputs('console.log("A")',{score:90}),/score хувьсагч/));
+test('hardcoded grade does not pass varying inputs',()=>{const ex=exercises.find(e=>e.id==='grade');const source='let score = 84; console.log("B");';assert.ok(ex.tests.some(t=>!sameOutput(capture(withInputs(source,t.vars)),t.output)));});
+test('one extra output line fails',()=>assert.equal(sameOutput(['B','extra'],['B']),false));
+test('no output fails',()=>assert.equal(sameOutput([],['B']),false));
+test('syntax error caught before execution',()=>assert.throws(()=>withInputs('let n = ;',{}),SyntaxError));
+test('structure check ignores operators inside strings/comments',()=>{assert.equal(checkStructure('let a = "&&"; // if (true) {}',['if','logical:&&']).some(c=>c.passed),false);});
+test('quiz unanswered and incorrect options count zero',()=>assert.deepEqual(scoreQuiz(questions,{[questions[0].id]:questions[0].answer,[questions[1].id]:3}),{correct:1,total:20}));
+test('quiz question IDs and answer indexes are valid',()=>{assert.equal(new Set(questions.map(q=>q.id)).size,20);for(const q of questions){assert.ok(q.answer>=0&&q.answer<q.options.length);assert.equal(q.options.length,4);}for(const q of quizzes)assert.equal(questions.filter(x=>q.topics.includes(x.topic)).length,q.id==='all'?20:5);});

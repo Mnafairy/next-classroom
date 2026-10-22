@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Generated from the pinned pyodide dependency by postinstall/build.
+/public/python/runtime/
+/work/
+
+# Generated JavaScript classroom app from apps/kodlab.
+/public/kodlab/
+/apps/kodlab/node_modules/

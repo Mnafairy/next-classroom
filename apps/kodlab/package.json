@@ -1,0 +1,23 @@
+{
+  "name": "@oyunlag/kodlab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 4173",
+    "build": "vite build",
+    "test": "tsx --test tests/*.test.js"
+  },
+  "dependencies": {
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/view": "6.43.14",
+    "@codemirror/state": "6.7.6",
+    "codemirror": "6.0.2",
+    "acorn": "8.19.0",
+    "lucide": "0.468.0"
+  },
+  "devDependencies": {
+    "vite": "7.3.7"
+  },
+  "description": "Монгол хэлтэй 6–8-р ангийн JavaScript дасгал, мэдлэгийн сорил"
+}

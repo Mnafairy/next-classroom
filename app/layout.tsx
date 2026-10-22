@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "./python.css";
+import "./flow.css";
+import "./classroom.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,20 +17,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Next Classroom",
+  title: "КодЛаб · Хичээл сонгох",
   description:
-    "An interactive Next.js foundations course. Set up your Mac, build React components, and practice props with code and a live preview.",
+    "Python, JavaScript, Next.js хичээлээ сонгоод код бичиж сурцгаая.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="mn"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <Script src="/exam-guard.js" strategy="beforeInteractive" />
         <a className="skip-link" href="#main-content">
-          Skip to lesson
+          Хичээл рүү очих
         </a>
         {children}
       </body>

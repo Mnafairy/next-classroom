@@ -15,11 +15,15 @@ import {
   Terminal,
   Trophy,
   X,
+  UserRound,
 } from "lucide-react";
 import { useRef, useState, useSyncExternalStore } from "react";
 import { exercises, modules, COMMANDS } from "@/lib/course/lessons";
 import {
   canSave,
+  getCloudVersion,
+  getCloudStatus,
+  recoverCloudProgress,
   getDraft,
   getProgress,
   getServerProgress,
@@ -37,12 +41,19 @@ const ExerciseSandbox = dynamic(() => import("./ExerciseSandbox"), {
   loading: () => (
     <div className="sandbox-loading">
       <Code2 size={24} />
-      <span>Getting your editor ready…</span>
+      <span>Кодын орчныг бэлдэж байна…</span>
     </div>
   ),
 });
 
-export default function LearningWorkspace() {
+export default function LearningWorkspace({
+  student,
+  onSwitchStudent,
+}: {
+  student: string;
+  onSwitchStudent: () => void;
+}) {
+  useSyncExternalStore(subscribeProgress, getCloudVersion, () => 0);
   const progress = useSyncExternalStore(
     subscribeProgress,
     getProgress,
@@ -60,6 +71,8 @@ export default function LearningWorkspace() {
   const [reset, setReset] = useState<"exercise" | "course" | null>(null);
   const [solutionConfirm, setSolutionConfirm] = useState(false);
   const completed = progress.completed.includes(exercise.id);
+  const cloudStatus = getCloudStatus();
+  const syncAttention = /хадгалаагүй|боломжгүй|Өөр цонхонд/.test(cloudStatus);
   const lessonHeading = useRef<HTMLHeadingElement>(null);
 
   function select(id: string) {
@@ -150,7 +163,7 @@ export default function LearningWorkspace() {
     setSandboxKey((key) => key + 1);
     setChecks([]);
     setMessage(
-      "Solution loaded. Read through it, then reset the exercise to practice on your own.",
+      "Жишээ хариуг ачааллаа. Уншиж ойлгоод, дасгалыг эхнээс нь өөрөө бодоорой.",
     );
     setSolutionConfirm(false);
   }
@@ -184,41 +197,84 @@ export default function LearningWorkspace() {
         <div className="brand-area">
           <button
             className="icon-button mobile-menu"
-            aria-label="Open course navigation"
+            aria-label="Хичээлийн цэс нээх"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu size={20} />
           </button>
-          <Link className="brand" href="/" aria-label="Next Classroom home">
+          <Link
+            className="brand"
+            href="/next-classroom"
+            aria-label="Next Classroom home"
+          >
             <span className="brand-symbol">
               N<span>↗</span>
             </span>
             <span>
-              next<span className="brand-divider">/</span>
-              <strong>classroom</strong>
+              Код<span className="brand-divider">/</span>
+              <strong>Лаб</strong>
             </span>
           </Link>
         </div>
         <div className="header-meta">
-          <span className="local-save">
+          <button
+            className="classroom-student"
+            onClick={onSwitchStudent}
+            aria-label={`Сурагч ${student} · Сурагч солих`}
+            title="Сурагч солих"
+          >
+            <UserRound size={16} />
+            <span>
+              <small>Сурагч солих</small>
+              <strong>{student}</strong>
+            </span>
+          </button>
+          <Link
+            href="/"
+            className="lesson-chooser-link"
+            prefetch={false}
+            aria-label="Хичээл сонгох"
+            title="Хичээл сонгох"
+          >
+            <ArrowLeft size={15} aria-hidden="true" />
+            <span>Хичээл сонгох</span>
+          </Link>
+          <span
+            className="local-save"
+            role="status"
+            data-attention={syncAttention}
+          >
             <span className={canSave() ? "save-dot" : "save-dot storage-off"} />
-            {canSave()
-              ? "Saved on this device"
-              : "Practice mode · saving unavailable"}
+            {cloudStatus || "Ахиц ачаалж байна…"}
           </span>
           <details className="course-options">
-            <summary aria-label="Course options">
+            <summary aria-label="Хичээлийн сонголт">
               <MoreHorizontal size={20} />
             </summary>
             <div className="options-menu">
               <button onClick={() => setReset("course")}>
                 <RotateCcw size={14} />
-                Reset all progress
+                Бүх ахицыг эхнээс нь эхлэх
               </button>
             </div>
           </details>
         </div>
       </header>
+      <div
+        className="classroom-mobile-save"
+        role="status"
+        data-attention={syncAttention}
+      >
+        {cloudStatus}
+      </div>
+      {cloudStatus.includes("Өөр цонхонд") && (
+        <div className="classroom-sync-alert" role="alert">
+          <p>{cloudStatus}</p>
+          <button onClick={recoverCloudProgress}>
+            Ажлаа татаж, серверийн ахицыг ачаалах
+          </button>
+        </div>
+      )}
       <div className="app-body">
         <LessonNavigation
           active={exercise.id}
@@ -231,7 +287,7 @@ export default function LearningWorkspace() {
           <button
             className="sidebar-backdrop"
             onClick={() => setSidebarOpen(false)}
-            aria-label="Close navigation overlay"
+            aria-label="Цэс хаах"
           />
         )}
         <main className="course-main" id="main-content">
@@ -240,7 +296,7 @@ export default function LearningWorkspace() {
               {modules[exercise.module].title}
             </span>
             <span className="lesson-position">
-              Lesson {index + 1} of {exercises.length}
+              Хичээл {index + 1} / {exercises.length}
               <span aria-hidden="true"> · </span>
               {exercise.duration}
             </span>
@@ -252,7 +308,7 @@ export default function LearningWorkspace() {
             {completed && (
               <span className="lesson-status lesson-complete">
                 <CheckCircle2 size={14} />
-                Complete
+                Дууссан
               </span>
             )}
           </div>
@@ -261,8 +317,8 @@ export default function LearningWorkspace() {
             <div className="task-heading">
               <h2>
                 {exercise.kind === "quiz"
-                  ? "Check your understanding"
-                  : "Your task"}
+                  ? "Мэдлэгээ шалгая"
+                  : "Таны даалгавар"}
               </h2>
               <p>{exercise.task}</p>
             </div>
@@ -289,7 +345,7 @@ export default function LearningWorkspace() {
                       <div className="panel-heading">
                         <div>
                           <Terminal size={17} />
-                          <strong>Your terminal commands</strong>
+                          <strong>Терминалын команд</strong>
                         </div>
                       </div>
                       <GuidedCodeEditor
@@ -350,7 +406,7 @@ export default function LearningWorkspace() {
                 <div className="run-actions">
                   <button className="button-primary" onClick={checkKnowledge}>
                     <Check size={15} />
-                    Check answer
+                    Хариу шалгах
                   </button>
                 </div>
               </div>
@@ -378,22 +434,22 @@ export default function LearningWorkspace() {
                 >
                   <Lightbulb size={15} />
                   {hintIndex < 0
-                    ? "Hint"
+                    ? "Санамж"
                     : hintIndex < exercise.hints.length - 1
-                      ? "Another hint"
-                      : "Hint shown"}
+                      ? "Дараагийн санамж"
+                      : "Санамжийг үзсэн"}
                 </button>
               </div>
               <details className="exercise-options">
-                <summary>Exercise options</summary>
+                <summary>Дасгалын сонголт</summary>
                 <div className="options-menu">
                   <button onClick={() => setReset("exercise")}>
                     <RotateCcw size={14} />
-                    Reset exercise
+                    Дасгалыг эхнээс нь эхлэх
                   </button>
                   <button onClick={() => setSolutionConfirm(true)}>
                     <Lightbulb size={14} />
-                    Show solution
+                    Жишээ хариу харах
                   </button>
                 </div>
               </details>
@@ -401,7 +457,7 @@ export default function LearningWorkspace() {
           </section>
           {exercise.checklist && (
             <details className="setup-checklist">
-              <summary>Setup checklist</summary>
+              <summary>Бэлтгэлээ шалгах</summary>
               {exercise.checklist.map((item, itemIndex) => (
                 <label key={item}>
                   <input
@@ -437,14 +493,14 @@ export default function LearningWorkspace() {
               onClick={() => select(exercises[index - 1].id)}
             >
               <ArrowLeft size={15} />
-              Previous lesson
+              Өмнөх хичээл
             </button>
             {index < exercises.length - 1 ? (
               <button
                 className="next-lesson"
                 onClick={() => select(exercises[index + 1].id)}
               >
-                Next lesson
+                Дараагийн хичээл
                 <ArrowRight size={15} />
               </button>
             ) : (
@@ -452,7 +508,7 @@ export default function LearningWorkspace() {
                 className="next-lesson"
                 onClick={() => select(exercises[0].id)}
               >
-                Back to the beginning
+                Эхний хичээл рүү
                 <ArrowRight size={15} />
               </button>
             )}
@@ -469,7 +525,7 @@ export default function LearningWorkspace() {
           >
             <button
               className="dialog-close icon-button"
-              aria-label="Close dialog"
+              aria-label="Цонх хаах"
               onClick={() => {
                 setReset(null);
                 setSolutionConfirm(false);
@@ -482,17 +538,17 @@ export default function LearningWorkspace() {
             </span>
             <h2 id="dialog-title">
               {reset === "course"
-                ? "Start the course fresh?"
+                ? "Хичээлийг эхнээс нь эхлэх үү?"
                 : reset
-                  ? "Reset this exercise?"
-                  : "Take a look at the solution?"}
+                  ? "Дасгалыг эхнээс нь эхлэх үү?"
+                  : "Жишээ хариу харах уу?"}
             </h2>
             <p>
               {reset === "course"
-                ? "This removes all saved code and completed exercises from this browser."
+                ? "Энэ сурагчийн хадгалсан код болон дуусгасан дасгалын ахиц серверээс мөн устна."
                 : reset
-                  ? "Your current code and answers for this exercise will be replaced with the starter version."
-                  : "The working answer will replace your current draft. Reset afterward to try the exercise independently."}
+                  ? "Энэ дасгалын код, хариултууд эхний хувилбараар солигдоно."
+                  : "Одоогийн код жишээ хариугаар солигдоно. Дараа нь дасгалыг эхнээс нь эхэлж, өөрөө бодож үзээрэй."}
             </p>
             <div>
               <button
@@ -503,13 +559,13 @@ export default function LearningWorkspace() {
                   setSolutionConfirm(false);
                 }}
               >
-                Keep practicing
+                Үргэлжлүүлэн бодох
               </button>
               <button
                 className="button-primary"
                 onClick={reset ? performReset : showSolution}
               >
-                {reset ? "Reset" : "Show solution"}
+                {reset ? "Эхнээс нь эхлэх" : "Жишээ хариу харах"}
               </button>
             </div>
           </section>

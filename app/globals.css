@@ -73,6 +73,16 @@ button svg {
 .skip-link:focus {
   top: 12px;
 }
+.lesson-chooser-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #526583;
+  font-size: 12px;
+  min-height: 40px;
+  white-space: nowrap;
+}
+.lesson-chooser-link:hover { color: #2458e6; }
 .app-header {
   height: 72px;
   position: sticky;
@@ -2595,4 +2605,9 @@ summary:focus-visible,
   .course-sidebar.sidebar-open {
     visibility: visible;
   }
+}
+
+@media (max-width: 760px) {
+  .lesson-chooser-link > span { display: none; }
+  .lesson-chooser-link { min-width: 32px; justify-content: center; }
 }

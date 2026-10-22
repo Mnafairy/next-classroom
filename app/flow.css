@@ -1,0 +1,961 @@
+.py-flow-page {
+  max-width: 1450px;
+}
+.py-flow-page .py-page-title {
+  align-items: center;
+}
+.py-flow-page .py-page-title h1 {
+  margin-top: 8px;
+}
+.py-flow-mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.py-app .py-flow-mode-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 15px 18px;
+  border: 1px solid var(--py-line);
+  background: white;
+  border-radius: 9px;
+  text-align: left;
+  color: #8c9ab0;
+}
+.py-flow-mode-tabs button > span:first-child {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #f2f5fa;
+  flex-shrink: 0;
+}
+.py-flow-mode-tabs strong {
+  display: block;
+  font-size: 13px;
+  color: #536b90;
+}
+.py-flow-mode-tabs small {
+  display: block;
+  font-size: 9px;
+  margin-top: 3px;
+  color: #91a0b7;
+}
+.py-flow-mode-tabs button > svg:last-child {
+  margin-left: auto;
+  color: var(--py-blue);
+  flex-shrink: 0;
+}
+.py-app .py-flow-mode-tabs button.active {
+  border-color: #8cabf0;
+  background: #f9fbff;
+  box-shadow: 0 0 0 2px #2458e608;
+}
+.py-flow-mode-tabs button.active > span:first-child {
+  background: #eaf0ff;
+  color: var(--py-blue);
+}
+.py-flow-mode-tabs button.active strong {
+  color: var(--py-blue);
+}
+.py-flow-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 15px;
+  background: white;
+  border: 1px solid var(--py-line);
+  border-radius: 9px;
+  margin-bottom: 18px;
+}
+.py-flow-transport {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.py-flow-transport .py-primary,
+.py-flow-transport .py-secondary {
+  min-height: 36px;
+  font-size: 11px;
+  padding: 8px 13px;
+}
+.py-flow-speed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8395af;
+  font-size: 10px;
+}
+.py-flow-speed select {
+  border: 1px solid #e0e7f3;
+  border-radius: 5px;
+  background: #fafcff;
+  color: #6b80a2;
+  padding: 5px 7px;
+  font: inherit;
+}
+.py-flow-speed > span {
+  border-left: 1px solid var(--py-line);
+  margin-left: 6px;
+  padding-left: 14px;
+  min-width: 88px;
+  font-size: 10px;
+  color: #92a3bb;
+}
+.py-flow-speed strong {
+  color: #4c6da3;
+}
+.py-flow-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: start;
+  gap: 18px;
+}
+.py-flow-left {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+.py-flow-code,
+.py-flow-state,
+.py-flow-output,
+.py-flow-diagram-card {
+  background: white;
+  border: 1px solid var(--py-line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.py-flow-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 47px;
+  padding: 12px 17px;
+  background: #fcfdff;
+  border-bottom: 1px solid #e9eef7;
+  color: #7a8fae;
+  font-size: 10px;
+}
+.py-flow-card-heading > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 650;
+}
+.py-flow-card-heading > span:last-child:not(:first-child) {
+  font-size: 8px;
+  color: #9aa9bd;
+}
+.py-flow-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.py-flow-live > span {
+  width: 5px;
+  height: 5px;
+  background: #edc247;
+  border-radius: 50%;
+}
+.py-flow-code-lines {
+  padding: 22px 0;
+}
+.py-flow-code-lines > div {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  position: relative;
+  background: white;
+  border-left: 3px solid transparent;
+}
+.py-flow-code-lines > div.active {
+  background: #fff8df;
+  border-left-color: #e7b637;
+}
+.py-flow-line-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  flex-shrink: 0;
+  color: #b28b22;
+}
+.py-flow-line-number {
+  color: #bcc7d9;
+  font:
+    10px var(--font-geist-mono),
+    monospace;
+  width: 24px;
+  flex-shrink: 0;
+  user-select: none;
+}
+.py-flow-code-lines > div.active .py-flow-line-number {
+  color: #b49341;
+}
+.py-flow-code-lines code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  color: #526c92;
+  line-height: 1.9;
+  padding: 3px 12px 3px 0;
+}
+.py-flow-code-lines > div.active code {
+  color: #8e691a;
+}
+.py-flow-code-footer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-top: 1px solid #eff2f8;
+  padding: 10px 16px;
+  font-size: 9px;
+  color: #9dabc0;
+}
+.py-flow-state-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 12px;
+  padding: 19px;
+}
+.py-flow-state-grid > div {
+  min-width: 0;
+  padding: 11px 14px;
+  background: #f7faff;
+  border: 1px solid #e9eff8;
+  border-radius: 7px;
+}
+.py-flow-state-grid > div:last-child:nth-child(3) {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.py-flow-state-grid > div > span {
+  display: block;
+  font:
+    9px/1.6 var(--font-geist-mono),
+    monospace;
+  color: #8196b4;
+}
+.py-flow-state-grid strong {
+  display: block;
+  color: #476bab;
+  font:
+    700 23px/1.5 var(--font-geist-mono),
+    monospace;
+  margin-top: 4px;
+}
+.py-flow-state-grid strong.true {
+  color: #25896e;
+}
+.py-flow-state-grid strong.false {
+  color: #b38935;
+}
+.py-flow-state-grid strong.neutral {
+  color: #bdc9da;
+}
+.py-flow-state-grid small {
+  font-size: 11px;
+  color: #a0afc6;
+}
+.py-flow-state-grid > div:last-child:nth-child(3) > strong {
+  margin-top: 0;
+  font-size: 18px;
+}
+.py-flow-output > pre {
+  padding: 16px 20px;
+  min-height: 105px;
+  color: #4c8b75;
+  max-height: 190px;
+  overflow: auto;
+  font-size: 12px;
+}
+.py-flow-output pre > span {
+  display: inline;
+  white-space: pre;
+}
+.py-flow-output pre > span.latest {
+  color: #148467;
+  background: #f3faf6;
+  border-radius: 3px;
+}
+.py-flow-output pre > span.empty {
+  font-size: 10px;
+  color: #b2bfd3;
+}
+.py-flow-teacher-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 14px 16px;
+  background: #edf3fd;
+  border: 1px solid #e4ecf9;
+  border-radius: 8px;
+}
+.py-flow-teacher-tip > svg {
+  color: #7e9fd3;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.py-flow-teacher-tip p {
+  font-size: 10px;
+  color: #7c92b3;
+  line-height: 1.9;
+}
+.py-flow-teacher-tip strong {
+  color: #577aa9;
+}
+.py-flow-diagram {
+  padding: 10px 10px 0;
+  background-image: radial-gradient(#e2e9f3 0.8px, transparent 0.8px);
+  background-size: 16px 16px;
+}
+.py-flow-diagram > svg {
+  display: block;
+  width: 100%;
+  max-height: 590px;
+  overflow: visible;
+}
+.py-flow-edge {
+  stroke: #c2cee1;
+  stroke-width: 1.8px;
+  stroke-linejoin: round;
+  transition: stroke 0.2s;
+}
+.py-flow-edge.active {
+  stroke: var(--py-blue);
+  stroke-width: 2.7px;
+}
+.py-flow-branch {
+  font:
+    9px var(--font-geist-sans),
+    Arial,
+    sans-serif;
+  fill: #8b9fbd;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+.py-flow-branch.true {
+  fill: #369981;
+}
+.py-flow-branch.false {
+  fill: #b18c42;
+}
+.py-flow-node > :is(rect, polygon) {
+  fill: #fff;
+  stroke: #cfdaeb;
+  stroke-width: 1.4px;
+  transition:
+    fill 0.2s,
+    stroke 0.2s;
+}
+.py-flow-node.visited > :is(rect, polygon) {
+  fill: #f4f8ff;
+  stroke: #acc3e5;
+}
+.py-flow-node.decision > polygon {
+  fill: #fffdf6;
+  stroke: #e3d6b6;
+}
+.py-flow-node.active > :is(rect, polygon) {
+  fill: #eaf1ff;
+  stroke: var(--py-blue);
+  stroke-width: 2.4px;
+  filter: drop-shadow(0 2px 5px #2458e61a);
+}
+.py-flow-node > text {
+  fill: #758bab;
+  font:
+    11px var(--font-geist-mono),
+    Arial,
+    monospace;
+}
+.py-flow-node.active > text {
+  fill: #2458e6;
+  font-weight: 600;
+}
+.py-flow-node.decision > text {
+  font-size: 11px;
+}
+.py-flow-active-indicator {
+  fill: #2458e6;
+  stroke: white;
+  stroke-width: 2px;
+}
+.py-flow-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 17px;
+  justify-content: center;
+  padding: 13px 16px;
+  border-top: 1px solid #edf1f7;
+  font-size: 8px;
+  color: #9cabc0;
+  background: white;
+}
+.py-flow-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.py-flow-legend i {
+  width: 12px;
+  height: 8px;
+  display: inline-block;
+  border: 1px solid #c1cfe3;
+  background: #fbfcff;
+}
+.py-flow-legend i.terminal {
+  border-radius: 10px;
+}
+.py-flow-legend i.decision {
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  border-color: #d8c8a1;
+  background: #fffcf2;
+}
+.py-flow-legend i.output {
+  transform: skew(-18deg);
+}
+.py-flow-current {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 18px 22px;
+  background: white;
+  border: 1px solid #d9e4f7;
+  border-radius: 9px;
+}
+.py-flow-step-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  background: #edf3ff;
+  color: #376cbd;
+  font:
+    650 15px var(--font-geist-mono),
+    monospace;
+  flex-shrink: 0;
+}
+.py-flow-current > div > span {
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #99acc7;
+  font-weight: 700;
+}
+.py-flow-current p {
+  font-size: 12px;
+  color: #5a759c;
+  margin-top: 3px;
+  line-height: 1.8;
+}
+.py-flow-current > svg {
+  color: #40a582;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.py-flow-scrubber {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  padding: 15px 8px;
+  color: #91a3bc;
+  font-size: 9px;
+}
+.py-flow-scrubber > input {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--py-blue);
+  cursor: pointer;
+}
+.py-flow-scrubber > span {
+  min-width: 45px;
+  text-align: right;
+}
+.py-flow-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  background: #eef4fd;
+  border: 1px solid #e0e9f8;
+  border-radius: 9px;
+  padding: 22px;
+  margin-top: 7px;
+}
+.py-flow-inputs label {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #617ea8;
+  font-size: 11px;
+  font-weight: 650;
+}
+.py-flow-inputs label > code {
+  margin-left: auto;
+  padding: 3px 9px;
+  border-radius: 4px;
+  background: #dfeafa;
+  font-size: 11px;
+  color: #4c72b0;
+}
+.py-flow-inputs input[type="range"] {
+  width: 100%;
+  margin: 20px 0 0;
+  accent-color: var(--py-blue);
+  cursor: pointer;
+}
+.py-flow-inputs > div:last-child > strong {
+  font-size: 11px;
+  color: #5c7da9;
+}
+.py-flow-inputs p {
+  font-size: 9px;
+  color: #92a5c1;
+  margin-top: 5px;
+}
+.py-flow-inputs > div:last-child > div {
+  display: flex;
+  gap: 8px;
+  margin-top: 11px;
+}
+.py-app .py-flow-inputs button {
+  border: 1px solid #d6e3f7;
+  border-radius: 5px;
+  background: white;
+  color: #7893b9;
+  padding: 4px 11px;
+  font-size: 10px;
+}
+.py-app .py-flow-inputs button.active {
+  color: #2458e6;
+  border-color: #91b1ea;
+  background: #e5eeff;
+}
+.py-app .py-flow-trace-toggle {
+  margin: 18px 0 10px;
+  font-size: 11px;
+}
+.py-flow-trace {
+  max-height: 310px;
+  overflow: auto;
+  border: 1px solid var(--py-line);
+  border-radius: 8px;
+  background: white;
+}
+.py-flow-trace table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  text-align: left;
+}
+.py-flow-trace caption {
+  text-align: left;
+  font-size: 10px;
+  color: #8ca0bd;
+  padding: 13px 15px;
+}
+.py-flow-trace :is(th, td) {
+  padding: 10px 15px;
+  border-top: 1px solid #e9eef8;
+  color: #7b90af;
+  white-space: nowrap;
+}
+.py-flow-trace th {
+  font-weight: 650;
+  background: #f9fbff;
+}
+.py-flow-trace tr.active td {
+  color: #3c6cb5;
+  background: #edf3ff;
+}
+.py-flow-practice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 22px;
+  margin-top: 22px;
+  border-top: 1px solid var(--py-line);
+}
+.py-flow-practice > span {
+  font-size: 10px;
+  color: #9aabc4;
+}
+.py-flow-practice strong {
+  color: #6d87ad;
+  margin-right: 5px;
+}
+.py-app .py-flow-lesson-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #6484bc;
+  margin-top: 17px;
+  padding: 11px 12px;
+  border: 1px dashed #d3dff4;
+  border-radius: 6px;
+  background: #fbfcff;
+}
+.py-flow-lesson-link > svg {
+  flex-shrink: 0;
+}
+.py-flow-lesson-link > svg:last-child {
+  margin-left: auto;
+}
+.py-flow-lesson-link:hover {
+  border-color: #8fafe4;
+  color: #2458e6;
+}
+@media (max-width: 1380px) and (min-width: 761px) {
+  .py-header-brand > .py-grade {
+    display: none;
+  }
+  .py-header-nav {
+    gap: 2px;
+  }
+  .py-header-nav a {
+    font-size: 10px;
+    padding: 11px 10px;
+  }
+  .py-header-brand {
+    gap: 12px;
+  }
+}
+@media (max-width: 1150px) {
+  .py-flow-mode-tabs {
+    gap: 10px;
+  }
+  .py-app .py-flow-mode-tabs button {
+    gap: 8px;
+    padding: 12px;
+  }
+  .py-flow-mode-tabs strong {
+    font-size: 11px;
+  }
+  .py-flow-mode-tabs small {
+    font-size: 8px;
+  }
+  .py-flow-mode-tabs button > svg:last-child {
+    display: none;
+  }
+  .py-flow-code-lines code {
+    font-size: 10px;
+  }
+  .py-flow-transport {
+    gap: 5px;
+  }
+  .py-flow-transport .py-primary,
+  .py-flow-transport .py-secondary {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+  .py-flow-controls {
+    gap: 9px;
+  }
+  .py-flow-controls .py-icon {
+    width: 27px;
+  }
+}
+@media (max-width: 1020px) {
+  .py-flow-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 13px;
+  }
+  .py-flow-card-heading {
+    padding: 11px 13px;
+    font-size: 9px;
+    gap: 7px;
+  }
+  .py-flow-state-grid {
+    gap: 8px;
+    padding: 12px;
+  }
+  .py-flow-state-grid > div {
+    padding: 9px 11px;
+  }
+  .py-flow-state-grid strong {
+    font-size: 20px;
+  }
+  .py-flow-state-grid > div > span {
+    font-size: 8px;
+  }
+  .py-flow-card-heading .py-flow-live {
+    display: none;
+  }
+  .py-flow-diagram-key {
+    display: none;
+  }
+  .py-flow-code-lines code {
+    font-size: 10px;
+  }
+  .py-flow-line-marker {
+    width: 14px;
+  }
+  .py-flow-line-number {
+    width: 19px;
+  }
+  .py-flow-teacher-tip p {
+    font-size: 9px;
+  }
+  .py-flow-mode-tabs small {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .py-flow-page > .py-page-title > .py-pill {
+    display: none;
+  }
+  .py-flow-page .py-subtitle {
+    font-size: 11px;
+  }
+  .py-flow-mode-tabs {
+    gap: 7px;
+  }
+  .py-app .py-flow-mode-tabs button {
+    flex-direction: column;
+    padding: 12px 6px;
+    gap: 7px;
+    text-align: center;
+  }
+  .py-flow-mode-tabs button > span:first-child {
+    width: 30px;
+    height: 30px;
+  }
+  .py-flow-mode-tabs strong {
+    font-size: 10px;
+  }
+  .py-flow-controls {
+    padding: 10px;
+    gap: 13px;
+  }
+  .py-flow-transport {
+    width: 100%;
+    justify-content: space-between;
+    gap: 3px;
+  }
+  .py-flow-speed {
+    width: 100%;
+    border-top: 1px solid #edf1f7;
+    padding: 10px 3px 0;
+  }
+  .py-flow-speed > span {
+    margin-left: auto;
+    border-left: 0;
+  }
+  .py-flow-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .py-flow-left {
+    display: contents;
+  }
+  .py-flow-code {
+    grid-row: 1;
+  }
+  .py-flow-diagram-card {
+    grid-row: 2;
+  }
+  .py-flow-state {
+    grid-row: 3;
+  }
+  .py-flow-output {
+    grid-row: 4;
+  }
+  .py-flow-teacher-tip {
+    grid-row: 5;
+  }
+  .py-flow-code-lines {
+    padding: 16px 0;
+  }
+  .py-flow-code-lines code {
+    font-size: 12px;
+  }
+  .py-flow-line-marker {
+    width: 20px;
+  }
+  .py-flow-line-number {
+    width: 25px;
+  }
+  .py-flow-card-heading {
+    font-size: 10px;
+  }
+  .py-flow-diagram > svg {
+    max-height: 470px;
+  }
+  .py-flow-state-grid {
+    grid-template-columns: 1fr 1.3fr;
+    padding: 16px;
+  }
+  .py-flow-state-grid > div:last-child:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  .py-flow-current {
+    padding: 15px;
+    gap: 12px;
+  }
+  .py-flow-current p {
+    font-size: 11px;
+  }
+  .py-flow-step-badge {
+    width: 34px;
+    height: 34px;
+  }
+  .py-flow-inputs {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+  .py-flow-scrubber {
+    gap: 11px;
+  }
+  .py-flow-teacher-tip p {
+    font-size: 10px;
+  }
+  .py-flow-practice {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .py-flow-practice > span {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .py-flow-traveler {
+    display: none;
+  }
+}
+.py-flow-page.py-presenting {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  max-width: none;
+  overflow-y: auto;
+  background: #f5f7fb;
+  padding: 22px 4vw 35px;
+}
+.py-presenting > .py-page-title {
+  margin-bottom: 15px;
+}
+.py-presenting .py-page-title .py-eyebrow,
+.py-presenting .py-page-title .py-subtitle {
+  display: none;
+}
+.py-presenting .py-page-title h1 {
+  margin: 0;
+  font-size: 29px;
+}
+.py-presenting .py-flow-mode-tabs {
+  margin-bottom: 13px;
+}
+.py-presenting .py-flow-mode-tabs button {
+  padding: 10px 16px;
+}
+.py-presenting .py-flow-controls {
+  margin-bottom: 14px;
+}
+.py-presenting .py-flow-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+}
+.py-presenting .py-flow-left {
+  grid-template-columns: 1.2fr 1fr;
+  align-items: start;
+  gap: 13px;
+}
+.py-presenting .py-flow-code,
+.py-presenting .py-flow-teacher-tip {
+  grid-column: 1 / -1;
+}
+.py-presenting .py-flow-code-lines {
+  padding: 15px 0;
+}
+.py-presenting .py-flow-code-lines code {
+  font-size: 15px;
+}
+.py-presenting .py-flow-code-lines > div {
+  min-height: 33px;
+}
+.py-presenting .py-flow-state-grid {
+  padding: 13px;
+  gap: 8px;
+}
+.py-presenting .py-flow-state-grid > div {
+  padding: 8px;
+}
+.py-presenting .py-flow-output > pre {
+  min-height: 130px;
+  max-height: 210px;
+  font-size: 14px;
+}
+.py-presenting .py-flow-teacher-tip p {
+  font-size: 12px;
+}
+.py-presenting .py-flow-diagram > svg {
+  max-height: min(51dvh, 480px);
+}
+.py-presenting .py-flow-current {
+  margin-top: 14px;
+  padding: 14px 20px;
+}
+.py-presenting .py-flow-current p {
+  font-size: 14px;
+}
+.py-presenting .py-flow-card-heading {
+  font-size: 11px;
+}
+.py-presenting .py-flow-node > text {
+  font-size: 15px;
+  fill: #536d94;
+}
+.py-presenting .py-flow-node.active > text {
+  fill: #2458e6;
+}
+.py-presenting .py-flow-node.decision > text {
+  font-size: 14px;
+}
+.py-presenting .py-flow-branch {
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  .py-presentation-button {
+    font-size: 9px !important;
+    padding: 8px 10px !important;
+    min-height: 34px !important;
+  }
+  .py-presentation-button svg {
+    width: 12px;
+  }
+  .py-presenting .py-flow-layout {
+    grid-template-columns: 1fr;
+  }
+  .py-presenting .py-flow-left {
+    display: contents;
+  }
+  .py-presenting .py-flow-code-lines code {
+    font-size: 12px;
+  }
+  .py-presenting .py-page-title h1 {
+    font-size: 23px;
+  }
+  .py-presenting .py-flow-current p {
+    font-size: 12px;
+  }
+}

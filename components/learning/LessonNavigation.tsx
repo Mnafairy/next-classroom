@@ -29,7 +29,7 @@ export default function LessonNavigation({
       aria-label="Course navigation"
     >
       <div className="sidebar-intro">
-        <h2>Lessons</h2>
+        <h2>Хичээлүүд</h2>
         <button
           className="icon-button close-sidebar"
           onClick={onClose}
@@ -115,12 +115,12 @@ export default function LessonNavigation({
       </nav>
       <div className="sidebar-bottom">
         <p className="progress-caption">
-          {completed.length} of {exercises.length} complete
+          {completed.length} / {exercises.length} хичээл дууссан
         </p>
         <div
           className="progress-track"
           role="progressbar"
-          aria-label="Course completion"
+          aria-label="Хичээлийн ахиц"
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={percent}

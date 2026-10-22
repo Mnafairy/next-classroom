@@ -1,87 +1,107 @@
-# Next Classroom
+# КодЛаб · Хичээл сонгох
 
-An English, interactive Next.js foundations course for students learning React components, props, events, and state. It includes seven modules and 21 exercises: Mac setup, Next.js concepts, components/imports, props with inline button styles, Cards, click handlers, and counters with independent Like counts.
+The main page is a Mongolian lesson chooser: Python (Grades 9–10) at `/python`, JavaScript (Grades 6–8) at `/kodlab`, and Next.js at `/next-classroom`. Students choose their lesson before entering the existing lesson experience. All three courses ask for a student ID and synchronize progress through the MongoDB backend. Each lesson has a return link to the chooser.
 
-## Run locally
+Existing Python hash bookmarks such as `/python#/visualize/if` forward to `/python#/visualize/if`. Moving Python keeps its storage keys and saved student work on the same origin. The Next.js course instructions remain in [docs/next-classroom.md](docs/next-classroom.md).
 
-Install the dependencies and start the app:
+## КодЛаб · JavaScript (Grades 6–8)
+
+The Mongolian JavaScript lab is available at **`/kodlab`**, alongside Python at
+`/python` and the Next.js course at `/next-classroom`. It includes all 24 exercises,
+20 knowledge-test questions, the code playground, and separate student profiles in MongoDB. A new student ID starts fresh; the same ID resumes its saved work on another device once database access is configured.
+
+The source is in [`apps/kodlab`](apps/kodlab/README.md). Root `npm install` or
+`npm ci` installs its workspace dependencies. Development startup and production
+builds prepare the app automatically; `npm run kodlab:dev` starts its own live
+editor at `http://localhost:4173/kodlab/`. Use `npm run kodlab:build` to refresh
+the files served by Next.js. `npm test` includes the JavaScript checks.
+
+All JavaScript assets are served locally. Saved work from the public ChatGPT
+Site does not transfer automatically to this server's address.
+
+## Run
 
 ```sh
 npm install
-npm run dev -- --port 3001
+npm run dev
 ```
 
-Open http://localhost:3001. Port 3001 is useful when another project already uses 3000. The course's learner setup instructions use the usual port 3000 and explain how to follow the port printed by Terminal.
+Open the address printed by Next.js. If another app uses port 3000, run `npm run dev -- --port 3002`.
 
-Use Node.js 20.9 or newer. The app keeps the installed Next.js 16.3.8 and React 19.2.8 versions. Consult the installed Next.js guides under `node_modules/next/dist/docs/` before changing framework behavior.
-
-## Share with the classroom network
-
-For development, run `npm run dev:lan` and share http://192.168.1.210:3000 with students on the same network. Keep the Mac and its server running. If another server already occupies port 3000, stop that server before starting this one or choose a different port and share that port.
-
-For a classroom session, first stop the development server, then run:
+For the classroom network, use a production build:
 
 ```sh
 npm run build
 npm run start:lan
 ```
 
-The development configuration allows the current classroom host `192.168.1.210`. If the Mac's network address changes, update `allowedDevOrigins` in `next.config.ts` and the shared link, then restart the development server. Production mode does not use this development allowlist.
-
-Run identifiers use `crypto.getRandomValues`, which works on plain HTTP network addresses. `crypto.randomUUID` requires a secure context and is not available on ordinary `http://192.168...` pages. Localhost verification alone does not cover this difference. Student progress belongs to each browser and address, so progress saved on localhost does not appear automatically at the network address.
-
-The editor uses Sandpack's React provider, while previews use its public runtime client directly. This avoids the React preview wrapper's `crypto.subtle` ID hashing, which also requires a secure context. Student code still runs in the isolated preview iframe, and each answer check verifies both that iframe and the current run ID.
+Share this computer's current local-network address on port 3000. Keep the computer and server running. This is a local implementation; it has not been deployed online.
 
 ## Student experience
 
-- Short explanations connect components to JavaScript functions and props to object inputs.
-- Early exercises use code gaps; later exercises use an editable component workspace. Module 5 adds Card.tsx beside Button.tsx and page.tsx.
-- The exercises use real default exports, relative imports, JSX, and JavaScript props, without lesson type annotations.
-- The blue/red exercise passes `color="blue"` and `color="red"` from the page and uses `backgroundColor: color` in the Button's inline style.
-- Module 6 teaches click handlers and passing functions through Card to Button. Module 7 teaches useState, a counter with Reset, and independent Like counts inside Cards. Interactive examples include the appropriate Next.js "use client" boundary.
-- Run updates the component preview; Check answer checks compilation, component structure, rendered output, fresh prop values, and results after repeated clicks.
-- Hints, expected-result examples, reset controls, and solutions support practice.
-- Drafts, lesson selection, and completed exercises are saved in the current browser with no account. The storage key is `next-classroom:progress:v1`.
-- Viewing a solution does not count as independent completion. Reset and try the exercise yourself to earn completion.
+- 28 exercises across seven modules: variables and types; input and arithmetic; if/elif/else; and/or/not; for; while; continue and nested loops.
+- An explicit transition from familiar conditions to single loops before introducing nested loops.
+- A Python editor with syntax highlighting, four-space indentation, line numbers, and Command/Ctrl + Enter to run.
+- Real Python execution in the browser, input values supplied one per line, output, syntax errors, line numbers, and missing-input feedback.
+- Answer checks execute multiple inputs and boundary values, and inspect Python syntax for the requested structures. Comments containing a keyword cannot satisfy a structure check.
+- Hints, concept explanations, reference sheets, example solutions, reset confirmation, and `.py` downloads.
+- 21 quiz questions, seven topic quizzes and one combined quiz, saved answers, scoring, explanations, and retries.
+- A free-code area with its own saved code and inputs.
+- Separate MongoDB drafts and progress for each student ID, with a browser fallback copy. Only imported, active student IDs can load/save progress. IDs are classroom identifiers, not authenticated accounts.
+- Viewed solutions do not count as independent completion. Reset the exercise before solving independently. Editing a completed exercise invalidates its completion until checked again.
+- JSON export of code, progress, and quiz answers. The export is a download. The teacher dashboard at `/admin` shows assigned students, classes, saved work, progress and teacher notes.
 
-## Preview boundary
+## Animated teaching view
 
-Sandpack runs the student's React/TSX in a separate iframe using React 19.2.8. Its browser bundler and package delivery require an internet connection, even when this app runs locally. A preview failure leaves the lesson and drafts usable, with a retry message.
+Choose **Кодын урсгал** in the main navigation, or the animation link inside a condition/loop exercise.
 
-This is a component preview, not a complete Next.js server. Next.js routing and server rendering are taught conceptually and practiced in the real local project from the setup module. Terminal commands shown in the course are instructional and are not executed on the student's Mac by the webpage.
+- `/python#/visualize/if`: battery-level if/else example with distinct True and False paths and a shared statement after the branches.
+- `/python#/visualize/for`: range iteration, the current `i`, repeated output, and the final exhausted-iteration check.
+- `/python#/visualize/while`: condition checks, output, an explicit counter update, the return path, and the final False check.
+- Play/pause, previous/next step, reset, jump to end, speed selection, and a step slider.
+- A **Том дэлгэц** teaching view gives the code and diagram more room for a classroom display. Escape returns to the normal view.
+- A highlighted Python line, active flowchart node, animated dot along the current arrow, variable cards, output, and an optional trace table stay synchronized.
+- Change the battery level or loop length to restart with a new example. Compare battery 20 vs 21, and different loop lengths.
+- Motion starts only when requested. Reduced-motion preferences hide the traveling dot while keeping the code, diagram, and step controls available.
 
-The hidden preview entry renders the page, measures its buttons and Cards, and probes fresh text, colors, and event handlers. For interactive exercises, it clicks a separate hidden copy of the page, verifying repeated updates, reset behavior, and state independence while leaving the visible preview at its initial state. Alerts appear as inline status messages in the preview; alert opens a normal browser dialog in a real student project. The parent accepts reports only from its preview iframe and current run identifier. Editing code invalidates completion feedback; stale preview output cannot pass a new answer.
+These are guided, deterministic examples. The animated flowchart does not interpret arbitrary student code. Exercise code is executed separately by the Python runtime.
 
-The local `/api/check` endpoint parses/type-checks the supplied exercise files using the TypeScript compiler and real React declarations. It never executes student code. It checks default exports, the relative component import, component rendering, and inline style usage. Unrelated imports and type-check bypass directives are rejected before program creation.
+## Python runtime
+
+The pinned Pyodide 0.29.2 dependency supplies Python/WebAssembly. `postinstall`, development startup, and production builds copy its runtime files into generated `public/python/runtime/`; those files are intentionally gitignored. The browser fetches the runtime from this app, so it does not require a third-party CDN connection. Package installation still needs internet unless dependencies are already cached.
+
+A disposable web worker runs each request, keeping Python off the interface thread and away from the web server. Execution is limited to six seconds after Python loads, with a separate 45-second loading deadline and a 16,000-character output limit per case. Stop terminates the worker; each new request receives a fresh Python environment. Student Python is never executed by a server API.
+
+Supply all `input()` values in advance, one per line. Input prompts are omitted from the captured output. This is not a live terminal conversation. Builtins and bundled standard-library modules are available; additional scientific packages are not automatically installed.
+
+The checker is practice feedback, not a secure exam grader. Course data and solutions are available in the browser.
 
 ## Validation
 
 ```sh
-npm run test
+npm test
 npm run lint
 npm run typecheck
 npm run build
 ```
 
-The tests cover all supplied solutions, alternate correct syntax, import failures, prop type errors, broken JSX, hard-coded props, stale runs, output differences, and saved-data recovery. DOM tests render the actual React samples through the same generated preview runner, click buttons, verify counters and independent state, and reject disconnected, doubled, or prematurely called handlers. jsdom is a development-only test dependency.
+The Python tests execute all supplied solutions and samples through the same harness used by the browser worker. They cover multiple inputs, boundary mistakes, hard-coded output, syntax requirements, input failures, output limits, corrupt saved data, and profile-key separation. Animation tests verify branch selection, iteration and check counts, highlighted lines and graph references, and compare final animated output with real Python output. Running these development tests requires `python3`; students do not need it installed.
 
-For a production-mode local server:
+The original Next.js course tests continue to run alongside the Python tests.
 
-```sh
-npm run build
-npm run start -- --port 3001
-```
+## Files
 
-## Extend the course
+- `lib/python/course.ts`: exercises, examples, requirements, solutions, and tests.
+- `lib/python/questions.ts`: quiz content.
+- `lib/python/flow.ts`: guided flowchart geometry and execution steps.
+- `components/python/`: lab, editor, quizzes, dialogs, and animated teaching view.
+- `public/python/harness.py`: shared Python runner and checker.
+- `public/python/worker.js`: browser worker entry point.
+- `scripts/prepare-python.mjs`: self-hosted runtime preparation.
+- `lib/python/state.ts` and `storage.ts`: student profiles, server synchronization and safe progress restore.
 
-- `lib/course/lessons.ts`: modules, explanations, questions, starter/solution files, code gaps, expected output, and hints.
-- `lib/course/types.ts`: exercise and progress contracts.
-- `lib/course/validators.ts`: structural checks and TypeScript diagnostics.
-- `lib/course/runtime-checks.ts`: checks against rendered results.
-- `lib/course/sandbox.ts`: isolated preview runner and virtual files.
-- `lib/course/progress.ts`: versioned browser storage and safe restore.
-- `components/learning/`: workspace, navigation, lesson content, editor, and feedback.
+The existing `lib/course/`, `components/learning/`, and `/api/check` remain dedicated to the original Next.js course.
 
-Add a stable exercise ID, starter files, working solutions, hints, and expected output. Props exercises must remain reusable with new values. Run all validations after adding content.
+## MongoDB and deployment
 
-The implementation plan is in `docs/implementation-plan.md`. This delivery is local; no repository push or online deployment is included.
+See [MongoDB setup and hosting](docs/mongodb-deployment.md) for the selected Atlas project, server-only environment variables, save behavior, and Vercel/Sites options. Live Atlas access requires a database user and network permission.
