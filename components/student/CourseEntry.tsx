@@ -53,6 +53,7 @@ export default function CourseEntry({
   const info = courses[course];
   const [id, setId] = useState("");
   const [error, setError] = useState("");
+  const [examActive, setExamActive] = useState(false);
   const [busy, setBusy] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   return (
@@ -126,9 +127,15 @@ export default function CourseEntry({
               if (busy) return;
               setBusy(true);
               setError("");
+              setExamActive(false);
               try {
                 await onLogin(id);
               } catch (error) {
+                setExamActive(
+                  error instanceof Error &&
+                    "status" in error &&
+                    error.status === 423,
+                );
                 const message =
                   error instanceof Error
                     ? error.message
@@ -162,6 +169,7 @@ export default function CourseEntry({
               onChange={(event) => {
                 setId(event.target.value.normalize("NFKC"));
                 setError("");
+                setExamActive(false);
               }}
             />
             <p id="entry-help" className="classroom-field-help">
@@ -169,6 +177,14 @@ export default function CourseEntry({
             </p>
             <p id="entry-error" role="alert" className="classroom-entry-error">
               {error}
+              {examActive && (
+                <>
+                  {" "}
+                  <Link href="/exam" prefetch={false}>
+                    Шалгалтаа үргэлжлүүлэх →
+                  </Link>
+                </>
+              )}
             </p>
             <button type="submit" className="classroom-enter" disabled={busy}>
               {busy ? (

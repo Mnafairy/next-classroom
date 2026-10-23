@@ -12,6 +12,8 @@ export const messages = {
   saved: "Серверт хадгалагдсан",
   saving: "Серверт хадгалж байна…",
   offline: "Серверт хадгалаагүй · холболтоо шалгана уу",
+  examActive:
+    "Шалгалт идэвхтэй байгаа тул хичээлд орох боломжгүй. Эхлээд шалгалтаа үргэлжлүүлнэ үү.",
   rejected: "Ахиц хадгалах боломжгүй. Кодоо татаж аваад багшдаа хандана уу.",
   conflict:
     "Өөр цонхонд ахиц өөрчлөгдсөн. Өөрийн ажлыг татаад серверийн ахицыг ачаална уу.",
@@ -24,7 +26,7 @@ type Session = {
   revision: number;
   pending: Snapshot | null;
   busy: boolean;
-  blocked: "conflict" | "rejected" | null;
+  blocked: "conflict" | "rejected" | "examActive" | null;
   inherited: Backup[];
   lastSaved: string;
   timer?: ReturnType<typeof setTimeout>;
@@ -87,9 +89,11 @@ export function createCloudProgress(
         new Error(
           response.status === 403
             ? messages.unregistered
-            : response.status === 409
-              ? messages.conflict
-              : messages.offline,
+            : response.status === 423
+              ? messages.examActive
+              : response.status === 409
+                ? messages.conflict
+                : messages.offline,
         ),
         { status: response.status },
       );
@@ -167,11 +171,13 @@ export function createCloudProgress(
           ? error.status
           : 0;
       s.blocked =
-        status === 409
-          ? "conflict"
-          : status >= 400 && status < 500 && ![408, 429].includes(status)
-            ? "rejected"
-            : null;
+        status === 423
+          ? "examActive"
+          : status === 409
+            ? "conflict"
+            : status >= 400 && status < 500 && ![408, 429].includes(status)
+              ? "rejected"
+              : null;
       report(s, s.blocked ?? "offline");
       if (!s.blocked) schedule(s, 10000);
       return;

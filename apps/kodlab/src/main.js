@@ -135,7 +135,13 @@ app.addEventListener('submit',async e=>{
   const restored=exercises.find(ex=>ex.id===state.active)||exercises[0];
   history.replaceState(null,'',state.attempt?'#/tests':'#/exercises/'+restored.id);route();
   if(!storageAvailable)toast('Энэ браузерт хадгалах боломжгүй. Тайлангаа татаж аваарай.');
- }catch(error){const button=e.target.querySelector('button[type="submit"]');button.disabled=false;button.textContent='Хичээлд орох';input.readOnly=false;e.target.setAttribute('aria-busy','false');input.setAttribute('aria-invalid','true');document.querySelector('#student-id-error').textContent=error.message==='Invalid student ID'?'Үсэг, тоо, цэг, зураас эсвэл доогуур зураас ашиглаарай.':error.message;input.focus();}
+ }catch(error){
+  const button=e.target.querySelector('button[type="submit"]');button.disabled=false;button.textContent='Хичээлд орох';input.readOnly=false;e.target.setAttribute('aria-busy','false');input.setAttribute('aria-invalid','true');
+  const message=document.querySelector('#student-id-error');
+  message.textContent=error.message==='Invalid student ID'?'Үсэг, тоо, цэг, зураас эсвэл доогуур зураас ашиглаарай.':error.message;
+  if(error.status===423){const link=document.createElement('a');link.href='/exam';link.textContent=' Шалгалтаа үргэлжлүүлэх →';message.append(link);}
+  input.focus();
+ }
 });
 window.addEventListener('hashchange',route);route();
 window.addEventListener('pageshow',event=>{if(event.persisted&&studentId){signOutStudent();quizResult=null;render();}});
