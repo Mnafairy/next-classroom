@@ -105,6 +105,8 @@ test("ID normalization preserves leading zeros and handles case and pasted white
   assert.equal(normalizeStudentId(" 8a-001 "), "8A-001");
   assert.equal(normalizeStudentId("00123"), "00123");
   assert.equal(profileKey("8a-001"), profileKey("8A-001"));
+  assert.equal(normalizeStudentId(" orgilsaikhan.ch "), "ORGILSAIKHAN.CH");
+  assert.equal(profileKey("orgilsaikhan.ch"), profileKey("ORGILSAIKHAN.CH"));
 });
 test("invalid IDs cannot switch or overwrite an active profile", () => {
   selectStudent("001");

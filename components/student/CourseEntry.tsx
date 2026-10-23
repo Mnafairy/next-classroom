@@ -18,7 +18,7 @@ const courses = {
     mark: "Py",
     grade: "9, 10-р анги",
     placeholder: "10A-01",
-    maxLength: 24,
+    maxLength: 40,
     title: "Бодлогоос эхэлнэ.\nКодоор бүтээнэ.",
     description:
       "Хувьсагч, нөхцөл, давталтыг жижиг бодлогоор сурч, бичсэн кодынхоо үр дүнг шууд хараарай.",
@@ -117,7 +117,7 @@ export default function CourseEntry({
           <p className="classroom-eyebrow">ТАНЫ СУРАЛЦАХ ОРОН ЗАЙ</p>
           <h2 id="entry-heading">Хичээлдээ тавтай морил.</h2>
           <p className="classroom-entry-description">
-            Багшийн өгсөн сурагчийн ID-гаа оруулаарай.
+            Сурагчийн ID эсвэл багшийн нэвтрэх нэрээ оруулаарай.
           </p>
           <form
             aria-busy={busy}
@@ -135,7 +135,7 @@ export default function CourseEntry({
                     : "Холболтоо шалгаад дахин оролдоорой.";
                 setError(
                   message === "Invalid student ID"
-                    ? "ID-даа зөвхөн үсэг, тоо, зураас эсвэл доогуур зураас ашиглаарай."
+                    ? "Үсэг, тоо, цэг, зураас эсвэл доогуур зураас ашиглаарай."
                     : message,
                 );
                 input.current?.focus();
@@ -144,7 +144,7 @@ export default function CourseEntry({
               }
             }}
           >
-            <label htmlFor="student-id">Сурагчийн ID</label>
+            <label htmlFor="student-id">Сурагчийн ID эсвэл багшийн нэр</label>
             <input
               ref={input}
               id="student-id"
@@ -153,19 +153,19 @@ export default function CourseEntry({
               required
               maxLength={info.maxLength}
               autoComplete="username"
-              autoCapitalize="characters"
+              autoCapitalize="none"
               spellCheck={false}
               placeholder={`Жишээ: ${info.placeholder}`}
               readOnly={busy}
               aria-invalid={!!error}
               aria-describedby="entry-help entry-error"
               onChange={(event) => {
-                setId(event.target.value.normalize("NFKC").toUpperCase());
+                setId(event.target.value.normalize("NFKC"));
                 setError("");
               }}
             />
             <p id="entry-help" className="classroom-field-help">
-              Өмнө нь орж байсан бол ижил ID-гаа ашиглаарай.
+              Багш бол orgilsaikhan.ch зэрэг өөрийн нэвтрэх нэрээ ашиглаарай.
             </p>
             <p id="entry-error" role="alert" className="classroom-entry-error">
               {error}

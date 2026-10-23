@@ -46,9 +46,9 @@ export function normalizeStudentId(value) {
     .trim()
     .normalize("NFKC")
     .toUpperCase();
-  if (!/^[\p{L}\p{N}][\p{L}\p{N}_-]{0,39}$/u.test(id))
+  if (!/^[\p{L}\p{N}][\p{L}\p{N}._-]{0,39}$/u.test(id))
     throw new Error(
-      "Сурагчийн ID-г 1–40 үсэг, тоо, - эсвэл _ тэмдэгтээр бичээрэй. Дунд нь зай оруулахгүй.",
+      "Сурагчийн ID эсвэл багшийн нэрийг 1–40 үсэг, тоо, цэг, - эсвэл _ тэмдэгтээр бичээрэй. Дунд нь зай оруулахгүй.",
     );
   return id;
 }

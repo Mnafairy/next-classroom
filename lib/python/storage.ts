@@ -6,7 +6,7 @@ export const storageKey = (id: string) => `python-lab:progress:v1:${id}`;
 export const normalizeStudent = (value: string) =>
   value.trim().normalize("NFKC").toUpperCase();
 export const validStudent = (value: string) =>
-  /^[\p{L}\p{N}][\p{L}\p{N}_-]{1,23}$/u.test(value);
+  /^[\p{L}\p{N}][\p{L}\p{N}._-]{1,39}$/u.test(value);
 
 export function emptyProgress(): StudentProgress {
   return {

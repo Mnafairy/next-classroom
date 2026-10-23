@@ -1,4 +1,4 @@
-import { isRegisteredStudent } from "@/lib/student/registry";
+import { isRegisteredLearner } from "@/lib/student/registry";
 import { studentExamActive } from "@/lib/exam/access";
 import { summarize } from "@/lib/admin/progress";
 import { readJsonObject, sameOrigin } from "@/lib/http/request";
@@ -17,7 +17,7 @@ const json = (data: unknown, status = 200) =>
   });
 
 export async function POST(request: Request) {
-  // ID-only classroom access, deliberately not an authentication system.
+  // ID-only lesson access for students and teachers; does not create an admin session.
   if (!sameOrigin(request)) return json({ error: "Forbidden" }, 403);
   let body: ProgressRequest;
   try {
@@ -36,12 +36,12 @@ export async function POST(request: Request) {
         },
         423,
       );
-    if (!(await isRegisteredStudent(studentId)))
+    if (!(await isRegisteredLearner(studentId)))
       return json(
         {
           code: "student_not_registered",
           error:
-            "Сурагчийн ID бүртгэлгүй эсвэл идэвхгүй байна. Багшдаа хандана уу.",
+            "Сурагчийн ID эсвэл багшийн нэвтрэх нэр бүртгэлгүй эсвэл идэвхгүй байна.",
         },
         403,
       );

@@ -45,7 +45,7 @@ export function subscribe(listener: () => void) {
 export async function login(value: string) {
   const student = normalizeStudent(value);
   if (!validStudent(student))
-    throw new Error("2–24 үсэг, тоо, зураас эсвэл доогуур зураас ашиглаарай.");
+    throw new Error("2–40 үсэг, тоо, цэг, зураас эсвэл доогуур зураас ашиглаарай.");
   let local = emptyProgress();
   try {
     local = restoreProgress(localStorage.getItem(storageKey(student)));

@@ -1,6 +1,8 @@
 import { classroomDatabase } from "./database";
-export async function isRegisteredStudent(id: string) {
-  return !!(await (
+import { accountCollection } from "../admin/accounts";
+
+export async function isRegisteredLearner(id: string) {
+  const student = await (
     await classroomDatabase()
   )
     .collection<{ _id: string; sourceId: string; deletedAt?: Date }>(
@@ -9,5 +11,12 @@ export async function isRegisteredStudent(id: string) {
     .findOne(
       { _id: id, sourceId: { $type: "string" }, deletedAt: { $exists: false } },
       { projection: { _id: 1 } },
-    ));
+    );
+  if (student) return true;
+  return !!(await (
+    await accountCollection()
+  ).findOne(
+    { _id: id.toLowerCase(), active: true },
+    { projection: { _id: 1 } },
+  ));
 }

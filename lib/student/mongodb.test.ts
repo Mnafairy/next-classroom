@@ -7,6 +7,8 @@ import { join } from "node:path";
 import { createServer } from "node:net";
 import { MongoClient } from "mongodb";
 import { POST } from "../../app/api/progress/route";
+import { GET as adminGet } from "../../app/api/admin/route";
+import { eligibleStudent } from "../exam/service";
 
 test(
   "real MongoDB: save/reload, course/student isolation, stale writes and concurrent first saves",
@@ -62,14 +64,12 @@ test(
     try {
       await probe.connect();
       const db = probe.db("kodlab_test");
-      await db
-        .collection("student_profiles")
-        .insertMany(
-          ["001", "002", "003"].map((id) => ({
-            _id: id as never,
-            sourceId: "source-" + id,
-          })),
-        );
+      await db.collection("student_profiles").insertMany(
+        ["001", "002", "003"].map((id) => ({
+          _id: id as never,
+          sourceId: "source-" + id,
+        })),
+      );
       for (const id of ["1", "12", "UNKNOWN"])
         for (const course of ["python", "javascript", "nextjs"]) {
           assert.equal((await call("load", id, course)).status, 403);
@@ -119,6 +119,62 @@ test(
           .collection("student_progress")
           .countDocuments({ studentId: "001" }),
         1,
+      );
+
+      const accounts = db.collection<{ _id: string; active: boolean }>(
+        "admin_accounts",
+      );
+      await accounts.insertMany([
+        { _id: "orgilsaikhan.ch", active: true },
+        { _id: "batzorig.b", active: true },
+        { _id: "inactive.teacher", active: false },
+      ]);
+      for (const course of ["python", "javascript", "nextjs"]) {
+        for (const id of ["unknown.teacher", "inactive.teacher"])
+          for (const action of ["load", "save"])
+            assert.equal((await call(action, id, course)).status, 403);
+
+        assert.equal(
+          (await call("load", "orgilsaikhan.ch", course)).data.progress,
+          null,
+        );
+        const practice = { drafts: { example: { code: `teacher ${course}` } } };
+        assert.equal(
+          (await call("save", " Orgilsaikhan.ch ", course, 0, practice)).status,
+          200,
+        );
+        assert.deepEqual(
+          (await call("load", "ORGILSAIKHAN.CH", course)).data.progress,
+          practice,
+        );
+        assert.equal(
+          (await call("load", "batzorig.b", course)).data.progress,
+          null,
+        );
+        assert.equal((await call("load", "002", course)).data.progress, null);
+      }
+      assert.equal(await db.collection("student_profiles").countDocuments(), 3);
+      assert.equal(await db.collection("admin_sessions").countDocuments(), 0);
+      assert.equal(
+        (await adminGet(new Request("http://localhost/api/admin"))).status,
+        401,
+      );
+      await assert.rejects(() => eligibleStudent("ORGILSAIKHAN.CH"));
+
+      await accounts.updateOne(
+        { _id: "orgilsaikhan.ch" },
+        { $set: { active: false } },
+      );
+      for (const action of ["load", "save"])
+        assert.equal(
+          (await call(action, "orgilsaikhan.ch", "python", 1)).status,
+          403,
+        );
+      assert.equal(
+        await db
+          .collection("student_progress")
+          .countDocuments({ studentId: "ORGILSAIKHAN.CH" }),
+        3,
       );
     } finally {
       await probe.close();

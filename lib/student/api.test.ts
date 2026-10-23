@@ -11,6 +11,7 @@ const request = (body: unknown, headers = {}) =>
 test("IDs preserve leading zeroes and normalize consistently", () => {
   assert.equal(normalizeStudentId(" ００１ "), "001");
   assert.equal(normalizeStudentId("8a-01"), "8A-01");
+  assert.equal(normalizeStudentId(" Orgilsaikhan.ch "), "ORGILSAIKHAN.CH");
   for (const value of ["", "../a", "$id", {}, "a b"])
     assert.throws(() => normalizeStudentId(value));
 });

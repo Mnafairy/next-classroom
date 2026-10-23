@@ -185,6 +185,9 @@ test("student IDs normalize consistently and are kept in separate storage keys",
   assert.equal(normalizeStudent(" 10a-01 "), "10A-01");
   assert(validStudent("10А-01"));
   assert(validStudent("САРУУЛ"));
+  assert(validStudent(normalizeStudent("orgilsaikhan.ch")));
+  assert(validStudent("A".repeat(40)));
+  assert(!validStudent("A".repeat(41)));
   assert(!validStudent("a"));
   assert(!validStudent("has space"));
   assert.notEqual(storageKey("10A-01"), storageKey("10A-02"));
