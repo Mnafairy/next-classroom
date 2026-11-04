@@ -1,6 +1,7 @@
 import { requireAdmin, adminJson, adminError } from "@/lib/admin/http";
 import { normalizeStudentId } from "@/lib/student/identity";
 import {
+  issueExamCode,
   teacherExamDetail,
   teacherExamRows,
   resetStudentExam,
@@ -28,6 +29,15 @@ export async function POST(request: Request) {
     if (!sameOrigin(request)) return adminJson({ error: "Forbidden" }, 403);
     const identity = await requireAdmin(request);
     const body = await readJsonObject(request, 32 * 1024);
+    if (body.action === "issue-code") {
+      let id: string;
+      try {
+        id = normalizeStudentId(body.studentId);
+      } catch {
+        throw new InputError("Сурагчийн ID буруу байна.");
+      }
+      return adminJson({ code: await issueExamCode(id, identity.id) });
+    }
     if (body.action === "reset-class") {
       if (
         typeof body.groupId !== "string" ||

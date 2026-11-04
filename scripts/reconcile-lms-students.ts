@@ -2,6 +2,7 @@ import { loadEnvConfig } from "@next/env";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import assert from "node:assert/strict";
 import type { MongoClient } from "mongodb";
+import { accountCollection } from "../lib/admin/accounts";
 import { parseLmsImport } from "../lib/admin/lms-import";
 import { classroomDatabase, progressCollection } from "../lib/student/database";
 import { adminCollections } from "../lib/admin/data";
@@ -19,9 +20,10 @@ async function main() {
   assert.ok(plan.students.length > 0, "Refuse an empty roster cleanup");
   const progress = await progressCollection(),
     { profiles } = await adminCollections();
-  const [saved, people] = await Promise.all([
+  const [saved, people, teachers] = await Promise.all([
     progress.find({}).toArray(),
     profiles.find({}).toArray(),
+    (await accountCollection()).find({}, { projection: { _id: 1 } }).toArray(),
   ]);
   const available = [
       ...new Set([
@@ -29,7 +31,11 @@ async function main() {
         ...people.filter((p) => p.manualEnrollment === true).map((p) => p._id),
       ]),
     ],
-    known = new Set(available);
+    known = new Set([
+      ...available,
+      ...teachers.map((t) => t._id.toUpperCase()),
+      ...plan.teachers.map((t) => t.id.toUpperCase()),
+    ]);
   const unknown = [
     ...new Set([...saved.map((p) => p.studentId), ...people.map((p) => p._id)]),
   ].filter((id) => !known.has(id));
@@ -157,7 +163,7 @@ async function main() {
       removedUnlistedRecords: removed,
       activeProfiles: await profiles.countDocuments(),
       remainingUnlistedRecords: await progress.countDocuments({
-        studentId: { $nin: available },
+        studentId: { $nin: [...known] },
       }),
       backup: backupPath,
       database: db.databaseName,

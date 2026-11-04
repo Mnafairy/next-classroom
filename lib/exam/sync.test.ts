@@ -61,9 +61,23 @@ test("stale tabs and lost save acknowledgments recover without overwriting answe
       ...saved,
       revision: saved.revision + 1,
       answers: { choices: body.choices, code: body.code },
-      status: body.action === "submit" ? "submitted" : "active",
+      status: "active",
     };
-    response.end(JSON.stringify({ attempt: saved, serverNow: Date.now() }));
+    response.end(
+      JSON.stringify({
+        attempt:
+          body.action === "submit"
+            ? {
+                studentId: saved.studentId,
+                name: saved.name,
+                className: saved.className,
+                generation: saved.generation,
+                status: "submitted",
+              }
+            : saved,
+        serverNow: Date.now(),
+      }),
+    );
   });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   const address = server.address();
@@ -89,14 +103,16 @@ test("stale tabs and lost save acknowledgments recover without overwriting answe
       { choices: { q16: 1 }, code: {} },
       false,
     );
-    assert.deepEqual(tab2?.attempt?.answers.choices, { q10: 2, q16: 1 });
+    assert(tab2?.attempt?.status === "active");
+    assert.deepEqual(tab2.attempt.answers.choices, { q10: 2, q16: 1 });
     const postsBeforeRetry = posts;
     const retry = await saveExamAnswers(
       initial,
       { choices: { q10: 2 }, code: {} },
       false,
     );
-    assert.equal(retry?.attempt?.revision, saved.revision);
+    assert(retry?.attempt?.status === "active");
+    assert.equal(retry.attempt.revision, saved.revision);
     assert.equal(
       posts,
       postsBeforeRetry + 1,

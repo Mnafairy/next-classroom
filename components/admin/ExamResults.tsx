@@ -20,6 +20,7 @@ import { adminRequest, downloadCsv } from "./api";
 import AdminDialog from "./AdminDialog";
 import AdminNavigation from "./AdminNavigation";
 import ExamResultGroup, { examStatusLabels as labels } from "./ExamResultGroup";
+import ExamCodeDialog from "./ExamCodeDialog";
 import ResetExamDialog from "./ResetExamDialog";
 import ExamAttemptDetail from "./ExamAttemptDetail";
 import ResetClassExamDialog, {
@@ -36,6 +37,7 @@ export default function ExamResults({ identity }: { identity: AdminIdentity }) {
     [query, setQuery] = useState(""),
     [navigationOpen, setNavigationOpen] = useState(false),
     [notice, setNotice] = useState("");
+  const [codeStudent, setCodeStudent] = useState<TeacherExamRow | null>(null);
   const [classReset, setClassReset] = useState<ClassResetSelection | null>(
     null,
   );
@@ -343,6 +345,7 @@ export default function ExamResults({ identity }: { identity: AdminIdentity }) {
                   students={section.students}
                   opening={opening}
                   onOpen={(id) => void open(id)}
+                  onIssue={setCodeStudent}
                   onReset={setPendingReset}
                   onSelect={
                     group === "all" ? () => selectGroup(section.id) : undefined
@@ -393,6 +396,12 @@ export default function ExamResults({ identity }: { identity: AdminIdentity }) {
         >
           <div className="admin-mobile-navigation">{navigation}</div>
         </AdminDialog>
+      )}
+      {codeStudent && (
+        <ExamCodeDialog
+          student={codeStudent}
+          onClose={() => setCodeStudent(null)}
+        />
       )}
       {pendingReset && (
         <ResetExamDialog

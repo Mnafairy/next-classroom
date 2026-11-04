@@ -337,13 +337,45 @@ test(
       const beforeProgress = await db
         .collection("student_progress")
         .findOne({ studentId: "001" });
-      await applyLmsImport(plan);
-      const alpha = await authenticateAdmin("alpha", "alpha@oyunlag.edu.mn");
-      assert.ok(alpha);
-      assert.ok(
-        await authenticateAdmin("beta@oyunlag.edu.mn", "beta@oyunlag.edu.mn"),
+      await db.collection("admin_login_attempts").deleteMany({});
+      const setupCodes = new Map<string, string>();
+      const passwordFor = (id: string) => id + "-private-test-password";
+      // Include a pre-upgrade account whose existing password is its school email.
+      await db
+        .collection("admin_accounts")
+        .insertOne({
+          _id: "alpha" as never,
+          name: "alpha",
+          email: "alpha@oyunlag.edu.mn",
+          active: true,
+          passwordHash: await hashPassword("alpha@oyunlag.edu.mn"),
+        });
+      assert.equal(
+        await authenticateAdmin("alpha", "alpha@oyunlag.edu.mn"),
+        null,
       );
-      assert.ok(await authenticateAdmin("gamma", "gamma@oyunlag.edu.mn"));
+      await applyLmsImport(plan, async (id, secret) => {
+        setupCodes.set(id, secret);
+      });
+      for (const [id, code] of setupCodes) {
+        const challenge = await login(
+          request("/api/admin/session", { username: id, password: code }),
+        );
+        assert.deepEqual(await challenge.json(), { setupRequired: true });
+        assert.equal(challenge.headers.get("set-cookie"), null);
+        const complete = await login(
+          request("/api/admin/session", {
+            username: id,
+            password: code,
+            newPassword: passwordFor(id),
+          }),
+        );
+        assert.equal(complete.status, 200);
+        assert.equal(await authenticateAdmin(id, code), null);
+      }
+      assert.equal(setupCodes.size, 3);
+      const alpha = await authenticateAdmin("alpha", passwordFor("alpha"));
+      assert.ok(alpha);
       assert.equal(
         await authenticateAdmin("alpha", "beta@oyunlag.edu.mn"),
         null,
@@ -353,10 +385,11 @@ test(
         null,
       );
       const hashBefore = alpha.passwordHash;
-      await applyLmsImport(plan);
+      await applyLmsImport(plan, async () => {
+        assert.fail("A repeated import rotated a private password");
+      });
       assert.equal(
-        (await authenticateAdmin("alpha", "alpha@oyunlag.edu.mn"))
-          ?.passwordHash,
+        (await authenticateAdmin("alpha", passwordFor("alpha")))?.passwordHash,
         hashBefore,
       );
       assert.equal(
@@ -392,13 +425,13 @@ test(
       assert.ok(!("gender" in accountDoc));
       const { createAdminSession } = await import("./auth");
       const alphaToken = await createAdminSession(alpha);
-      const beta = await authenticateAdmin("beta", "beta@oyunlag.edu.mn");
+      const beta = await authenticateAdmin("beta", passwordFor("beta"));
       assert.ok(beta);
       const betaToken = await createAdminSession(beta);
       assert.equal((await getAdminIdentity(alphaToken))?.id, "alpha");
       assert.equal((await getAdminIdentity(betaToken))?.id, "beta");
       const alphaCookie = `kodlab-admin=${alphaToken}`;
-      const gamma = await authenticateAdmin("gamma", "gamma@oyunlag.edu.mn");
+      const gamma = await authenticateAdmin("gamma", passwordFor("gamma"));
       assert.ok(gamma);
       const gammaCookie = `kodlab-admin=${await createAdminSession(gamma)}`;
       const scoped = await (
@@ -662,21 +695,17 @@ test(
       );
       const { eligibleStudent } = await import("../exam/service");
       assert.equal((await eligibleStudent("20S0999")).group.grade, 7);
-      await db
-        .collection("student_progress")
-        .insertOne({
-          _id: "javascript:20S0999" as never,
-          studentId: "20S0999",
-          progressJson: '{"drafts":{"name":"saved work"}}',
-          revision: 4,
-        });
-      await db
-        .collection("exam_attempts")
-        .insertOne({
-          _id: "test:20S0999" as never,
-          studentId: "20S0999",
-          answers: { choices: { q01: 2 } },
-        });
+      await db.collection("student_progress").insertOne({
+        _id: "javascript:20S0999" as never,
+        studentId: "20S0999",
+        progressJson: '{"drafts":{"name":"saved work"}}',
+        revision: 4,
+      });
+      await db.collection("exam_attempts").insertOne({
+        _id: "test:20S0999" as never,
+        studentId: "20S0999",
+        answers: { choices: { q01: 2 } },
+      });
       const workBefore = await db
         .collection("student_progress")
         .findOne({ studentId: "20S0999" });

@@ -12,6 +12,8 @@ import { gradeExam } from "./grading";
 import { POST as examPost } from "../../app/api/exam/route";
 import {
   startAttempt,
+  issueExamCode,
+  examView,
   currentAttempt,
   saveAttempt,
   teacherExamRows,
@@ -126,8 +128,43 @@ test(
           },
           { _id: "7A", name: "7А", grade: 7, teacherIds: ["teacher1"] },
         ]);
+      async function admitted(id: string, token?: string) {
+        const profile = await profiles.findOne({ _id: id });
+        assert(profile);
+        return startAttempt(
+          id,
+          token,
+          await issueExamCode(id, profile.teacherIds[0]),
+          "0".repeat(32),
+        );
+      }
       await assert.rejects(() => startAttempt("1"));
-      const started = await startAttempt("STUDENT8");
+      await assert.rejects(() => startAttempt("STUDENT8"));
+      await assert.rejects(() => issueExamCode("STUDENT8", "teacher2"));
+      const staleCode = await issueExamCode("STUDENT8", "teacher1");
+      await (
+        await examCollections()
+      ).sessions.updateOne(
+        { attemptId: `${EXAM_ID}:STUDENT8` },
+        { $set: { redeemUntil: new Date(0) } },
+      );
+      await assert.rejects(() =>
+        startAttempt("STUDENT8", undefined, staleCode, "a".repeat(32)),
+      );
+      const code = await issueExamCode("STUDENT8", "teacher1");
+      const started = await startAttempt(
+        "STUDENT8",
+        undefined,
+        code,
+        "a".repeat(32),
+      );
+      assert.equal(
+        (await startAttempt("STUDENT8", undefined, code, "a".repeat(32))).token,
+        started.token,
+      );
+      await assert.rejects(() =>
+        startAttempt("STUDENT8", undefined, code, "b".repeat(32)),
+      );
       const a = started.attempt;
       assert.equal(a.deadline.getTime() - a.startedAt.getTime(), 2100000);
       assert.equal((await cookieAttempt(started.token))?._id, a._id);
@@ -154,7 +191,7 @@ test(
       await assert.rejects(() =>
         saveAttempt(a, { revision: 0, choices: {}, code: {} }, false),
       );
-      const resumed = await startAttempt("STUDENT8");
+      const resumed = await startAttempt("STUDENT8", started.token);
       assert.equal(resumed.attempt.deadline.getTime(), a.deadline.getTime());
       assert.equal(resumed.attempt.revision, 1);
       await assert.rejects(() => startAttempt("OTHER8", started.token));
@@ -242,12 +279,17 @@ test(
         )?.answers.choices.q02,
         1,
       );
-      assert.equal((await startAttempt("STUDENT8")).attempt.status, "expired");
+      assert.equal(
+        (await startAttempt("STUDENT8", started.token)).attempt.status,
+        "expired",
+      );
+      assert(!("answers" in examView(expired!)));
+      await assert.rejects(() => startAttempt("STUDENT8"));
       assert.equal(
         await attempts.countDocuments({ _id: `${EXAM_ID}:STUDENT8` }),
         1,
       );
-      const second = await startAttempt("OTHER8");
+      const second = await admitted("OTHER8");
       const submitted = await saveAttempt(
         second.attempt,
         { revision: 0, choices: { q01: 2 }, code: {} },
@@ -294,7 +336,7 @@ test(
       assert.equal(reset?.previousAttempts?.[0].resetBy, "teacher2");
       assert.equal(await currentAttempt(second.token), null);
       assert.equal((await teacherExamRows("teacher2"))[0].status, "reset");
-      const retake = await startAttempt("OTHER8");
+      const retake = await admitted("OTHER8");
       assert.equal(retake.attempt.status, "active");
       assert.equal(retake.attempt.generation, 1);
       assert.equal(
@@ -329,7 +371,7 @@ test(
       assert.equal(repeated?.previousAttempts?.length, 2);
       assert.equal(repeated?.previousAttempts?.[1].answers.choices.q03, 3);
       assert.equal(await currentAttempt(retake.token), null);
-      const extension = await startAttempt("OTHER8");
+      const extension = await admitted("OTHER8");
       const stale = {
         ...extension.attempt,
         deadline: new Date(Date.now() - 1000),
@@ -341,14 +383,14 @@ test(
       assert.equal((await finishAttempt(stale, "expired")).status, "active");
       // Pre-upgrade sessions and attempts without generation still work until explicitly reset.
       await sessions.updateOne(
-        { _id: tokenHash(started.token) },
+        { sessionHash: tokenHash(started.token) },
         { $unset: { generation: "" } },
       );
       await attempts.updateOne({ _id: a._id }, { $unset: { generation: "" } });
       assert.equal((await currentAttempt(started.token))?.status, "expired");
       await resetStudentExam("teacher1", "STUDENT8", 0);
       assert.equal(await currentAttempt(started.token), null);
-      const legacyRetake = await startAttempt("STUDENT8");
+      const legacyRetake = await admitted("STUDENT8");
       assert.equal(legacyRetake.attempt.generation, 1);
       assert.equal(
         legacyRetake.attempt.previousAttempts?.[0].result?.total,
@@ -379,7 +421,7 @@ test(
           teacherIds: ["teacher1"],
         })),
       );
-      await assert.rejects(() => startAttempt("STUDENT10"));
+      await assert.rejects(() => issueExamCode("STUDENT10", "teacher1"));
       for (const grade of [6, 7]) {
         const studentId = `STUDENT${grade}`;
         const lesson = {
@@ -405,7 +447,7 @@ test(
           (await (await lessonRequest("load")).json()).progress,
           lesson,
         );
-        const run = await startAttempt(studentId);
+        const run = await admitted(studentId);
         assert.equal(run.attempt.className, `${grade}А`);
         assert.equal(
           run.attempt.deadline.getTime() - run.attempt.startedAt.getTime(),
@@ -433,7 +475,7 @@ test(
         ]);
         assert.deepEqual(classReset.ready, [studentId]);
         assert.equal(await currentAttempt(run.token), null);
-        const next = await startAttempt(studentId);
+        const next = await admitted(studentId);
         assert.equal(next.attempt.generation, 1);
         assert.deepEqual(next.attempt.answers.choices, {});
         assert.equal(next.attempt.previousAttempts?.[0].result?.total, 2);
@@ -467,19 +509,19 @@ test(
           teacherIds: [id === "BULKOTHER" ? "teacher1" : "teacher2"],
         })),
       );
-      const bulkOne = await startAttempt("BULK1");
+      const bulkOne = await admitted("BULK1");
       await saveAttempt(
         bulkOne.attempt,
         { revision: 0, choices: { q01: 2 }, code: {} },
         true,
       );
-      const bulkTwo = await startAttempt("BULK2");
+      const bulkTwo = await admitted("BULK2");
       await saveAttempt(
         bulkTwo.attempt,
         { revision: 0, choices: { q02: 1 }, code: {} },
         false,
       );
-      await startAttempt("BULK4");
+      await admitted("BULK4");
       await resetStudentExam("teacher2", "BULK4", 0);
       const targets = [
         { studentId: "BULK1", generation: 0 },
@@ -574,7 +616,7 @@ test(
         (await teacherExamDetail("teacher2", "BULK1")).history.length,
         1,
       );
-      const newRun = await startAttempt("BULK1");
+      const newRun = await admitted("BULK1");
       const repeatedBatch = await resetClassExam("teacher2", "BULK", targets);
       assert.deepEqual(repeatedBatch.changed, ["BULK1"]);
       assert.deepEqual(repeatedBatch.ready, ["BULK2"]);
@@ -591,7 +633,7 @@ test(
         groupId: "8A",
         teacherIds: ["teacher1"],
       });
-      const sync = await startAttempt("SYNC8");
+      const sync = await admitted("SYNC8");
       const firstSave = await saveAttempt(
         sync.attempt,
         { revision: 0, choices: { q10: 1 }, code: {} },
@@ -748,7 +790,7 @@ test(
         groupId: "8A",
         teacherIds: ["teacher1"],
       });
-      const nextStudent = await startAttempt("NEXT8", sync.token);
+      const nextStudent = await admitted("NEXT8", sync.token);
       assert.equal(nextStudent.attempt.studentId, "NEXT8");
       assert.deepEqual(nextStudent.attempt.answers.choices, {});
       assert.equal(nextStudent.attempt.revision, 0);
@@ -801,7 +843,10 @@ test(
       const fullAnswers = {
         choices: Object.fromEntries(examQuestions.map((q, i) => [q.id, i % 4])),
         code: Object.fromEntries(
-          examExercises.map((e, i) => [e.id, `${e.starter}console.log(${i});`]),
+          examExercises.map((e, i) => [
+            e.id,
+            `${e.starter}console.log(${i}); //${"а".repeat(9000)}`,
+          ]),
         ),
       };
       const writerId = "full-flow-single-writer-00001";
@@ -843,18 +888,22 @@ test(
       assert.equal(submittedResponse.status, 200);
       const submittedView = (await submittedResponse.json()).attempt;
       assert.equal(submittedView.status, "submitted");
-      assert.deepEqual(
-        submittedView.answers,
-        lastEdit,
-        "Immediate submit includes the final edit despite a lost earlier acknowledgment",
-      );
+      assert.equal("answers" in submittedView, false);
       const resultBefore = await attempts.findOne({ studentId: "NEXT8" });
+      assert.deepEqual(
+        resultBefore?.answers,
+        lastEdit,
+        "Submission retains the final edit on the teacher side",
+      );
       assert.deepEqual(resultBefore?.result, gradeExam(lastEdit));
-      const duplicateSubmit = await api({
+      const repeatBody = {
         ...saveBody,
         action: "submit",
         ...lastEdit,
-      });
+        baseAnswers: lastEdit,
+      };
+      assert(Buffer.byteLength(JSON.stringify(repeatBody)) > 192 * 1024);
+      const duplicateSubmit = await api(repeatBody);
       assert.equal(duplicateSubmit.status, 200);
       assert.deepEqual(
         await attempts.findOne({ studentId: "NEXT8" }),
@@ -874,7 +923,7 @@ test(
         groupId: "8A",
         teacherIds: ["teacher1"],
       });
-      const third = await startAttempt("THIRD8", nextStudent.token);
+      const third = await admitted("THIRD8", nextStudent.token);
       assert.deepEqual(third.attempt.answers, blank);
       assert.equal(
         third.attempt.deadline.getTime() - third.attempt.startedAt.getTime(),

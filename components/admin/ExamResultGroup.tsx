@@ -16,12 +16,14 @@ export default function ExamResultGroup({
   onOpen,
   onReset,
   onSelect,
+  onIssue,
 }: {
   name: string;
   students: TeacherExamRow[];
   opening: boolean;
   onOpen: (id: string) => void;
   onReset: (student: TeacherExamRow) => void;
+  onIssue: (student: TeacherExamRow) => void;
   onSelect?: () => void;
 }) {
   const complete = students.filter((s) => s.total !== null);
@@ -61,7 +63,7 @@ export default function ExamResultGroup({
               <th>Нийт /100</th>
               <th>Шилжсэн</th>
               <th>Илгээсэн</th>
-              <th>Дахин өгөх</th>
+              <th>Шалгалтын эрх</th>
             </tr>
           </thead>
           <tbody>
@@ -98,6 +100,9 @@ export default function ExamResultGroup({
                   {s.submittedAt ? dateLabel(s.submittedAt) : "—"}
                 </td>
                 <td className="admin-exam-row-action">
+                  <button className="admin-button" onClick={() => onIssue(s)}>
+                    Код олгох
+                  </button>
                   <button
                     className="admin-button admin-exam-reset-button"
                     disabled={

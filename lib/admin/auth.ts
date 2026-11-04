@@ -39,7 +39,7 @@ export async function authenticateAdmin(
     password,
     account?.passwordHash || `scrypt:${"0".repeat(32)}:${"0".repeat(128)}`,
   );
-  return account && valid ? account : null;
+  return account && valid && password !== account.email ? account : null;
 }
 export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -107,11 +107,12 @@ export async function allowLogin(request: Request) {
   return (attempt?.count || 0) <= 10;
 }
 export async function createAdminSession(account: AdminAccount) {
+  if (account.setupRequired) throw new Error("Teacher password setup required");
   const token = randomBytes(32).toString("base64url");
   const { sessions } = await authCollections();
   await sessions.insertOne({
     _id: hash(token),
-    version: hash(account.passwordHash),
+    version: `setup-v2:${hash(account.passwordHash)}`,
     accountId: account._id,
     expiresAt: new Date(Date.now() + SESSION_SECONDS * 1000),
   });
@@ -138,7 +139,12 @@ export async function getAdminIdentity(
   const account = await (
     await accountCollection()
   ).findOne({ _id: session.accountId, active: true });
-  if (!account || session.version !== hash(account.passwordHash)) return null;
+  if (
+    !account ||
+    account.setupRequired ||
+    session.version !== `setup-v2:${hash(account.passwordHash)}`
+  )
+    return null;
   return { id: account._id, name: account.name, email: account.email };
 }
 export async function isAdmin(token?: string) {

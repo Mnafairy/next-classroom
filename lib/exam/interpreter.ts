@@ -19,7 +19,27 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
     file.parseDiagnostics.length
   )
     throw new Error("Кодын хаалт, хашилт болон бичлэгээ шалгаарай.");
-  const values = new Map<string, Value>();
+  const scopes: Map<string, Value | undefined>[] = [];
+  function binding(name: string) {
+    for (let i = scopes.length - 1; i >= 0; i--)
+      if (scopes[i].has(name)) return scopes[i];
+    return undefined;
+  }
+  function block(statements: ts.NodeArray<ts.Statement>, depth: number) {
+    const scope = new Map<string, Value | undefined>();
+    for (const node of statements)
+      if (ts.isVariableStatement(node))
+        for (const decl of node.declarationList.declarations) {
+          if (!ts.isIdentifier(decl.name)) continue;
+          const name = decl.name.text;
+          if (scope.has(name))
+            throw new Error(`${name} хувьсагч давхар зарлагдсан.`);
+          scope.set(name, undefined);
+        }
+    scopes.push(scope);
+    for (const child of statements) statement(child, depth);
+    scopes.pop();
+  }
   const replaced = new Set<string>();
   const output: string[] = [];
   let steps = 0;
@@ -44,7 +64,7 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
     if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
     if (node.kind === ts.SyntaxKind.FalseKeyword) return false;
     if (ts.isIdentifier(node)) {
-      const value = values.get(node.text);
+      const value = binding(node.text)?.get(node.text);
       if (value === undefined)
         throw new Error(`${node.text} хувьсагч зарлагдаагүй байна.`);
       return value;
@@ -58,10 +78,17 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
     if (ts.isBinaryExpression(node)) {
       const kind = node.operatorToken.kind;
       if (kind === ts.SyntaxKind.EqualsToken) {
-        if (!ts.isIdentifier(node.left) || !values.has(node.left.text))
+        const target = ts.isIdentifier(node.left)
+          ? binding(node.left.text)
+          : undefined;
+        if (
+          !ts.isIdentifier(node.left) ||
+          !target ||
+          target.get(node.left.text) === undefined
+        )
           throw new Error("Зарласан хувьсагчид утга оноогоорой.");
         const value = expression(node.right, depth + 1);
-        values.set(node.left.text, value);
+        target.set(node.left.text, value);
         return value;
       }
       const left = expression(node.left, depth + 1);
@@ -112,7 +139,7 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
   function statement(node: ts.Statement, depth = 0) {
     step(depth);
     if (ts.isBlock(node)) {
-      node.statements.forEach((child) => statement(child, depth + 1));
+      block(node.statements, depth + 1);
       return;
     }
     if (ts.isEmptyStatement(node)) return;
@@ -123,8 +150,9 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
         if (!ts.isIdentifier(declaration.name) || !declaration.initializer)
           throw new Error("let нэр = утга; хэлбэрээр бичээрэй.");
         const name = declaration.name.text;
-        if (values.has(name))
-          throw new Error(`${name} хувьсагч давхар зарлагдсан.`);
+        const values = scopes[scopes.length - 1];
+        if (!ts.isBlock(node.parent) && !ts.isSourceFile(node.parent))
+          throw new Error("let зарлахдаа блок ашиглаарай.");
         const value = expression(declaration.initializer, depth + 1);
         if (depth === 0 && Object.hasOwn(inputs, name)) {
           values.set(name, inputs[name]);
@@ -147,7 +175,7 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
         ts.isIdentifier(e.expression.expression) &&
         e.expression.expression.text === "console" &&
         e.expression.name.text === "log" &&
-        !values.has("console")
+        !binding("console")
       ) {
         if (
           !e.arguments.length ||
@@ -172,7 +200,7 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
       "Давталт, функц, import болон вебийн үйлдэл энэ шалгалтад ашиглахгүй.",
     );
   }
-  file.statements.forEach((node) => statement(node));
+  block(file.statements, 0);
   for (const name of Object.keys(inputs))
     if (!replaced.has(name))
       throw new Error(`Эхний ${name} хувьсагчийг хадгалаарай.`);

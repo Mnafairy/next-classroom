@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 import React, { act } from "react";
 import { examQuestions, examExercises } from "./content";
-import type { ExamView } from "./types";
+import type { ActiveExam, ExamView } from "./types";
 
 test("exam page preserves edits through a delayed save, failed submit, retry, and next-student handoff", async () => {
   const dom = new JSDOM('<!doctype html><div id="root"></div>', {
@@ -41,7 +41,8 @@ test("exam page preserves edits through a delayed save, failed submit, retry, an
   dom.window.HTMLDialogElement.prototype.close = function () {
     this.removeAttribute("open");
   };
-  const fresh = (id: string): ExamView => ({
+  type Stored = Omit<ActiveExam, "status"> & { status: ExamView["status"] };
+  const fresh = (id: string): Stored => ({
     studentId: id,
     name: id,
     className: "8А",
@@ -57,15 +58,27 @@ test("exam page preserves edits through a delayed save, failed submit, retry, an
     questions: examQuestions,
     exercises: examExercises,
   });
-  let server: ExamView | null = fresh("TESTA");
+  let server: Stored | null = fresh("TESTA");
   let failSubmit = true;
   let expireSubmit = false;
   let releaseSave: (() => void) | undefined;
   let releaseSubmit: (() => void) | undefined;
-  let savedFirst: ExamView | null = null;
+  let savedFirst: Stored | null = null;
   const calls: Record<string, unknown>[] = [];
   const response = () =>
-    Response.json({ attempt: structuredClone(server), serverNow: Date.now() });
+    Response.json({
+      attempt:
+        server && server.status !== "active"
+          ? {
+              studentId: server.studentId,
+              name: server.name,
+              className: server.className,
+              generation: server.generation,
+              status: server.status,
+            }
+          : structuredClone(server),
+      serverNow: Date.now(),
+    });
   install("fetch", async (_url: unknown, init?: RequestInit) => {
     if (!init?.body) return response();
     const body = JSON.parse(String(init.body));
@@ -222,7 +235,7 @@ test("exam page preserves edits through a delayed save, failed submit, retry, an
     assert.deepEqual(server?.answers.choices, {});
     assert.match(document.body.textContent || "", /0 \/ 26/);
     assert.equal(option(1).checked, false);
-    assert.deepEqual((savedFirst as ExamView | null)?.answers.choices, {
+    assert.deepEqual((savedFirst as Stored | null)?.answers.choices, {
       q01: 1,
       q20: 3,
     });

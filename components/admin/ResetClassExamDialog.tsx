@@ -60,8 +60,9 @@ export default function ResetClassExamDialog({
           <span>танд хуваарилсан сурагчийн оролдлого</span>
         </div>
         <p>
-          Өмнөх хариулт, код, оноо түүхэнд хадгалагдана. Сурагч бүр ID-гаар
-          дахин нэвтрэхэд шинэ <strong>{EXAM_MINUTES} минут</strong> эхэлнэ.
+          Өмнөх хариулт, код, оноо түүхэнд хадгалагдана. Сурагч бүр ID болон
+          багшийн олгосон кодоор дахин нэвтрэхэд шинэ{" "}
+          <strong>{EXAM_MINUTES} минут</strong> эхэлнэ.
         </p>
         {selection.active > 0 && (
           <p className="admin-reset-warning">

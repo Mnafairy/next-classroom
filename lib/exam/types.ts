@@ -35,12 +35,11 @@ export type PreviousExamAttempt = Pick<
   | "submittedAt"
   | "result"
 > & { resetBy: string; resetAt: Date };
-export type ExamView = {
-  studentId: string;
-  name: string;
-  className: string;
-  status: Exclude<ExamAttempt["status"], "reset">;
+type ExamIdentity = Pick<ExamAttempt, "studentId" | "name" | "className"> & {
   generation: number;
+};
+export type ActiveExam = ExamIdentity & {
+  status: "active";
   deadline: string;
   revision: number;
   departures: number;
@@ -48,6 +47,8 @@ export type ExamView = {
   questions: ExamQuestion[];
   exercises: ExamExercise[];
 };
+export type ExamView =
+  ActiveExam | (ExamIdentity & { status: "submitted" | "expired" });
 export type ExamResponse = { attempt: ExamView | null; serverNow: number };
 export type TeacherExamRow = {
   studentId: string;

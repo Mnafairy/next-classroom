@@ -1,8 +1,18 @@
+export function publicOrigin(request: Request) {
+  if (process.env.CLASSROOM_PUBLIC_ORIGIN)
+    return new URL(process.env.CLASSROOM_PUBLIC_ORIGIN).origin;
+  const url = new URL(request.url);
+  const host = request.headers.get("host");
+  if (host && !/[/\\@#?\s]/.test(host))
+    return new URL(url.protocol + "//" + host).origin;
+  return url.origin;
+}
+
 export function sameOrigin(request: Request) {
   if (request.headers.get("sec-fetch-site") === "cross-site") return false;
   const origin = request.headers.get("origin");
   try {
-    return !origin || new URL(origin).origin === new URL(request.url).origin;
+    return !origin || origin === publicOrigin(request);
   } catch {
     return false;
   }

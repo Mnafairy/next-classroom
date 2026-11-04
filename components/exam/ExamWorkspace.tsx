@@ -14,12 +14,7 @@ import {
   Play,
   ShieldCheck,
 } from "lucide-react";
-import {
-  EXAM_ID,
-  EXAM_MINUTES,
-  EXAM_TITLE,
-  EXAM_GRADE_LABEL,
-} from "@/lib/exam/content";
+import { EXAM_MINUTES, EXAM_TITLE, EXAM_GRADE_LABEL } from "@/lib/exam/content";
 import { hasCodeAnswer, type ExamAnswers } from "@/lib/exam/protocol";
 import type { ExamResponse, ExamView } from "@/lib/exam/types";
 import {
@@ -27,6 +22,13 @@ import {
   ExamSessionExpiredError,
   ExamRecoverySavedError,
 } from "@/lib/exam/client";
+import { createRunId } from "@/lib/course/run-id";
+import {
+  alternateDrafts,
+  rememberDraft,
+  savedDrafts,
+  tabDraft,
+} from "@/lib/exam/browser-drafts";
 import { restoreExamDraft } from "@/lib/exam/draft";
 import {
   mergeExamAnswers,
@@ -34,8 +36,6 @@ import {
   saveExamAnswers,
 } from "@/lib/exam/sync";
 
-const backupKey = (id: string, generation: number) =>
-  `kodlab-exam-draft:${EXAM_ID}:${id}:${generation}`;
 const codeExtensions = [
   javascript(),
   EditorView.contentAttributes.of({ "aria-label": "JavaScript хариулт" }),
@@ -54,25 +54,12 @@ async function request<T>(body?: Record<string, unknown>): Promise<T> {
   const data = await r.json();
   return data;
 }
-function readBackup(attempt: ExamView) {
-  try {
-    return restoreExamDraft(
-      attempt,
-      localStorage.getItem(backupKey(attempt.studentId, attempt.generation)) ||
-        (attempt.generation === 0
-          ? localStorage.getItem(
-              `kodlab-exam-draft:${EXAM_ID}:${attempt.studentId}`,
-            )
-          : null),
-    );
-  } catch {
-    return null;
-  }
-}
 export default function ExamWorkspace() {
   const [attempt, setAttempt] = useState<ExamView | null>(null),
     [loading, setLoading] = useState(true),
     [id, setId] = useState(""),
+    [code, setCode] = useState(""),
+    [alternates, setAlternates] = useState<string[]>([]),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [saveState, setSaveState] = useState(""),
@@ -91,7 +78,8 @@ export default function ExamWorkspace() {
     confirmRef = useRef<HTMLDialogElement>(null),
     expirySent = useRef(false);
   const writerId = useRef("");
-  const install = useCallback((data: ExamResponse) => {
+  const browserKey = useRef("");
+  const install = useCallback((data: ExamResponse, chosen?: string | null) => {
     expirySent.current = false;
     setIndex(0);
     setOutput({});
@@ -102,9 +90,26 @@ export default function ExamWorkspace() {
     setNow(data.serverNow);
     if (data.attempt?.status !== "active") confirmRef.current?.close();
     if (data.attempt) {
+      const raw =
+        chosen !== undefined
+          ? chosen
+          : data.attempt.status === "active"
+            ? tabDraft(data.attempt)
+            : null;
       const restored =
-        data.attempt.status === "active" ? readBackup(data.attempt) : null;
-      if (restored?.conflict) {
+        data.attempt.status === "active"
+          ? restoreExamDraft(data.attempt, raw)
+          : null;
+      setAlternates(
+        data.attempt.status === "active"
+          ? alternateDrafts(data.attempt, raw)
+          : [],
+      );
+      if (chosen && data.attempt.status === "active") {
+        writerId.current ||= createRunId();
+        rememberDraft(data.attempt, writerId.current, chosen);
+      }
+      if (restored?.conflict && data.attempt.status === "active") {
         const baseline = {
           ...data.attempt,
           answers: restored.baseAnswers,
@@ -116,7 +121,11 @@ export default function ExamWorkspace() {
           "Хөтөчийн ноорог хадгалсан хариултаас зөрлөө. Таны ажлыг хэвээр нээлээ. Дахин хадгалах эсвэл ажлаа татаж багшдаа өгнө үү.",
         );
       }
-      answersRef.current = restored?.answers || data.attempt.answers;
+      answersRef.current =
+        restored?.answers ||
+        (data.attempt.status === "active"
+          ? data.attempt.answers
+          : { choices: {}, code: {} });
       setAnswers(answersRef.current);
       if (data.attempt.status === "active") remember("kodlab-exam-active", "1");
       else {
@@ -154,7 +163,7 @@ export default function ExamWorkspace() {
           setSaveState("Хадгалж байна…");
           const snapshot = answersRef.current;
           try {
-            writerId.current ||= crypto.randomUUID();
+            writerId.current ||= createRunId();
             const data = await saveExamAnswers(
               current,
               snapshot,
@@ -186,18 +195,22 @@ export default function ExamWorkspace() {
               if (document.fullscreenElement)
                 void document.exitFullscreen().catch(() => {});
             } else {
-              remember(
-                backupKey(current.studentId, current.generation),
-                JSON.stringify({
-                  revision: data.attempt.revision,
-                  generation: current.generation,
-                  baseAnswers: data.attempt.answers,
-                  answers: answersRef.current,
-                }),
+              rememberDraft(
+                current,
+                writerId.current,
+                sameExamAnswers(nextAnswers, data.attempt.answers)
+                  ? null
+                  : JSON.stringify({
+                      revision: data.attempt.revision,
+                      generation: current.generation,
+                      baseAnswers: data.attempt.answers,
+                      answers: answersRef.current,
+                    }),
               );
             }
             setSaveState(
-              sameExamAnswers(nextAnswers, data.attempt.answers)
+              data.attempt.status !== "active" ||
+                sameExamAnswers(nextAnswers, data.attempt.answers)
                 ? "Хадгалсан"
                 : "Өөрчлөлт хадгалагдаж байна…",
             );
@@ -238,7 +251,7 @@ export default function ExamWorkspace() {
   const active = attempt?.status === "active";
   useEffect(() => {
     const current = attemptRef.current;
-    if (!active || !current) return;
+    if (!active || current?.status !== "active") return;
     if (sameExamAnswers(answers, current.answers)) return;
     const timer = setTimeout(() => void save().catch(() => {}), 1200);
     return () => clearTimeout(timer);
@@ -286,12 +299,13 @@ export default function ExamWorkspace() {
       window.removeEventListener("beforeunload", beforeUnload);
     };
   }, [active, save]);
-  const remaining = attempt
-    ? Math.max(
-        0,
-        Math.ceil((new Date(attempt.deadline).getTime() - now) / 1000),
-      )
-    : EXAM_MINUTES * 60;
+  const remaining =
+    attempt?.status === "active"
+      ? Math.max(
+          0,
+          Math.ceil((new Date(attempt.deadline).getTime() - now) / 1000),
+        )
+      : EXAM_MINUTES * 60;
   useEffect(() => {
     if (active && remaining === 0 && !expirySent.current) {
       expirySent.current = true;
@@ -306,9 +320,10 @@ export default function ExamWorkspace() {
     setAnswers(next);
     setSaveState("Өөрчлөлт хадгалагдаж байна…");
     const current = attemptRef.current;
-    if (current)
-      remember(
-        backupKey(current.studentId, current.generation),
+    if (current?.status === "active")
+      rememberDraft(
+        current,
+        (writerId.current ||= createRunId()),
         JSON.stringify({
           revision: current.revision,
           generation: current.generation,
@@ -319,7 +334,7 @@ export default function ExamWorkspace() {
   }
   function downloadAnswers() {
     const current = attemptRef.current;
-    if (!current) return;
+    if (current?.status !== "active") return;
     const url = URL.createObjectURL(
       new Blob(
         [
@@ -348,15 +363,16 @@ export default function ExamWorkspace() {
     const current = attemptRef.current;
     if (!current) return;
     try {
-      const raw = localStorage.getItem(
-        backupKey(current.studentId, current.generation),
-      );
-      if (!raw) {
+      const drafts = savedDrafts(current);
+      if (!drafts.length) {
         setError("Энэ хөтөчид өмнөх ноорог олдсонгүй. Багшдаа хандана уу.");
         return;
       }
       const url = URL.createObjectURL(
-        new Blob([raw], { type: "application/json" }),
+        new Blob(
+          [drafts.length === 1 ? drafts[0] : "[" + drafts.join(",") + "]"],
+          { type: "application/json" },
+        ),
       );
       const link = document.createElement("a");
       link.href = url;
@@ -369,7 +385,7 @@ export default function ExamWorkspace() {
       );
     }
   }
-  async function recoverSavedAnswers() {
+  async function recoverSavedAnswers(draft?: string) {
     setBusy(true);
     try {
       await queue.current.catch(() => {});
@@ -383,12 +399,19 @@ export default function ExamWorkspace() {
         throw new Error(
           "Энэ цонхны сурагчийн нэвтрэлт өөрчлөгдсөн. Ажлаа татаж аваад хуудсаа дахин нээнэ үү.",
         );
-      downloadAnswers();
-      if (current)
-        remember(backupKey(current.studentId, current.generation), null);
-      install(data);
-      setError("");
-      setSaveState("Хадгалсан хариултыг нээлээ");
+      if (
+        current.status === "active" &&
+        (!draft || !sameExamAnswers(answersRef.current, current.answers))
+      )
+        downloadAnswers();
+      if (draft) {
+        // Keep the previous draft's local backup when switching versions.
+        writerId.current = createRunId();
+      } else if (current.status === "active")
+        rememberDraft(current, writerId.current, null);
+      install(data, draft ?? null);
+      if (!draft) setError("");
+      setSaveState(draft ? "Нооргийг нээлээ" : "Хадгалсан хариултыг нээлээ");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Холболтоо шалгаарай.");
     } finally {
@@ -400,7 +423,31 @@ export default function ExamWorkspace() {
     setBusy(true);
     setError("");
     try {
-      install(await request<ExamResponse>({ action: "start", studentId: id }));
+      const claimKey = "kodlab-exam-login:" + id.trim().toUpperCase();
+      browserKey.current ||= createRunId();
+      try {
+        // An interrupted first response can be retried from this tab after a reload.
+        browserKey.current =
+          window.sessionStorage.getItem(claimKey) || browserKey.current;
+        window.sessionStorage.setItem(claimKey, browserKey.current);
+      } catch {
+        /* The in-memory key still covers retries while open. */
+      }
+      install(
+        await request<ExamResponse>({
+          action: "start",
+          studentId: id,
+          code: code.trim(),
+          browserKey: browserKey.current,
+        }),
+      );
+      setCode("");
+      browserKey.current = "";
+      try {
+        window.sessionStorage.removeItem(claimKey);
+      } catch {
+        /* Storage is optional. */
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Дахин оролдоно уу.");
     } finally {
@@ -467,8 +514,8 @@ export default function ExamWorkspace() {
       setBusy(false);
     }
   }
-  const questions = attempt?.questions || [],
-    exercises = attempt?.exercises || [];
+  const questions = active ? attempt.questions : [],
+    exercises = active ? attempt.exercises : [];
   const answered =
     questions.filter((q) => answers.choices[q.id] !== undefined).length +
     exercises.filter((e) => hasCodeAnswer(e.starter, answers.code[e.id]))
@@ -557,6 +604,18 @@ export default function ExamWorkspace() {
                 required
                 maxLength={40}
               />
+              <label htmlFor="exam-access">
+                Багшаас авсан нэг удаагийн код
+              </label>
+              <input
+                id="exam-access"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                required
+                maxLength={20}
+                autoComplete="one-time-code"
+                spellCheck={false}
+              />
               <button className="exam-primary" disabled={busy}>
                 {busy ? "Нээж байна…" : "Шалгалт эхлүүлэх / үргэлжлүүлэх"}
                 <ArrowRight size={17} />
@@ -595,8 +654,8 @@ export default function ExamWorkspace() {
               <ArrowRight size={17} />
             </button>
             <p>
-              Дараагийн сурагч өөрийн ID-гаар нэвтэрнэ. Таны шалгалтын дүн
-              хадгалагдсан хэвээр үлдэнэ.
+              Дараагийн сурагч өөрийн ID болон багшийн олгосон кодоор нэвтэрнэ.
+              Таны шалгалтын дүн хадгалагдсан хэвээр үлдэнэ.
             </p>
             <p>
               Хадгалалт алдаатай байсан бол энэ хөтөчид үлдсэн нооргоо татаж
@@ -676,6 +735,22 @@ export default function ExamWorkspace() {
                   {saveState}
                 </span>
               </div>
+              {alternates.length > 0 && (
+                <details>
+                  <summary>
+                    Энэ хөтчид хадгалсан бусад ноорог ({alternates.length})
+                  </summary>
+                  {alternates.map((raw, i) => (
+                    <button
+                      key={raw}
+                      disabled={busy}
+                      onClick={() => void recoverSavedAnswers(raw)}
+                    >
+                      Ноорог {i + 1} нээх
+                    </button>
+                  ))}
+                </details>
+              )}
               {away && (
                 <div className="exam-warning" role="status">
                   Шалгалтын цонхноос шилжсэн үйлдэл бүртгэгдлээ. Энэ хуудсандаа

@@ -11,6 +11,8 @@ import {
 import { adminRequest } from "./api";
 export default function AdminLogin({ configured }: { configured: boolean }) {
   const [username, setUsername] = useState("");
+  const [setup, setSetup] = useState(false),
+    [newPassword, setNewPassword] = useState("");
   const [password, setPassword] = useState(""),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -42,10 +44,22 @@ export default function AdminLogin({ configured }: { configured: boolean }) {
               setBusy(true);
               setError("");
               try {
-                await adminRequest("/api/admin/session", {
-                  method: "POST",
-                  body: JSON.stringify({ username, password }),
-                });
+                const result = await adminRequest<{ setupRequired?: boolean }>(
+                  "/api/admin/session",
+                  {
+                    method: "POST",
+                    body: JSON.stringify({
+                      username,
+                      password,
+                      ...(setup ? { newPassword } : {}),
+                    }),
+                  },
+                );
+                if (result.setupRequired) {
+                  setSetup(true);
+                  setBusy(false);
+                  return;
+                }
                 setPassword("");
                 window.location.reload();
               } catch (error) {
@@ -70,6 +84,8 @@ export default function AdminLogin({ configured }: { configured: boolean }) {
               value={username}
               onChange={(event) => {
                 setUsername(event.target.value);
+                setSetup(false);
+                setNewPassword("");
                 setError("");
               }}
               aria-invalid={!!error}
@@ -91,6 +107,20 @@ export default function AdminLogin({ configured }: { configured: boolean }) {
                 setError("");
               }}
             />
+            {setup && (
+              <label>
+                Шинэ нууц үг (12 буюу түүнээс олон тэмдэгт)
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  value={newPassword}
+                  minLength={12}
+                  maxLength={1024}
+                  required
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </label>
+            )}
             <p id="admin-login-error" role="alert" className="admin-error">
               {error}
             </p>

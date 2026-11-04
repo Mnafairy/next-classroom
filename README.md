@@ -35,7 +35,7 @@ npm run build
 npm run start:lan
 ```
 
-Share this computer's current local-network address on port 3000. Keep the computer and server running. This is a local implementation; it has not been deployed online.
+Share this computer's current local-network address on port 3000. Keep the computer and server running. This is a local implementation; it has not been deployed online. Behind a reverse proxy that changes the host or scheme, set `CLASSROOM_PUBLIC_ORIGIN` to the exact browser-facing origin. Direct LAN hosting uses the request’s Host header.
 
 ## Student experience
 
@@ -96,7 +96,7 @@ The original Next.js course tests continue to run alongside the Python tests.
 - `lib/python/flow.ts`: guided flowchart geometry and execution steps.
 - `components/python/`: lab, editor, quizzes, dialogs, and animated teaching view.
 - `public/python/harness.py`: shared Python runner and checker.
-- `public/python/worker.js`: browser worker entry point.
+- `public/python/worker.js`: Python worker for the sandboxed exercise frame. The frame runs on an opaque origin and can load only the Python runtime and harness.
 - `scripts/prepare-python.mjs`: self-hosted runtime preparation.
 - `lib/python/state.ts` and `storage.ts`: student profiles, server synchronization and safe progress restore.
 

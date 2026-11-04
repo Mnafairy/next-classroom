@@ -17,7 +17,7 @@ export async function cookieAttempt(token?: string) {
   if (!token || !/^[\w-]{43}$/.test(token)) return null;
   const { sessions, attempts } = await examCollections();
   const session = await sessions.findOne({
-    _id: tokenHash(token),
+    sessionHash: tokenHash(token),
     expiresAt: { $gt: new Date() },
   });
   const attempt = session

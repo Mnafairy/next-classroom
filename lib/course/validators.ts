@@ -1,4 +1,5 @@
 import ts from "typescript";
+import { realpathSync } from "node:fs";
 import path from "node:path";
 import { BUTTON, CARD, PAGE } from "./lessons";
 import type { CheckResult, Exercise, Files } from "./types";
@@ -53,6 +54,7 @@ export function validateSources(
       )
         restrictions.push("Use the static imports shown in this lesson.");
       if (
+        ts.isImportEqualsDeclaration(node) ||
         ts.isImportTypeNode(node) ||
         (ts.isExportDeclaration(node) && node.moduleSpecifier)
       )
@@ -89,22 +91,51 @@ export function validateSources(
   const libDirectory = path.join(process.cwd(), "node_modules/typescript/lib");
   host.getDefaultLibLocation = () => libDirectory;
   host.getDefaultLibFileName = () => path.join(libDirectory, "lib.es2020.d.ts");
-  const originalSource = host.getSourceFile.bind(host);
-  const originalFile = host.fileExists.bind(host);
-  const originalDirectory = host.directoryExists?.bind(host);
-  host.fileExists = (file) => virtual.has(file) || originalFile(file);
-  host.directoryExists = (dir) =>
-    dir.startsWith(base) || !!originalDirectory?.(dir);
-  host.getSourceFile = (file, language, onError, shouldCreate) =>
-    virtual.has(file)
-      ? ts.createSourceFile(
-          file,
-          virtual.get(file)!,
-          language,
-          true,
-          ts.ScriptKind.TSX,
-        )
-      : originalSource(file, language, onError, shouldCreate);
+  const roots = [
+    libDirectory,
+    ...["@types/react", "@types/react-dom", "csstype"].map((name) =>
+      path.join(process.cwd(), "node_modules", name),
+    ),
+  ];
+  const realRoots = roots.map((root) => realpathSync(root));
+  function permitted(file: string) {
+    const absolute = path.resolve(file);
+    if (
+      !roots.some((root) => absolute.startsWith(root + path.sep)) ||
+      !(
+        absolute.endsWith(".d.ts") || path.basename(absolute) === "package.json"
+      )
+    )
+      return false;
+    try {
+      const real = realpathSync(absolute);
+      return realRoots.some((root) => real.startsWith(root + path.sep));
+    } catch {
+      return false;
+    }
+  }
+  host.fileExists = (file) => virtual.has(file) || permitted(file);
+  host.readFile = (file) =>
+    virtual.get(file) ?? (permitted(file) ? ts.sys.readFile(file) : undefined);
+  host.getSourceFile = (file, language) => {
+    const code = host.readFile(file);
+    return code === undefined
+      ? undefined
+      : ts.createSourceFile(file, code, language, true);
+  };
+  host.directoryExists = (dir) => {
+    const absolute = path.resolve(dir);
+    return (
+      [...virtual.keys(), ...roots].some(
+        (file) => file === absolute || file.startsWith(absolute + path.sep),
+      ) ||
+      (roots.some((root) => absolute.startsWith(root + path.sep)) &&
+        ts.sys.directoryExists(absolute))
+    );
+  };
+  host.getDirectories = () => [];
+  host.readDirectory = () => [];
+  host.realpath = (file) => file;
   const program = ts.createProgram([...virtual.keys()], options, host);
   const diagnostics = ts
     .getPreEmitDiagnostics(program)

@@ -1,4 +1,8 @@
 /* Python runs in a disposable worker, never on the web server or UI thread. */
+if (self.origin !== "null" || !self.pythonBase) {
+  throw new Error("Python requires an isolated exercise frame.");
+}
+const runtime = new URL("runtime/", self.pythonBase).href;
 let python;
 let harness;
 
@@ -7,12 +11,15 @@ self.onmessage = async ({ data }) => {
   try {
     if (!python) {
       self.postMessage({ id, status: "loading" });
-      importScripts("/python/runtime/pyodide.js");
-      const harnessResponse = await fetch("/python/harness.py");
+      importScripts(runtime + "pyodide.js");
+      const harnessResponse = await fetch(
+        new URL("harness.py", self.pythonBase),
+        { credentials: "omit" },
+      );
       if (!harnessResponse.ok)
         throw new Error("Python шалгагчийг ачаалж чадсангүй.");
       harness = await harnessResponse.text();
-      python = await self.loadPyodide({ indexURL: "/python/runtime/" });
+      python = await self.loadPyodide({ indexURL: runtime });
     }
     self.postMessage({ id, status: "running" });
     const scope = python.toPy({ request_json: JSON.stringify(request) });

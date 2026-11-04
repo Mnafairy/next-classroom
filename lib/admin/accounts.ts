@@ -4,6 +4,7 @@ export type AdminAccount = {
   name: string;
   email: string;
   passwordHash: string;
+  setupRequired?: boolean;
   active: boolean;
   sourceId?: string;
 };

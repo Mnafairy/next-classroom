@@ -1,4 +1,8 @@
 import { examExercises, examQuestions } from "./content";
+export const MAX_CODE_UNITS = 12000;
+// Two full snapshots. A UTF-16 code unit can occupy six JSON bytes (e.g. a control character).
+export const EXAM_REQUEST_BYTES =
+  16 * 1024 + 2 * examExercises.length * MAX_CODE_UNITS * 6;
 export function hasCodeAnswer(starter: string, code: string | undefined) {
   return !!code?.trim() && code.trim() !== starter.trim();
 }
@@ -33,7 +37,7 @@ export function parseAnswers(body: Record<string, unknown>): ExamAnswers {
     if (
       !examExercises.some((e) => e.id === id) ||
       typeof value !== "string" ||
-      value.length > 12000
+      value.length > MAX_CODE_UNITS
     )
       throw new Error("Кодын хэмжээ эсвэл дасгалын ID буруу байна.");
     code[id] = value;

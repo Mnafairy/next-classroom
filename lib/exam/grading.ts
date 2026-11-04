@@ -97,11 +97,15 @@ export function gradeExam(answers: ExamAnswers) {
     try {
       if (structure(code, e.id))
         for (const c of codeCases[e.id]) {
-          const out = runExamCode(code, c.inputs);
-          if (out.length === 1 && out[0].trim() === c.output) passed++;
+          try {
+            const out = runExamCode(code, c.inputs);
+            if (out.length === 1 && out[0].trim() === c.output) passed++;
+          } catch {
+            /* A runtime error fails only this input. */
+          }
         }
     } catch {
-      /* Invalid code earns only the cases already passed. */
+      /* An unparseable structure earns no points. */
     }
     return {
       id: e.id,

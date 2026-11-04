@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { adminCollections, AccessError, InputError } from "../admin/data";
 import {
   EXAM_ID,
@@ -36,7 +36,7 @@ function resetError() {
     {
       code: "exam_reset",
       error:
-        "Шалгалтыг багш шинэчилсэн байна. Хуудсаа шинэчлээд ID-гаар дахин нэвтэрнэ үү.",
+        "Шалгалтыг багш шинэчилсэн байна. Хуудсаа шинэчлээд ID болон багшийн олгосон кодоор дахин нэвтэрнэ үү.",
     },
     { status: 409 },
   );
@@ -117,32 +117,109 @@ export async function endExamSession(token?: string) {
   if (token)
     await (
       await examCollections()
-    ).sessions.deleteOne({ _id: tokenHash(token) });
+    ).sessions.deleteOne({ sessionHash: tokenHash(token) });
 }
 export function examView(attempt: ExamAttempt): ExamView {
   if (attempt.status === "reset") throw resetError();
-  return {
+  const identity = {
     studentId: attempt.studentId,
     name: attempt.name,
     className: attempt.className,
-    status: attempt.status,
     generation: attempt.generation || 0,
+  };
+  if (attempt.status !== "active")
+    return { ...identity, status: attempt.status };
+  return {
+    ...identity,
+    status: "active",
     deadline: attempt.deadline.toISOString(),
     revision: attempt.revision,
     departures: attempt.departures,
     answers: attempt.answers,
-    questions: attempt.status === "active" ? examQuestions : [],
-    exercises: attempt.status === "active" ? examExercises : [],
+    questions: examQuestions,
+    exercises: examExercises,
   };
 }
-export async function startAttempt(studentId: string, token?: string) {
+
+export async function issueExamCode(studentId: string, teacherId: string) {
+  const { profile, group } = await eligibleStudent(studentId);
+  if (
+    !profile.teacherIds?.includes(teacherId) ||
+    !group.teacherIds?.includes(teacherId)
+  )
+    throw new AccessError("Энэ сурагчид код олгох эрхгүй байна.");
+  const { sessions, attempts } = await examCollections();
+  const attemptId = `${EXAM_ID}:${studentId}`;
+  const attempt = await attempts.findOne(
+    { _id: attemptId },
+    { projection: { generation: 1 } },
+  );
+  const code = randomBytes(10).toString("hex").toUpperCase();
+  const redeemUntil = new Date(Date.now() + 30 * 60_000);
+  await Promise.all([
+    sessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    sessions.createIndex({ sessionHash: 1 }, { sparse: true }),
+  ]);
+  // A replacement code revokes the previous code and its browser session.
+  await sessions.updateOne(
+    { _id: attemptId },
+    {
+      $set: {
+        attemptId,
+        generation: attempt?.generation || 0,
+        codeHash: tokenHash(code),
+        redeemUntil,
+        expiresAt: redeemUntil,
+      },
+      $unset: { sessionHash: "" },
+    },
+    { upsert: true },
+  );
+  return code;
+}
+
+export async function startAttempt(
+  studentId: string,
+  token?: string,
+  code?: unknown,
+  browserKey?: unknown,
+) {
   const existing = await currentAttempt(token);
-  if (existing?.status === "active" && existing.studentId !== studentId)
+  if (existing?.studentId === studentId && token)
+    return { attempt: existing, token };
+  if (existing?.status === "active")
     throw new AccessError("Идэвхтэй шалгалтын сурагчийг солих боломжгүй.");
+  const denied = () =>
+    new AccessError(
+      "Багшийн өгсөн код буруу, ашиглагдсан эсвэл хугацаа нь дууссан байна.",
+    );
+  if (
+    typeof code !== "string" ||
+    !/^[0-9a-f]{20}$/i.test(code) ||
+    typeof browserKey !== "string" ||
+    !/^[0-9a-f]{32}$/.test(browserKey)
+  )
+    throw denied();
   const { profile, group } = await eligibleStudent(studentId);
   const { attempts, sessions } = await examCollections();
   const now = new Date();
   const _id = `${EXAM_ID}:${studentId}`;
+  const nextToken = createHash("sha256")
+    .update(code.toUpperCase() + ":" + browserKey)
+    .digest("base64url");
+  const sessionHash = tokenHash(nextToken);
+  // An identical retry after a lost response gets the same cookie. A different browser cannot replay the code.
+  const grant = await sessions.findOneAndUpdate(
+    {
+      _id,
+      codeHash: tokenHash(code.toUpperCase()),
+      redeemUntil: { $gt: now },
+      $or: [{ sessionHash: { $exists: false } }, { sessionHash }],
+    },
+    { $set: { sessionHash, expiresAt: new Date(now.getTime() + 8 * 3600000) } },
+    { returnDocument: "after" },
+  );
+  if (!grant) throw denied();
   try {
     await attempts.updateOne(
       { _id },
@@ -180,6 +257,7 @@ export async function startAttempt(studentId: string, token?: string) {
   }
   let attempt = await attempts.findOne({ _id });
   if (!attempt) throw new Error("Attempt not created");
+  if ((attempt.generation || 0) !== grant.generation) throw resetError();
   if (attempt.status === "reset") {
     await attempts.updateOne(
       { ...runIdentity(attempt), status: "reset" },
@@ -204,16 +282,13 @@ export async function startAttempt(studentId: string, token?: string) {
       },
     );
     attempt = await attempts.findOne({ _id });
-    if (!attempt || attempt.status === "reset") throw resetError();
+    if (
+      !attempt ||
+      attempt.status === "reset" ||
+      (attempt.generation || 0) !== grant.generation
+    )
+      throw resetError();
   }
-  const nextToken = randomBytes(32).toString("base64url");
-  await sessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-  await sessions.insertOne({
-    _id: tokenHash(nextToken),
-    attemptId: _id,
-    generation: attempt.generation || 0,
-    expiresAt: new Date(Date.now() + 8 * 3600000),
-  });
   const final =
     attempt.status === "active" && attempt.deadline.getTime() <= Date.now()
       ? await finishAttempt(attempt, "expired")
@@ -560,7 +635,10 @@ export async function resetStudentExam(
   if (!updated) throw resetError();
   await sessions.deleteMany({
     attemptId: attempt._id,
-    generation: { $ne: updated.generation },
+    $or: [
+      { generation: { $lte: generation } },
+      { generation: { $exists: false } },
+    ],
   });
 }
 

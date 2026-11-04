@@ -52,8 +52,8 @@ export default function ResetExamDialog({
           нэвтрэлт хүчингүй болно.
         </p>
         <p>
-          Сурагч хуудсаа шинэчлээд ID-гаар дахин нэвтрэхэд шинэ{" "}
-          <strong>{EXAM_MINUTES} минут</strong> эхэлнэ.
+          Сурагч хуудсаа шинэчлээд ID болон багшийн олгосон кодоор дахин
+          нэвтрэхэд шинэ <strong>{EXAM_MINUTES} минут</strong> эхэлнэ.
         </p>
         {error && (
           <p role="alert" className="admin-error">

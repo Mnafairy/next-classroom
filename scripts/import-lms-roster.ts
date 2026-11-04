@@ -1,5 +1,11 @@
 import { loadEnvConfig } from "@next/env";
-import { readFile, writeFile, mkdir, chmod } from "node:fs/promises";
+import {
+  readFile,
+  writeFile,
+  mkdir,
+  chmod,
+  appendFile,
+} from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import { classroomDatabase } from "../lib/student/database";
 import { parseLmsImport, applyLmsImport } from "../lib/admin/lms-import";
@@ -31,7 +37,19 @@ async function main() {
     };
     const backupPath = `work/lms-before-${Date.now()}.json`;
     await writeFile(backupPath, JSON.stringify(backup), { mode: 0o600 });
-    console.log(JSON.stringify(await applyLmsImport(plan)));
+    const setupPath = `work/admin-setup-${randomBytes(12).toString("hex")}.txt`;
+    await writeFile(setupPath, "Private one-time teacher setup codes\n", {
+      mode: 0o600,
+      flag: "wx",
+    });
+    console.log("Private setup codes: " + setupPath);
+    console.log(
+      JSON.stringify(
+        await applyLmsImport(plan, (id, secret) =>
+          appendFile(setupPath, `${id}\t${secret}\n`),
+        ),
+      ),
+    );
     const key =
       process.env.ADMIN_RATE_LIMIT_KEY || randomBytes(32).toString("hex");
     const envPath = ".env.local";
@@ -47,12 +65,6 @@ async function main() {
     await chmod(envPath, 0o600);
     await writeFile("work/admin-rate-limit-key.txt", key, { mode: 0o600 });
     await chmod("work/admin-rate-limit-key.txt", 0o600);
-    await writeFile(
-      "work/admin-access.txt",
-      `KodLab admin accounts\nhttps://kodlab-two.vercel.app/admin\n\n${plan.teachers.map((t) => `${t.name}\nUsername: ${t.id}\nEmail login: ${t.email}\nInitial password: ${t.email}\n`).join("\n")}\nExisting account passwords are preserved on repeated imports.\nKeep this file private.\n`,
-      { mode: 0o600 },
-    );
-    await chmod("work/admin-access.txt", 0o600);
   } finally {
     const pool = globalThis as typeof globalThis & {
       classroomMongo?: Promise<MongoClient>;

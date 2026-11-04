@@ -111,3 +111,24 @@ test("answer input rejects forged IDs, huge code and invalid choices", () => {
   ])
     assert.throws(() => parseAnswers(body));
 });
+
+test("a runtime error on the first input preserves credit for four correct perimeter cases", () => {
+  const code =
+    "let width=8;let height=5;if(width===8)console.log(missing);else console.log(2*(width+height));";
+  assert.deepEqual(
+    gradeExam({ choices: {}, code: { c01: code } }).exercises[0],
+    { id: "c01", passed: 4, total: 5, points: 8 },
+  );
+});
+test("exam let declarations shadow, expire, and update the nearest enclosing binding", () => {
+  assert.deepEqual(
+    runExamCode(
+      "let x=1; if(true){let x=2; x=3; console.log(x);} console.log(x);",
+    ),
+    ["3", "1"],
+  );
+  assert.deepEqual(runExamCode("let x=1;if(true){x=2;}console.log(x)"), ["2"]);
+  assert.throws(() => runExamCode("if(true){let x=2;}console.log(x)"));
+  assert.throws(() => runExamCode("let x=1;if(true){console.log(x);let x=2;}"));
+  assert.throws(() => runExamCode("{let x=1; let x=2;}"));
+});

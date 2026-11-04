@@ -8,9 +8,11 @@ import {
   endAdminSession,
   requestToken,
   authenticateAdmin,
+  hashPassword,
 } from "@/lib/admin/auth";
+import { accountCollection } from "@/lib/admin/accounts";
 import { adminError, adminJson } from "@/lib/admin/http";
-import { readJsonObject, sameOrigin } from "@/lib/http/request";
+import { publicOrigin, readJsonObject, sameOrigin } from "@/lib/http/request";
 export const runtime = "nodejs";
 function cookieResponse(request: Request, token: string, maxAge: number) {
   const response = NextResponse.json(
@@ -19,7 +21,7 @@ function cookieResponse(request: Request, token: string, maxAge: number) {
   );
   response.cookies.set(ADMIN_COOKIE, token, {
     httpOnly: true,
-    secure: new URL(request.url).protocol === "https:",
+    secure: publicOrigin(request).startsWith("https://"),
     sameSite: "strict",
     path: "/",
     maxAge,
@@ -37,12 +39,51 @@ export async function POST(request: Request) {
         { error: "Олон удаа оролдлоо. 15 минутын дараа дахин оролдоорой." },
         429,
       );
-    const account = await authenticateAdmin(body.username, body.password);
+    let account = await authenticateAdmin(body.username, body.password);
     if (!account)
       return adminJson(
         { error: "Нэвтрэх нэр эсвэл нууц үг буруу байна." },
         401,
       );
+    if (account.setupRequired) {
+      if (body.newPassword === undefined)
+        return adminJson({ setupRequired: true });
+      const password = body.newPassword;
+      if (
+        typeof password !== "string" ||
+        password.length < 12 ||
+        password.length > 1024 ||
+        password === body.password ||
+        password.toLowerCase() === account.email
+      )
+        return adminJson(
+          {
+            error:
+              "Шинэ нууц үг 12–1024 тэмдэгттэй, имэйл болон түр кодоос өөр байна.",
+          },
+          400,
+        );
+      account = await (
+        await accountCollection()
+      ).findOneAndUpdate(
+        {
+          _id: account._id,
+          active: true,
+          setupRequired: true,
+          passwordHash: account.passwordHash,
+        },
+        {
+          $set: { passwordHash: await hashPassword(password) },
+          $unset: { setupRequired: "" },
+        },
+        { returnDocument: "after" },
+      );
+      if (!account)
+        return adminJson(
+          { error: "Түр код ашиглагдсан. Шинэ нууц үгээрээ нэвтэрнэ үү." },
+          401,
+        );
+    }
     // Revoke the previous browser session when signing in again.
     await endAdminSession(requestToken(request));
     return cookieResponse(

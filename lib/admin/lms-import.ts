@@ -1,7 +1,8 @@
 import { normalizeStudentId } from "../student/identity";
 import { classroomDatabase } from "../student/database";
 import { accountCollection } from "./accounts";
-import { hashPassword } from "./auth";
+import { randomBytes } from "node:crypto";
+import { hashPassword, verifyPassword } from "./auth";
 import { adminCollections } from "./data";
 
 export type LmsImport = {
@@ -121,7 +122,10 @@ export function parseLmsImport(value: unknown): LmsImport {
     students: [...students.values()],
   };
 }
-export async function applyLmsImport(plan: LmsImport) {
+export async function applyLmsImport(
+  plan: LmsImport,
+  recordSetup: (id: string, secret: string) => Promise<void>,
+) {
   const { profiles, groups } = await adminCollections(),
     accounts = await accountCollection();
   const [existingGroups, existingProfiles, existingAccounts] =
@@ -176,24 +180,41 @@ export async function applyLmsImport(plan: LmsImport) {
       { upsert: true },
     );
   for (const teacher of plan.teachers) {
-    const passwordHash = existingAccounts.some((a) => a._id === teacher.id)
-      ? undefined
-      : await hashPassword(teacher.email);
-    await accounts.updateOne(
-      { _id: teacher.id },
-      {
-        $set: {
-          name: teacher.name,
-          email: teacher.email,
-          sourceId: teacher.sourceId,
-        },
-        $setOnInsert: {
-          active: true,
-          ...(passwordHash ? { passwordHash } : {}),
-        },
-      },
-      { upsert: true },
-    );
+    const existing = existingAccounts.find((a) => a._id === teacher.id);
+    const identity = {
+      name: teacher.name,
+      email: teacher.email,
+      sourceId: teacher.sourceId,
+    };
+    if (
+      existing &&
+      !(await verifyPassword(existing.email, existing.passwordHash))
+    ) {
+      await accounts.updateOne({ _id: teacher.id }, { $set: identity });
+      continue;
+    }
+    const secret = randomBytes(24).toString("base64url");
+    const passwordHash = await hashPassword(secret);
+    // Persist the private handoff before changing an account, including on partial imports.
+    await recordSetup(teacher.id, secret);
+    if (existing) {
+      const changed = await accounts.updateOne(
+        { _id: teacher.id, passwordHash: existing.passwordHash },
+        { $set: { ...identity, passwordHash, setupRequired: true } },
+      );
+      if (!changed.matchedCount)
+        throw new Error(
+          "Teacher credentials changed during import. Retry with a fresh snapshot.",
+        );
+    } else {
+      await accounts.insertOne({
+        _id: teacher.id,
+        ...identity,
+        active: true,
+        passwordHash,
+        setupRequired: true,
+      });
+    }
   }
   if (plan.students.length)
     await profiles.bulkWrite(

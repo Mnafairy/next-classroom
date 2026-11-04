@@ -10,6 +10,9 @@ export async function examCollections() {
       attemptId: string;
       generation?: number;
       expiresAt: Date;
+      codeHash?: string;
+      redeemUntil?: Date;
+      sessionHash?: string;
     }>("exam_sessions"),
   };
 }

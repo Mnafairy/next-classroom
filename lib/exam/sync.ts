@@ -4,7 +4,7 @@ import {
   ExamSessionExpiredError,
 } from "./client";
 import type { ExamAnswers } from "./protocol";
-import type { ExamResponse, ExamView } from "./types";
+import type { ExamResponse, ActiveExam } from "./types";
 
 export class ExamAnswerConflictError extends Error {
   constructor() {
@@ -57,7 +57,7 @@ export function sameExamAnswers(left: ExamAnswers, right: ExamAnswers) {
 }
 
 export async function saveExamAnswers(
-  attempt: ExamView,
+  attempt: ActiveExam,
   answers: ExamAnswers,
   submit: boolean,
   writerId?: string,
@@ -88,7 +88,7 @@ export async function saveExamAnswers(
         latest.attempt.generation !== attempt.generation
       )
         throw new ExamSessionExpiredError(
-          "Шалгалтын нэвтрэлт өөрчлөгдсөн. ID-гаар дахин нэвтэрнэ үү.",
+          "Шалгалтын нэвтрэлт өөрчлөгдсөн. ID болон багшийн олгосон кодоор дахин нэвтэрнэ үү.",
         );
       if (latest.attempt.status !== "active")
         throw new Error(

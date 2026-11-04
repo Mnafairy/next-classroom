@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { publicOrigin } from "./lib/http/request";
 import { cookieAttempt, EXAM_COOKIE } from "./lib/exam/access";
 
 export async function proxy(request: NextRequest) {
@@ -25,7 +26,9 @@ export async function proxy(request: NextRequest) {
         },
         { status: 423, headers: { "Cache-Control": "private, no-store" } },
       );
-    const response = NextResponse.redirect(new URL("/exam", request.url));
+    const response = NextResponse.redirect(
+      new URL("/exam", publicOrigin(request)),
+    );
     response.headers.set("Cache-Control", "private, no-store");
     return response;
   } catch {
@@ -35,7 +38,7 @@ export async function proxy(request: NextRequest) {
           { error: "Шалгалтын холболтыг шалгана уу." },
           { status: 503 },
         )
-      : NextResponse.redirect(new URL("/exam", request.url));
+      : NextResponse.redirect(new URL("/exam", publicOrigin(request)));
   }
 }
 export const config = {

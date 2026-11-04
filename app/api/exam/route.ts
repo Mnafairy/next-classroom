@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { adminError, adminJson } from "@/lib/admin/http";
 import { AccessError, InputError } from "@/lib/admin/data";
 import { normalizeStudentId } from "@/lib/student/identity";
-import { readJsonObject, sameOrigin } from "@/lib/http/request";
+import { publicOrigin, readJsonObject, sameOrigin } from "@/lib/http/request";
 import { EXAM_COOKIE, examToken } from "@/lib/exam/access";
 import {
   currentAttempt,
@@ -12,6 +12,7 @@ import {
   recordDeparture,
   endExamSession,
 } from "@/lib/exam/service";
+import { EXAM_REQUEST_BYTES, MAX_CODE_UNITS } from "@/lib/exam/protocol";
 import { codeCases } from "@/lib/exam/grading";
 import { runExamCode } from "@/lib/exam/interpreter";
 
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     if (!sameOrigin(request)) return adminJson({ error: "Forbidden" }, 403);
-    const body = await readJsonObject(request, 192 * 1024);
+    const body = await readJsonObject(request, EXAM_REQUEST_BYTES);
     if (body.action === "start") {
       let id: string;
       try {
@@ -53,10 +54,15 @@ export async function POST(request: Request) {
       } catch {
         throw new InputError("Сурагчийн ID-гаа зөв оруулна уу.");
       }
-      const next = await startAttempt(id, examToken(request));
+      const next = await startAttempt(
+        id,
+        examToken(request),
+        body.code,
+        body.browserKey,
+      );
       (await cookies()).set(EXAM_COOKIE, next.token, {
         httpOnly: true,
-        secure: new URL(request.url).protocol === "https:",
+        secure: publicOrigin(request).startsWith("https://"),
         sameSite: "strict",
         path: "/",
         maxAge: 8 * 3600,
@@ -75,7 +81,7 @@ export async function POST(request: Request) {
       return adminJson(
         {
           error:
-            "Шалгалтын нэвтрэлт дууссан эсвэл багш шинэчилсэн байна. ID-гаар дахин нэвтэрнэ үү.",
+            "Шалгалтын нэвтрэлт дууссан эсвэл багш шинэчилсэн байна. ID болон багшийн олгосон кодоор дахин нэвтэрнэ үү.",
         },
         401,
       );
@@ -111,7 +117,7 @@ export async function POST(request: Request) {
         typeof body.exerciseId !== "string" ||
         !Object.hasOwn(codeCases, body.exerciseId) ||
         typeof body.code !== "string" ||
-        body.code.length > 12000
+        body.code.length > MAX_CODE_UNITS
       )
         throw new InputError("Дасгал болон кодоо шалгана уу.");
       try {

@@ -1,6 +1,6 @@
 import { parseAnswers, type ExamAnswers } from "./protocol";
 import { mergeExamAnswers } from "./sync";
-import type { ExamView } from "./types";
+import type { ActiveExam } from "./types";
 
 export type RestoredExamDraft = {
   answers: ExamAnswers;
@@ -10,7 +10,7 @@ export type RestoredExamDraft = {
 };
 
 export function restoreExamDraft(
-  attempt: ExamView,
+  attempt: ActiveExam,
   raw: string | null,
 ): RestoredExamDraft | null {
   try {

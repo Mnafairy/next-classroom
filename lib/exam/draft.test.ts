@@ -52,3 +52,59 @@ test("draft reload merges different answers and rejects another generation or ma
   );
   assert.equal(restoreExamDraft(attempt, "bad json"), null);
 });
+
+test("another tab's acknowledgment preserves this tab's offline draft and explicit recovery copy", async () => {
+  const { JSDOM } = await import("jsdom");
+  const { rememberDraft, tabDraft, alternateDrafts } =
+    await import("./browser-drafts");
+  const tabs = [
+    new JSDOM("", { url: "https://school.test" }),
+    new JSDOM("", { url: "https://school.test" }),
+  ];
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+  const originalStorage = Object.getOwnPropertyDescriptor(
+    globalThis,
+    "localStorage",
+  );
+  const select = (tab: number) =>
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: tabs[tab].window,
+    });
+  try {
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: tabs[0].window.localStorage,
+    });
+    select(1);
+    const raw = JSON.stringify({
+      revision: 1,
+      generation: 0,
+      baseAnswers: attempt.answers,
+      answers: { choices: { q01: 3 }, code: {} },
+    });
+    rememberDraft(attempt, "tab-b", raw);
+    select(0);
+    rememberDraft(attempt, "tab-a", null);
+    assert.equal(tabDraft(attempt), null);
+    assert.deepEqual(alternateDrafts(attempt, null), [raw]);
+    select(1);
+    assert.equal(tabDraft(attempt), raw);
+    assert.equal(
+      restoreExamDraft(
+        { ...attempt, revision: 2, answers: { choices: { q01: 0 }, code: {} } },
+        raw,
+      )?.answers.choices.q01,
+      3,
+    );
+    assert.deepEqual(alternateDrafts({ ...attempt, generation: 1 }, null), []);
+  } finally {
+    if (originalWindow)
+      Object.defineProperty(globalThis, "window", originalWindow);
+    else Reflect.deleteProperty(globalThis, "window");
+    if (originalStorage)
+      Object.defineProperty(globalThis, "localStorage", originalStorage);
+    else Reflect.deleteProperty(globalThis, "localStorage");
+    tabs.forEach((tab) => tab.window.close());
+  }
+});
