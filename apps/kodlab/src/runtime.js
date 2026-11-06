@@ -17,6 +17,10 @@ function workerBody(){
 }
 const workerSource=`(${workerBody.toString()})();`;
 export function cancelRuns(){for(const cancel of [...pending])cancel();}
+/**
+ * @param {string} code
+ * @returns {Promise<{logs: {level: string, text: string}[], error?: string, cancelled?: boolean}>}
+ */
 export function execute(code){
  return new Promise(resolve=>{
   if(code.length>20000){resolve({logs:[],error:'Код 20,000 тэмдэгтээс урт байна.'});return;}

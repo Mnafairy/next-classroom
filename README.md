@@ -102,6 +102,16 @@ The original Next.js course tests continue to run alongside the Python tests.
 
 The existing `lib/course/`, `components/learning/`, and `/api/check` remain dedicated to the original Next.js course.
 
+## Grade curriculum
+
+From the home page, open **Анги тус бүрийн хичээл** to find the Grade 7, 8, 10 and 11 Information Technology curriculum at `/curriculum`. Lesson pages include worked examples, practice steps, a deliverable, criteria and a self-check. JavaScript and Python examples run in the browser. HTML and Next.js examples can be downloaded for local practice.
+
+The [curriculum coverage review](docs/curriculum-coverage.md) maps the school workbook to the existing and new lessons.
+
+Every curriculum lesson also has six extra exercises in three levels, including the five lessons that reuse existing classroom content. Each task states a checkable outcome, includes a topic hint, and offers space for a solution or testing notes. JavaScript and Python tasks have a runnable scratchpad. A further challenge section suggests ways to extend a finished task. Draft code, notes and self-marked completion survive reloads in the same browser tab through session storage; downloads provide a lasting copy.
+
+The home page's test link opens `/practice-tests`. Grades 7, 8, 10 and 11 have 166 explained questions linked to all 83 curriculum topics. Students can choose a mixed grade test, a unit or one lesson, answer up to 12 questions, see scored feedback, retry missed topics or start another selection. Answers are shuffled and unseen questions are preferred. These are public formative tests, with answer keys available in the browser and no effect on teacher grades. The existing teacher-code JavaScript exam remains at `/exam`, linked from the test hub, and continues to use its existing access, deadline and grading rules.
+
 ## MongoDB and deployment
 
 See [MongoDB setup and hosting](docs/mongodb-deployment.md) for the selected Atlas project, server-only environment variables, save behavior, and Vercel/Sites options. Live Atlas access requires a database user and network permission.

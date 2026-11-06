@@ -554,7 +554,7 @@ export default function ExamWorkspace() {
         ) : !attempt ? (
           <section className="exam-intro">
             <ShieldCheck size={30} />
-            <p className="exam-kicker">БИЕ ДААСАН ҮНЭЛГЭЭ</p>
+            <p className="exam-kicker">БАГШИЙН КОДТОЙ ҮНЭЛГЭЭ</p>
             <h1>{EXAM_TITLE}</h1>
             <p>Мэдлэгээ шалгаад, зургаан жижиг бодлогыг кодоор шийдээрэй.</p>
             <dl className="exam-facts">
@@ -626,6 +626,9 @@ export default function ExamWorkspace() {
                 {error}
               </p>
             )}
+            <Link href="/practice-tests" className="exam-link" prefetch={false}>
+              Тайлбартай давтлагын тестүүд
+            </Link>
             <Link href="/" className="exam-link">
               Хичээл сонгох руу буцах
             </Link>

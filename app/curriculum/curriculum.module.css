@@ -1,0 +1,710 @@
+.page {
+  min-height: 100dvh;
+  background: var(--lab-bg);
+  color: var(--lab-ink);
+}
+.header,
+.main {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+  padding-inline: clamp(18px, 4vw, 48px);
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 24px;
+}
+.term {
+  font-size: 12px;
+  font-weight: 650;
+  text-align: right;
+  color: var(--lab-muted);
+}
+.main {
+  padding-block: 24px 64px;
+}
+.hero {
+  margin-bottom: 30px;
+}
+.hero .eyebrow {
+  margin: 0 0 8px;
+  color: #264ba9;
+  font-size: 13px;
+  font-weight: 700;
+}
+.hero h1 {
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 770;
+  letter-spacing: -0.035em;
+  line-height: 1.16;
+  overflow-wrap: anywhere;
+}
+.hero > p:not(.eyebrow) {
+  margin-top: 14px;
+  color: #465b77;
+  font-size: clamp(16px, 2vw, 19px);
+  line-height: 1.55;
+}
+.grades {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  list-style: none;
+}
+@media (max-width: 600px) {
+  .grades {
+    grid-template-columns: 1fr;
+  }
+}
+.gradeCard,
+.lessonList a,
+.neighbors a {
+  border: 1px solid var(--lab-line);
+  background: #fff;
+}
+.gradeCard:hover,
+.lessonList a:hover,
+.neighbors a:hover {
+  border-color: #a6bae5;
+  background: #f8fbff;
+}
+.gradeCard {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 16px;
+  border-radius: 12px;
+}
+.gradeNumber,
+.ordinal {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  background: #eaf0ff;
+  color: #264ba9;
+  font-size: 17px;
+  font-weight: 740;
+  font-variant-numeric: tabular-nums;
+}
+.gradeCard h2,
+.lessonLabel strong {
+  font-size: 16px;
+  font-weight: 730;
+}
+.gradeCard p,
+.lessonLabel > span {
+  color: #465b77;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.gradeCard > svg,
+.lessonList svg {
+  color: #264ba9;
+  flex-shrink: 0;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-bottom: 14px;
+  color: #264ba9;
+  font-weight: 650;
+}
+.reading,
+.sequence {
+  max-width: 780px;
+}
+.sequence > section + section {
+  margin-top: 24px;
+}
+.sequence h2,
+.block h2 {
+  margin-bottom: 10px;
+  font-size: 20px;
+  line-height: 1.35;
+  font-weight: 740;
+}
+.lessonList {
+  display: grid;
+  gap: 7px;
+  list-style: none;
+}
+.lessonList a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+.ordinal {
+  font-size: 14px;
+}
+.lessonLabel {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+}
+.note,
+.materials {
+  margin-block: 26px;
+  padding: 14px 18px;
+  border: 1px solid var(--lab-line);
+  border-radius: 10px;
+  background: #fff;
+  line-height: 1.6;
+}
+.note summary,
+.check summary {
+  width: fit-content;
+  color: #264ba9;
+  font-weight: 700;
+  cursor: pointer;
+}
+.note p,
+.check details p {
+  margin-top: 10px;
+}
+.note a,
+.practiceLinks a {
+  color: #264ba9;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.materials strong {
+  margin-right: 6px;
+}
+.block {
+  margin-top: 28px;
+  font-size: 16px;
+  line-height: 1.65;
+}
+.example {
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #192e4b;
+  color: #f4f7fc;
+}
+.example figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #4c5e77;
+  font-size: 13px;
+  font-weight: 650;
+}
+.example figcaption a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.example pre {
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-size: 14px;
+}
+.example pre:focus-visible {
+  outline: 2px solid #b9ccff;
+  outline-offset: -3px;
+}
+.runner {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--lab-line);
+  border-radius: 10px;
+  background: #fff;
+}
+.runner label {
+  display: grid;
+  gap: 5px;
+  font-size: 14px;
+  font-weight: 650;
+}
+.runner textarea,
+.output {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #536584;
+  border-radius: 6px;
+  background: #192e4b;
+  color: #f4f7fc;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: pre;
+  overflow: auto;
+}
+.runner textarea {
+  resize: vertical;
+}
+.runner textarea:focus-visible {
+  outline: 3px solid #96b2fc;
+  outline-offset: 2px;
+}
+.runner textarea.inputs,
+.output {
+  border-color: #d4deed;
+  background: #f1f5fc;
+  color: var(--lab-ink);
+}
+.output {
+  max-height: 220px;
+}
+.runnerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 650;
+}
+.runnerActions button {
+  min-height: 44px;
+  padding: 6px 15px;
+  border-radius: 6px;
+  background: #254db7;
+  color: #fff;
+}
+.runnerActions a {
+  color: #264ba9;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.steps,
+.criteria {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding-inline-start: 24px;
+}
+.steps {
+  list-style: decimal;
+}
+.criteria {
+  list-style: disc;
+}
+.check {
+  padding: 18px;
+  border: 1px solid #cfddf7;
+  border-radius: 10px;
+  background: #eaf0ff;
+}
+.check details {
+  margin-top: 10px;
+}
+.source {
+  margin-block: 20px;
+  color: var(--lab-muted);
+  font-size: 12px;
+}
+.neighbors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--lab-line);
+}
+.neighbors a {
+  display: grid;
+  gap: 5px;
+  flex: 1 1 250px;
+  padding: 14px;
+  border-radius: 10px;
+}
+.neighbors a > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #264ba9;
+  font-size: 12px;
+}
+.next {
+  text-align: right;
+}
+.next > span {
+  justify-content: flex-end;
+}
+
+/* Practice ladders and repeatable formative tests share the curriculum layout. */
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-block: 16px;
+}
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #254db7;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.primaryButton {
+  background: #254db7;
+  color: #fff;
+}
+.secondaryButton {
+  background: #fff;
+  color: #254db7;
+}
+.primaryButton:disabled {
+  cursor: not-allowed;
+  background: #e3e9f1;
+  border-color: #c7d1df;
+  color: #52627b;
+}
+.textLink {
+  color: #264ba9;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-size: 14px;
+  font-weight: 650;
+}
+.muted,
+.testIntro {
+  color: #465b77;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.testIntro {
+  margin-block: 0 20px;
+}
+.practiceArea {
+  scroll-margin-top: 24px;
+  padding-top: 28px;
+  border-top: 2px solid #cfddf7;
+}
+.sectionHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.sectionHeading h2 {
+  margin-bottom: 0;
+}
+.kicker {
+  color: #264ba9;
+  font-size: 12px;
+  font-weight: 750;
+  margin-bottom: 4px;
+}
+.progressBadge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  color: #1c5870;
+  background: #e2f3f3;
+  font-size: 13px;
+  font-weight: 700;
+}
+.levelGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-block: 20px;
+}
+.levelGrid > div {
+  padding: 12px;
+  border: 1px solid #d4deed;
+  border-radius: 10px;
+  background: #fff;
+}
+.levelGrid h3,
+.taskCard h3,
+.reviewLinks h3 {
+  font-size: 16px;
+  font-weight: 750;
+}
+.levelGrid p {
+  min-height: 44px;
+  margin-block: 4px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #465b77;
+}
+.taskButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.taskButtons button {
+  flex: 1;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 1px solid #bdcce5;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.taskButtons button[aria-pressed="true"] {
+  background: #254db7;
+  border-color: #254db7;
+  color: #fff;
+}
+.taskCard {
+  padding: clamp(14px, 3vw, 24px);
+  border: 1px solid #bdcce5;
+  border-radius: 12px;
+  background: #fff;
+}
+.taskPrompt {
+  margin-block: 10px 16px;
+  font-size: 17px;
+  line-height: 1.65;
+}
+.hint summary,
+.extension summary {
+  color: #264ba9;
+  font-weight: 700;
+  cursor: pointer;
+}
+.hint p {
+  margin-top: 8px;
+}
+.answerNotes {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  font-size: 14px;
+  font-weight: 650;
+}
+.answerNotes textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #afc0da;
+  border-radius: 6px;
+  font-weight: 400;
+  line-height: 1.6;
+  resize: vertical;
+  background: #f8fbff;
+}
+.extension {
+  margin-block: 18px;
+  padding: 16px;
+  border-radius: 10px;
+  background: #eaf0ff;
+}
+.extension p {
+  margin-block: 12px;
+}
+.quizArea {
+  line-height: 1.6;
+}
+.quizHeading {
+  margin-bottom: 18px;
+  font-size: 22px;
+  font-weight: 750;
+  scroll-margin-top: 24px;
+}
+.quizSetup {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid #d4deed;
+  border-radius: 12px;
+  background: #fff;
+  margin-block: 18px;
+}
+.quizSetup label {
+  font-size: 14px;
+  font-weight: 700;
+}
+.quizSetup select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 9px;
+  border: 1px solid #a5b8d5;
+  border-radius: 6px;
+  background: #f8fbff;
+  font-size: 14px;
+}
+.quizSetup p {
+  color: #465b77;
+  font-size: 13px;
+}
+.quizSetup .actionRow {
+  margin-bottom: 0;
+}
+.answerCount {
+  margin-block: 18px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #264ba9;
+}
+.questions {
+  display: grid;
+  gap: 22px;
+  margin-block: 24px;
+}
+.question {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #c6d4e9;
+  border-radius: 12px;
+  background: #fff;
+}
+.question legend {
+  padding-inline: 5px;
+  font-size: 17px;
+  font-weight: 730;
+  overflow-wrap: anywhere;
+}
+.questionTopic {
+  margin-bottom: 12px;
+  color: #465b77;
+  font-size: 12px;
+}
+.question pre {
+  max-width: 100%;
+  overflow: auto;
+  padding: 14px;
+  border-radius: 6px;
+  margin-block: 10px 16px;
+  background: #192e4b;
+  color: #f4f7fc;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 13px;
+}
+.options {
+  display: grid;
+  gap: 8px;
+}
+.options label {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 9px;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid #d4deed;
+  border-radius: 7px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.options label span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.options label:has(input:checked) {
+  border-color: #254db7;
+  background: #edf2ff;
+}
+.options input {
+  accent-color: #254db7;
+  flex-shrink: 0;
+}
+.options label strong {
+  font-size: 12px;
+}
+.options label[data-result="correct"] {
+  background: #e5f4ee;
+  border-color: #4a957c;
+  color: #195c45;
+}
+.options label[data-result="incorrect"] {
+  background: #fff0e8;
+  border-color: #c28663;
+  color: #743c1a;
+}
+.explanation {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 6px;
+  background: #f1f5fc;
+  font-size: 14px;
+}
+.explanation a {
+  display: inline-block;
+  margin-top: 6px;
+}
+.resultBox {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid #bcd9d0;
+  border-radius: 12px;
+  background: #eaf5f1;
+}
+.score {
+  font-size: 36px;
+  line-height: 1;
+  color: #195c45;
+}
+.resultBox p {
+  font-size: 14px;
+}
+.reviewLinks {
+  margin-block: 20px;
+}
+.reviewLinks ul {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  list-style: none;
+}
+.practiceArea button:focus-visible,
+.quizArea button:focus-visible,
+.quizArea select:focus-visible,
+.answerNotes textarea:focus-visible,
+.options label:has(input:focus-visible) {
+  outline: 3px solid #84a9f9;
+  outline-offset: 3px;
+}
+@media (max-width: 520px) {
+  .levelGrid {
+    grid-template-columns: 1fr;
+  }
+  .levelGrid > div {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 3px 12px;
+    align-items: center;
+  }
+  .levelGrid p {
+    min-height: auto;
+    margin: 0;
+    grid-column: 1;
+  }
+  .taskButtons {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+  .taskButtons button {
+    min-width: 62px;
+  }
+  .resultBox {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .question {
+    padding: 12px;
+  }
+}

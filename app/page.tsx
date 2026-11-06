@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  BookOpen,
   Check,
   Cloud,
   Code2,
@@ -11,7 +12,6 @@ import LegacyPythonLink from "@/components/LegacyPythonLink";
 import { exercises as pythonExercises } from "@/lib/python/course";
 import { exercises as nextExercises } from "@/lib/course/lessons";
 import styles from "./page.module.css";
-import { EXAM_MINUTES, EXAM_GRADE_LABEL } from "@/lib/exam/content";
 
 const lessons = [
   {
@@ -103,6 +103,18 @@ export default function Home() {
             </span>
           </aside>
         </section>
+        <Link
+          href="/curriculum"
+          className={styles.curriculumLink}
+          prefetch={false}
+        >
+          <BookOpen size={23} aria-hidden="true" />
+          <span>
+            <strong>Анги тус бүрийн хичээл</strong>
+            <span>7, 8, 10, 11-р анги · Мэдээллийн технологи</span>
+          </span>
+          <ArrowRight size={19} aria-hidden="true" />
+        </Link>
         <div className={styles.sectionHeading}>
           <h2>Хичээлээ сонгоорой</h2>
           <span>3 чиглэл · Өөрийн хурдаар</span>
@@ -165,8 +177,8 @@ export default function Home() {
           })}
         </nav>
         <div className={styles.howTo}>
-          <Link href="/exam" prefetch={false}>
-            {EXAM_GRADE_LABEL} · JavaScript шалгалт · {EXAM_MINUTES} минут →
+          <Link href="/practice-tests" prefetch={false}>
+            7, 8, 10, 11-р анги · Тайлбартай давтлагын тест →
           </Link>
         </div>
         <div className={styles.howTo}>
