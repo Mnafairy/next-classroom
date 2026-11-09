@@ -1,19 +1,12 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpen,
-  Check,
-  Cloud,
-  Code2,
-  Monitor,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Check, Cloud, Code2, Monitor } from "lucide-react";
 import LegacyPythonLink from "@/components/LegacyPythonLink";
 import { exercises as pythonExercises } from "@/lib/python/course";
 import { exercises as nextExercises } from "@/lib/course/lessons";
+import { GradeCards, LessonCard, type LessonCardData } from "./lesson-cards";
 import styles from "./page.module.css";
 
-const lessons = [
+const lessons: LessonCardData[] = [
   {
     name: "Python",
     mark: "Py",
@@ -25,7 +18,7 @@ const lessons = [
     file: "hello.py",
     outcome: "Бодлогын хариугаа шууд ажиллуулж шалгана.",
     href: "/python",
-    theme: styles.python,
+    theme: "python",
   },
   {
     name: "JavaScript",
@@ -38,7 +31,8 @@ const lessons = [
     file: "hello.js",
     outcome: "Кодын үр дүнг харж, мэдлэгээ сорилоор бататгана.",
     href: "/kodlab/index.html",
-    theme: styles.javascript,
+    documentLink: true,
+    theme: "javascript",
   },
   {
     name: "Next.js",
@@ -51,7 +45,7 @@ const lessons = [
     file: "page.tsx",
     outcome: "Кодоо өөрчлөөд веб хэрхэн ажиллахыг харна.",
     href: "/next-classroom",
-    theme: styles.next,
+    theme: "next",
   },
 ];
 
@@ -103,84 +97,27 @@ export default function Home() {
             </span>
           </aside>
         </section>
-        <Link
-          href="/curriculum"
-          className={styles.curriculumLink}
-          prefetch={false}
-        >
-          <BookOpen size={23} aria-hidden="true" />
-          <span>
-            <strong>Анги тус бүрийн хичээл</strong>
-            <span>7, 8, 10, 11-р анги · Мэдээллийн технологи</span>
-          </span>
-          <ArrowRight size={19} aria-hidden="true" />
-        </Link>
-        <div className={styles.sectionHeading}>
-          <h2>Хичээлээ сонгоорой</h2>
-          <span>3 чиглэл · Өөрийн хурдаар</span>
-        </div>
-        <nav className={styles.lessons} aria-label="Хичээл сонгох">
-          {lessons.map((lesson) => {
-            const content = (
-              <>
-                <div className={styles.cardTop}>
-                  <span className={styles.lessonMark} aria-hidden="true">
-                    {lesson.mark}
-                  </span>
-                  <span className={styles.grade}>{lesson.grade}</span>
-                </div>
-                <div className={styles.cardTitle}>
-                  <h2>{lesson.name}</h2>
-                  <span>{lesson.count}</span>
-                </div>
-                <p className={styles.description}>{lesson.description}</p>
-                <div className={styles.topics}>
-                  {lesson.topics.map((topic) => (
-                    <span key={topic}>{topic}</span>
-                  ))}
-                </div>
-                <div className={styles.code} aria-hidden="true">
-                  <div>
-                    <Code2 size={13} />
-                    <span>{lesson.file}</span>
-                    <span className={styles.codeDot} />
-                  </div>
-                  <pre>{lesson.code}</pre>
-                </div>
-                <p className={styles.outcome}>
-                  <Sparkles size={15} aria-hidden="true" />
-                  {lesson.outcome}
-                </p>
-                <span className={styles.enter}>
-                  Хичээлд орох <ArrowRight size={18} aria-hidden="true" />
-                </span>
-              </>
-            );
-            const props = {
-              className: `${styles.card} ${lesson.theme}`,
-              "aria-label": `${lesson.name} хичээлд орох`,
-            };
-            return lesson.name === "JavaScript" ? (
-              <a key={lesson.name} href={lesson.href} {...props}>
-                {content}
-              </a>
-            ) : (
-              <Link
-                key={lesson.name}
-                href={lesson.href}
-                prefetch={false}
-                {...props}
-              >
-                {content}
-              </Link>
-            );
-          })}
-        </nav>
-        <div className={styles.howTo}>
-          <Link href="/practice-tests" prefetch={false}>
-            7, 8, 10, 11-р анги · Тайлбартай давтлагын тест →
-          </Link>
-        </div>
+        <section aria-labelledby="choose-lesson">
+          <div className={styles.sectionHeading}>
+            <h2 id="choose-lesson">Хичээлээ сонгоорой</h2>
+            <span>Өөрийн хурдаар</span>
+          </div>
+          <div className={styles.cardGroupHeading}>
+            <p>Мэдээллийн технологи · Ангиар</p>
+            <Link href="/practice-tests" prefetch={false}>
+              Давтлагын тест <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
+          <GradeCards />
+          <div className={styles.cardGroupHeading}>
+            <p>Код бичих дадлага</p>
+          </div>
+          <nav className={styles.lessons} aria-label="Код бичих дадлага">
+            {lessons.map((lesson) => (
+              <LessonCard key={lesson.name} card={lesson} />
+            ))}
+          </nav>
+        </section>
         <div className={styles.howTo}>
           <span>
             <strong>1</strong> Хичээлээ сонгох

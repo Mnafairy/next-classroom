@@ -101,37 +101,6 @@
   font-size: 11px;
   font-weight: 600;
 }
-.curriculumLink {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 72px;
-  padding: 14px 20px;
-  margin-bottom: 32px;
-  border: 1px solid #cddbf6;
-  border-radius: 14px;
-  background: #edf3ff;
-  color: #214ba9;
-}
-.curriculumLink:hover {
-  background: #e3edff;
-  border-color: #a3bae8;
-}
-.curriculumLink > svg {
-  flex-shrink: 0;
-}
-.curriculumLink > span {
-  display: grid;
-  flex: 1;
-  gap: 2px;
-}
-.curriculumLink strong {
-  font-size: 17px;
-}
-.curriculumLink > span > span {
-  font-size: 13px;
-  color: var(--lab-muted);
-}
 .sectionHeading {
   display: flex;
   align-items: center;
@@ -149,10 +118,40 @@
   font-size: 12px;
   color: var(--lab-muted);
 }
-.lessons {
+.cardGroupHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 12px;
+  color: var(--lab-muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+.gradeCards + .cardGroupHeading {
+  margin-top: 30px;
+}
+.cardGroupHeading a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  color: var(--lab-blue);
+}
+.cardGroupHeading a:hover {
+  text-decoration: underline;
+}
+.lessons,
+.gradeCards {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
+}
+.lessons {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.gradeCards {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 .card {
   --accent: var(--lab-blue);
@@ -228,7 +227,7 @@
   gap: 8px;
   margin: 23px 0 10px;
 }
-.cardTitle h2 {
+.cardTitle :is(h2, h3) {
   font-size: 26px;
   font-weight: 750;
   letter-spacing: -0.8px;
@@ -373,8 +372,12 @@
   .card {
     padding: 20px;
   }
-  .lessons {
+  .lessons,
+  .gradeCards {
     gap: 14px;
+  }
+  .gradeCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 800px) {
@@ -394,6 +397,12 @@
     grid-template-columns: 1fr 1fr;
     column-gap: 28px;
     padding: 24px;
+  }
+  .gradeCards .card {
+    display: flex;
+  }
+  .gradeCards .enter {
+    align-self: stretch;
   }
   .cardTop,
   .cardTitle,
@@ -460,6 +469,9 @@
   }
   .sectionHeading h2 {
     font-size: 18px;
+  }
+  .gradeCards {
+    grid-template-columns: 1fr;
   }
   .card {
     display: flex;

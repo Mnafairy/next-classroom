@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { gradePlans, gradeHref } from "@/lib/curriculum";
+import { GradeCards } from "../lesson-cards";
 import styles from "./curriculum.module.css";
 
 export const metadata: Metadata = {
@@ -28,26 +27,7 @@ export default function CurriculumPage() {
           Тайлбартай давтлагын тест →
         </Link>
       </div>
-      <ul className={styles.grades} aria-label="Ангиуд">
-        {gradePlans.map((plan) => (
-          <li key={plan.grade}>
-            <Link
-              href={gradeHref(plan.grade)}
-              className={styles.gradeCard}
-              prefetch={false}
-            >
-              <span className={styles.gradeNumber} aria-hidden="true">
-                {plan.grade}
-              </span>
-              <div>
-                <h2>{plan.grade}-р анги</h2>
-                <p>{plan.summary}</p>
-              </div>
-              <ArrowRight size={18} aria-hidden="true" />
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <GradeCards heading="h2" />
       <details className={styles.note}>
         <summary>Жилийн хөтөлбөрийн хамрах хүрээ</summary>
         <p>
