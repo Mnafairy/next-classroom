@@ -18,3 +18,12 @@
 .classroom-cloud-status button { text-decoration:underline; margin-left:10px; padding:6px; }
 @media(max-width:1100px) { .topbar { gap:12px; } .sidebar { width:240px; } .workspace,.tests-workspace { padding:26px 24px; } }
 @media(max-width:760px) { .topbar { gap:8px; } .sidebar { width:270px; } .workspace,.tests-workspace { padding:25px 17px; } .instructions { padding:22px; min-height:0; } .button { min-height:44px; } .workspace-heading h1 { font-size:27px; } .progress-button>span { display:none; } }
+.topnav .curriculum-tab { color: var(--blue); }
+.grade-practice-link { margin-top: 16px; }
+@media (max-width: 760px) {
+  .topnav { gap: 2px; }
+  .topnav .nav-tab { gap: 4px; padding-inline: 6px; }
+}
+@media (max-width: 400px) {
+  .topnav .nav-tab svg { display: none; }
+}
