@@ -59,7 +59,7 @@ export async function POST(request: Request) {
         return adminJson(
           {
             error:
-              "Шинэ нууц үг 12–1024 тэмдэгттэй, имэйл болон түр кодоос өөр байна.",
+              "Шинэ нууц үг 12–1024 тэмдэгттэй, имэйл болон түр нууц үгээс өөр байна.",
           },
           400,
         );
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       );
       if (!account)
         return adminJson(
-          { error: "Түр код ашиглагдсан. Шинэ нууц үгээрээ нэвтэрнэ үү." },
+          { error: "Нууц үг шинэчлэгдсэн. Шинэ нууц үгээрээ нэвтэрнэ үү." },
           401,
         );
     }

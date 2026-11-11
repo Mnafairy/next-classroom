@@ -12,6 +12,7 @@ import {
   ADMIN_COOKIE,
   authenticateAdmin,
   getAdminIdentity,
+  createAdminSession,
 } from "./auth";
 import { applyLmsImport, parseLmsImport } from "./lms-import";
 import { schoolFixture } from "./test-fixtures";
@@ -358,20 +359,42 @@ test(
         setupCodes.set(id, secret);
       });
       for (const [id, code] of setupCodes) {
+        const temporaryPassword = id === "alpha" ? "alpha@oyunlag.edu.mn" : code;
         const challenge = await login(
-          request("/api/admin/session", { username: id, password: code }),
+          request("/api/admin/session", {
+            username: id,
+            password: temporaryPassword,
+          }),
         );
         assert.deepEqual(await challenge.json(), { setupRequired: true });
         assert.equal(challenge.headers.get("set-cookie"), null);
+        if (id === "alpha") {
+          const pending = await authenticateAdmin(
+            "alpha@oyunlag.edu.mn",
+            temporaryPassword,
+          );
+          assert.ok(pending?.setupRequired);
+          await assert.rejects(createAdminSession(pending), /setup required/);
+          const reuseEmail = await login(
+            request("/api/admin/session", {
+              username: id,
+              password: temporaryPassword,
+              newPassword: temporaryPassword,
+            }),
+          );
+          assert.equal(reuseEmail.status, 400);
+          assert.equal(reuseEmail.headers.get("set-cookie"), null);
+        }
         const complete = await login(
           request("/api/admin/session", {
             username: id,
-            password: code,
+            password: temporaryPassword,
             newPassword: passwordFor(id),
           }),
         );
         assert.equal(complete.status, 200);
         assert.equal(await authenticateAdmin(id, code), null);
+        assert.equal(await authenticateAdmin(id, temporaryPassword), null);
       }
       assert.equal(setupCodes.size, 3);
       const alpha = await authenticateAdmin("alpha", passwordFor("alpha"));
@@ -423,7 +446,6 @@ test(
         .findOne({ _id: "alpha" as never });
       assert.ok(accountDoc);
       assert.ok(!("gender" in accountDoc));
-      const { createAdminSession } = await import("./auth");
       const alphaToken = await createAdminSession(alpha);
       const beta = await authenticateAdmin("beta", passwordFor("beta"));
       assert.ok(beta);

@@ -39,7 +39,9 @@ export async function authenticateAdmin(
     password,
     account?.passwordHash || `scrypt:${"0".repeat(32)}:${"0".repeat(128)}`,
   );
-  return account && valid && password !== account.email ? account : null;
+  if (!account) return null;
+  if (account.setupRequired && password === account.email) return account;
+  return valid && password !== account.email ? account : null;
 }
 export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");

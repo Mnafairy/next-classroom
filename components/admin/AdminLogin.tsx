@@ -132,7 +132,7 @@ export default function AdminLogin({ configured }: { configured: boolean }) {
                 </>
               ) : (
                 <>
-                  Нэвтрэх
+                  {setup ? "Нууц үгээ хадгалаад нэвтрэх" : "Нэвтрэх"}
                   <ArrowRight size={17} />
                 </>
               )}
