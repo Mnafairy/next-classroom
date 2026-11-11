@@ -6,7 +6,8 @@ import { questions as pythonQuestions } from "../python/questions";
 import { exercises as nextExercises } from "../course/lessons";
 import { exercises as jsExercises } from "../../apps/kodlab/src/content.js";
 import type { Course } from "../student/identity";
-import { lessons as webLessons } from "../web-lab/lessons";
+import { exercises as webExercises } from "../web-lab/lessons";
+import { readProgress as readWebProgress } from "../web-lab/progress";
 import type { CourseSummary, StudentDetail } from "./types";
 
 export const catalog: Record<Course, { id: string; title: string }[]> = {
@@ -15,7 +16,7 @@ export const catalog: Record<Course, { id: string; title: string }[]> = {
     ({ id, title }: { id: string; title: string }) => ({ id, title }),
   ),
   nextjs: nextExercises.map(({ id, title }) => ({ id, title })),
-  htmlcss: webLessons.map(({ id, title }) => ({ id, title })),
+  htmlcss: webExercises.map(({ id, title }) => ({ id, title })),
 };
 export const object = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
@@ -31,7 +32,7 @@ export function parseProgress(json: string): Record<string, unknown> {
   }
 }
 function states(course: Course, value: unknown) {
-  const data = object(value),
+  const data = object(course === "htmlcss" ? readWebProgress(value) : value),
     drafts = object(data.drafts);
   const ids = new Set(catalog[course].map((e) => e.id));
   const assisted = new Set<string>();

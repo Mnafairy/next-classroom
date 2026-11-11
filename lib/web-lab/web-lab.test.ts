@@ -3,19 +3,19 @@ import test from "node:test";
 import { JSDOM } from "jsdom";
 import { detail } from "../admin/progress";
 import { cardDocument } from "./document";
-import { grades, lessonFor, lessons } from "./lessons";
+import { checkExercise } from "./checks";
+import { exercises, lessons, pageFiles, starterHtml } from "./lessons";
 import {
+  exerciseDraft,
   initialProgress,
-  openLesson,
   readProgress,
-  starterDraft,
-  starterHtml,
+  starterFiles,
 } from "./progress";
 
 const document = new JSDOM().window.document;
 const sampleImage = "data:image/jpeg;base64,QUJD";
 
-test("card previews and downloads keep the lesson tags and embedded image", () => {
+test("preview and downloads retain the four lesson tags and embedded image while excluding executable markup", () => {
   const { html, hasContent } = cardDocument(
     {
       "index.html":
@@ -37,96 +37,143 @@ test("card previews and downloads keep the lesson tags and embedded image", () =
   assert.equal(page.querySelector("img")?.alt, "Шатрын хөлөг");
   assert.equal(page.querySelectorAll("img[src], img[srcset]").length, 1);
   assert.equal(page.querySelector("script"), null);
-  assert.match(
-    page.querySelector("style")?.textContent ?? "",
-    /\.card \{ color: red; \}/,
-  );
 });
 
-test("all worked examples use the four teaching tags", () => {
+test("all exercises have a real starter page and card examples use only the teaching tags", () => {
   assert.equal(lessons.length, 5);
-  for (const grade of grades) {
-    for (const { id } of lessons) {
-      const { example } = lessonFor(id, grade);
-      const template = document.createElement("template");
-      template.innerHTML = example.html;
-      for (const tag of template.content.querySelectorAll("*")) {
-        assert.ok(
-          ["div", "h2", "p", "img"].includes(tag.localName),
-          tag.localName,
-        );
-      }
+  assert.equal(exercises.length, 13);
+  for (const exercise of exercises) {
+    assert.match(exercise.starter["index.html"], /<!doctype html>/i);
+    const rendered = cardDocument(exercise.solution, sampleImage, document);
+    for (const node of new JSDOM(
+      rendered.html,
+    ).window.document.body.querySelectorAll("*")) {
+      assert.ok(["div", "h2", "p", "img"].includes(node.localName));
     }
+    assert.doesNotMatch(
+      exercise.solution["style.css"],
+      /@media|display:\s*(flex|grid)/,
+    );
   }
 });
 
-test("restored drafts carry across guided lessons and the final project starts with the scaffold", () => {
+test("old lesson drafts migrate to the matching exercise with their exact code", () => {
+  const code = '<div class="card"><h2>Миний клуб</h2></div>';
   const progress = readProgress({
-    ...initialProgress,
+    version: 1,
     grade: 8,
-    completed: ["html-tags", "bad"],
+    active: "html-tags",
+    completed: ["css-colors"],
     drafts: {
       "html-tags": {
-        files: { "index.html": "<h2>Шатар</h2>", "style.css": "" },
+        files: { "index.html": code, "style.css": ".card { color: blue; }" },
         step: 3,
       },
-    },
-  });
-  assert.equal(progress.grade, 8);
-  assert.deepEqual(progress.completed, ["html-tags"]);
-  assert.equal(progress.drafts["html-tags"]?.step, 3);
-  const next = openLesson(progress, "css-colors");
-  assert.deepEqual(next.drafts["css-colors"], {
-    files: { "index.html": "<h2>Шатар</h2>", "style.css": "" },
-    step: 0,
-  });
-  assert.deepEqual(
-    openLesson(next, "own-project").drafts["own-project"] ?? starterDraft,
-    starterDraft,
-  );
-  const teacher = detail("htmlcss", next, "css-colors");
-  assert.equal(teacher.summary.total, 5);
-  assert.equal(teacher.summary.completed, 1);
-  assert.equal(teacher.selected?.files["index.html"], "<h2>Шатар</h2>");
-});
-
-test("blank saved HTML gets a scaffold while its CSS and step survive", () => {
-  const progress = readProgress({
-    ...initialProgress,
-    drafts: {
-      "html-tags": {
-        files: { "index.html": "\n ", "style.css": ".card { color: blue; }" },
-        step: 2,
+      "card-layout": {
+        files: {
+          "index.html": code,
+          "style.css": ".gallery { display: grid; }",
+        },
+        step: 0,
       },
     },
   });
-  assert.deepEqual(progress.drafts["html-tags"], {
-    files: { "index.html": starterHtml, "style.css": ".card { color: blue; }" },
-    step: 2,
-  });
+  assert.equal(progress.version, 2);
+  assert.equal(progress.active, "card-image");
+  assert.equal(progress.drafts["card-image"]?.files["index.html"], code);
+  assert.equal(
+    progress.drafts["card-image"]?.files["style.css"],
+    ".card { color: blue; }",
+  );
+  assert.equal(
+    progress.drafts["image-width"]?.files["style.css"],
+    ".gallery { display: grid; }",
+  );
+  assert.deepEqual(progress.completed, [
+    "card-background",
+    "card-text-color",
+    "card-font-size",
+  ]);
+  const teacher = detail("htmlcss", progress, "card-image");
+  assert.equal(teacher.summary.total, 13);
+  assert.equal(teacher.selected?.files["index.html"], code);
 });
 
-test("the scaffold stays empty in the preview until a student adds body content", () => {
-  const starter = cardDocument(starterDraft.files, sampleImage, document);
-  assert.equal(starter.hasContent, false);
+test("new and previously blank projects receive scaffolds while independent exercises keep their own starters", () => {
   assert.equal(
-    new JSDOM(starter.html).window.document.body.textContent?.trim(),
-    "",
+    exerciseDraft(initialProgress, "card-title").files["index.html"],
+    starterHtml,
   );
-  const source = starterHtml.replace(
-    "</body>",
-    "  <div><h2>Миний карт</h2></div>\n</body>",
+  assert.match(
+    exerciseDraft(initialProgress, "card-image").files["index.html"],
+    /<p>Баасан гараг бүр уулздаг\.<\/p>/,
   );
-  const card = cardDocument(
-    { ...starterDraft.files, "index.html": source },
-    sampleImage,
-    document,
-  );
-  assert.equal(card.hasContent, true);
-  const page = new JSDOM(card.html).window.document;
+  const restored = readProgress({
+    version: 1,
+    active: "html-tags",
+    drafts: {
+      "html-tags": {
+        step: 0,
+        files: { "index.html": "", "style.css": "p { color: blue; }" },
+      },
+    },
+  });
   assert.equal(
-    page.querySelector("body > div > h2")?.textContent,
-    "Миний карт",
+    restored.drafts["card-wrapper"]?.files["index.html"],
+    exercises.find(({ id }) => id === "card-wrapper")?.starter["index.html"],
   );
-  assert.equal(page.querySelectorAll("head > title").length, 1);
+  assert.equal(
+    restored.drafts["card-wrapper"]?.files["style.css"],
+    "p { color: blue; }",
+  );
+  assert.equal(
+    cardDocument(starterFiles, sampleImage, document).hasContent,
+    false,
+  );
+});
+
+test("restoring assisted progress excludes it from completion and keeps the free-code draft", () => {
+  const progress = readProgress({
+    ...initialProgress,
+    active: "bad",
+    completed: ["card-title", "card-title", "bad"],
+    drafts: {
+      "card-title": {
+        files: pageFiles("<h2>Шатрын клуб</h2>"),
+        viewedSolution: true,
+      },
+    },
+    playground: pageFiles("<h2>Чөлөөт код</h2>"),
+  });
+  assert.equal(progress.active, "card-title");
+  assert.deepEqual(progress.completed, []);
+  assert.match(progress.playground["index.html"], /Чөлөөт код/);
+  assert.equal(detail("htmlcss", progress, "card-title").summary.assisted, 1);
+});
+
+test("HTML checking reads actual elements rather than comments and catches incorrect content", () => {
+  const exercise = exercises[0];
+  const render = (html: string) =>
+    new JSDOM(cardDocument(pageFiles(html), sampleImage, document).html).window
+      .document;
+  assert.ok(
+    checkExercise(exercise, render("<h2>Шатрын клуб</h2>")).every(
+      ({ passed }) => passed,
+    ),
+  );
+  assert.ok(
+    checkExercise(exercise, render("<!-- <h2>Шатрын клуб</h2> -->")).every(
+      ({ passed }) => !passed,
+    ),
+  );
+  assert.ok(
+    checkExercise(exercise, render("<p>Шатрын клуб</p>")).every(
+      ({ passed }) => !passed,
+    ),
+  );
+  assert.ok(
+    checkExercise(exercise, render("<h2>Өөр нэр</h2>")).every(
+      ({ passed }) => !passed,
+    ),
+  );
 });

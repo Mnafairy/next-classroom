@@ -39,7 +39,9 @@ export default function WebLab({ sampleImage }: { sampleImage: string }) {
         course="htmlcss"
         onLogin={async (value) => {
           const id = normalizeStudentId(value);
-          setProgress(readProgress(await cloud.load(id, initialProgress)));
+          const restored = readProgress(await cloud.load(id, initialProgress));
+          setProgress(restored);
+          cloud.save(restored);
           setStudent(id);
         }}
       />

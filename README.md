@@ -6,7 +6,7 @@ Existing Python hash bookmarks such as `/python#/visualize/if` forward to `/pyth
 
 ## HTML & CSS Card Lab (Grades 6–8)
 
-Five 40-minute lessons introduce `div`, `h2`, `p`, and `img`, CSS colors, the box model, responsive layouts, and an independent card project. Students type in the HTML and CSS editors and see the result in an isolated preview. They can test at phone and desktop widths, switch devices using their student ID, and download an HTML file with the styles and sample image embedded.
+Five 40-minute lessons cover `h2`, `p`, `img`, and `div`, CSS colors and text, spacing and borders, image styling, and an independent card project. Each lesson includes explanations, examples, common mistakes, practice and a review question. The workspace follows the JavaScript exercise layout with a topic sidebar, 13 exercises, a code editor, Run and Check actions, hints, and a result panel. Student IDs sync code and progress across devices. HTML downloads embed the styles and sample image. Earlier Card Lab drafts migrate when students return.
 
 ## КодЛаб · JavaScript (Grades 6–8)
 
