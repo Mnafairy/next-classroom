@@ -35,8 +35,37 @@ test("preview and downloads retain the four lesson tags and embedded image while
   assert.equal(page.querySelector("h2")?.textContent, "Шатрын клуб");
   assert.equal(page.querySelector("img")?.getAttribute("src"), sampleImage);
   assert.equal(page.querySelector("img")?.alt, "Шатрын хөлөг");
-  assert.equal(page.querySelectorAll("img[src], img[srcset]").length, 1);
+  assert.deepEqual(
+    [...page.querySelectorAll("img[src]")].map((image) =>
+      image.getAttribute("src"),
+    ),
+    [sampleImage, "https://example.com/a.jpg"],
+  );
+  assert.equal(page.querySelector("img[srcset]"), null);
   assert.equal(page.querySelector("script"), null);
+});
+
+test("image sources accept direct HTTPS and embedded raster images", () => {
+  const images = [
+    "./chess.jpg",
+    "data:image/png;base64,QUJD",
+    "https://example.com/photo.png",
+    "http://example.com/photo.png",
+    "file:///photo.png",
+    "javascript:alert(1)",
+  ];
+  const { html } = cardDocument(
+    pageFiles(images.map((src) => `<img src="${src}" alt="Зураг">`).join("\n")),
+    sampleImage,
+    document,
+  );
+  const preview = new JSDOM(html).window.document;
+  assert.deepEqual(
+    [...preview.querySelectorAll("img")].map((image) =>
+      image.getAttribute("src"),
+    ),
+    [sampleImage, images[1], images[2], null, null, null],
+  );
 });
 
 test("all exercises have a real starter page and card examples use only the teaching tags", () => {

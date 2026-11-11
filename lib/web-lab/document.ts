@@ -2,6 +2,24 @@ import { sampleImageName } from "./lessons";
 import type { Files } from "./progress";
 
 const tags = new Set(["div", "h2", "p", "img"]);
+const embeddedImage =
+  /^data:image\/(?:avif|gif|jpeg|png|webp);base64,[a-z0-9+/]+={0,2}$/i;
+
+function imageSource(value: string | null, sampleImage: string) {
+  const src = value?.trim();
+  if (!src) return;
+  if (src === sampleImageName || src === `./${sampleImageName}`)
+    return sampleImage;
+  if (embeddedImage.test(src)) return src;
+
+  try {
+    const url = new URL(src);
+    if (url.protocol === "https:" && !url.username && !url.password)
+      return url.href;
+  } catch {
+    // Relative filenames need a bundled image or a full URL.
+  }
+}
 
 export function cardDocument(
   files: Files,
@@ -21,13 +39,14 @@ export function cardDocument(
     }
 
     const isImage = element.localName === "img";
-    const useSample =
-      isImage && element.getAttribute("src") === sampleImageName;
+    const src = isImage
+      ? imageSource(element.getAttribute("src"), sampleImage)
+      : undefined;
     for (const { name } of [...element.attributes]) {
       if (name !== "class" && !(isImage && name === "alt"))
         element.removeAttribute(name);
     }
-    if (useSample) element.setAttribute("src", sampleImage);
+    if (src) element.setAttribute("src", src);
   }
 
   // Keep an HTML end tag typed into the CSS editor inside the style element.
@@ -40,7 +59,8 @@ export function cardDocument(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data: https:; base-uri 'none'; form-action 'none'">
 <title>Миний карт · КодЛаб</title>
 <style>
 * { box-sizing: border-box; }

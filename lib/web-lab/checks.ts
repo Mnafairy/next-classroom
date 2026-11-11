@@ -20,12 +20,17 @@ export function checkExercise(
       case "content":
         passed = Boolean(element.textContent?.trim());
         break;
-      case "image":
+      case "image": {
+        const ImageElement = document.defaultView?.HTMLImageElement;
         passed = Boolean(
-          element.getAttribute("src")?.startsWith("data:image/jpeg;base64,") &&
-          element.getAttribute("alt")?.trim(),
+          ImageElement &&
+          element instanceof ImageElement &&
+          element.complete &&
+          element.naturalWidth > 0 &&
+          element.alt.trim(),
         );
         break;
+      }
       case "style":
         passed =
           document.defaultView
