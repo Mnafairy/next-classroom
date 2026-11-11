@@ -633,7 +633,6 @@
   position: relative;
   min-height: 260px;
 }
-.livePreview,
 .livePreview iframe {
   display: block;
   width: 100%;

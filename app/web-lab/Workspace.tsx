@@ -42,6 +42,7 @@ import {
   type Progress,
 } from "@/lib/web-lab/progress";
 import LessonReading from "./LessonReading";
+import ResultPreview from "./ResultPreview";
 import WebEditor from "./WebEditor";
 import styles from "./web-lab.module.css";
 
@@ -693,13 +694,11 @@ export default function Workspace({
                         aria-hidden={outputTab !== "preview"}
                       >
                         {run ? (
-                          <iframe
+                          <ResultPreview
                             key={run.id}
-                            title="Кодын үр дүн"
-                            sandbox="allow-same-origin"
-                            tabIndex={outputTab === "preview" ? 0 : -1}
-                            srcDoc={preview}
-                            onLoad={(event) => loaded(event.currentTarget)}
+                            html={preview}
+                            visible={outputTab === "preview"}
+                            onLoad={loaded}
                           />
                         ) : (
                           <div className={styles.empty}>
