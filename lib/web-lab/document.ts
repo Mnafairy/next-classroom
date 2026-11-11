@@ -32,7 +32,10 @@ export function cardDocument(
 
   // Keep an HTML end tag typed into the CSS editor inside the style element.
   const css = files["style.css"].replace(/<\/style/gi, "<\\/style");
-  return `<!doctype html>
+  const hasContent = Boolean(
+    template.content.firstElementChild || template.content.textContent?.trim(),
+  );
+  const html = `<!doctype html>
 <html lang="mn">
 <head>
 <meta charset="utf-8">
@@ -50,4 +53,5 @@ ${css}
 ${template.innerHTML}
 </body>
 </html>`;
+  return { html, hasContent };
 }

@@ -20,9 +20,9 @@ import {
   type LessonId,
 } from "@/lib/web-lab/lessons";
 import {
-  emptyDraft,
   maxCodeLength,
   openLesson,
+  starterDraft,
   startingDraft,
   type Draft,
   type Files,
@@ -93,7 +93,7 @@ function LessonGuide({
       <details className={styles.resource}>
         <summary>Жишээ харах</summary>
         <div className={styles.example}>
-          <span>index.html</span>
+          <span>{"<body> доторх код"}</span>
           <pre tabIndex={0}>{lesson.example.html}</pre>
           {lesson.example.css && (
             <>
@@ -168,7 +168,7 @@ export default function Workspace({
   const lessonIndex = lessons.findIndex(({ id }) => id === active);
   const nextLesson = lessons[lessonIndex + 1];
   const lesson = useMemo(() => lessonFor(active, grade), [active, grade]);
-  const draft = progress.drafts[active] ?? emptyDraft;
+  const draft = progress.drafts[active] ?? starterDraft;
   const files = useDeferredValue(draft.files);
   const preview = useMemo(
     () => cardDocument(files, sampleImage, document),
@@ -180,7 +180,7 @@ export default function Workspace({
         { "index.html": lesson.example.html, "style.css": lesson.example.css },
         sampleImage,
         document,
-      ),
+      ).html,
     [lesson, sampleImage],
   );
 
@@ -223,7 +223,12 @@ export default function Workspace({
   }
 
   function download() {
-    const html = cardDocument(draft.files, sampleImage, document);
+    const { html, hasContent } = cardDocument(
+      draft.files,
+      sampleImage,
+      document,
+    );
+    if (!hasContent) return;
     const url = URL.createObjectURL(
       new Blob([html], { type: "text/html;charset=utf-8" }),
     );
@@ -389,15 +394,15 @@ export default function Workspace({
                   </div>
                 </div>
                 <div className={styles.preview}>
-                  {!files["index.html"].trim() && (
+                  {!preview.hasContent && (
                     <p className={styles.empty}>
-                      HTML бичихэд үр дүн энд гарна.
+                      {"<body> дотор картаа бичихэд үр дүн энд гарна."}
                     </p>
                   )}
                   <iframe
                     title="Кодын шууд үр дүн"
                     sandbox=""
-                    srcDoc={preview}
+                    srcDoc={preview.html}
                     style={{ width }}
                   />
                 </div>
@@ -424,7 +429,7 @@ export default function Workspace({
                 <button
                   type="button"
                   onClick={download}
-                  disabled={!draft.files["index.html"].trim()}
+                  disabled={!preview.hasContent}
                 >
                   <Download size={16} aria-hidden="true" /> HTML татах
                 </button>
