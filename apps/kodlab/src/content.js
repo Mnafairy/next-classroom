@@ -1,13 +1,13 @@
 export const courseGradeLabel = '6–8-р анги';
 export const topics = [
-  {id:'variables',title:'Хувьсагч',tag:'let',note:'Утга хадгалах, өөрчлөх',color:'#5369ca',description:'Хувьсагч утга хадгална. let-ээр нэр өгч зарлаад, дараа нь = ашиглан утгыг нь өөрчилнө.',example:'let name = "John";\nname = "Билгүүн";\nconsole.log(name);',output:'Билгүүн'},
+  {id:'variables',title:'Хувьсагч',tag:'let',note:'Утга, төрөл, утга оноох',color:'#5369ca',description:'Хувьсагч утга хадгална. let-ээр нэр өгч зарлаад, дараа нь = ашиглан утгыг нь өөрчилнө. Тоо нь number, хашилтад бичсэн текст нь string, true ба false нь boolean төрөлтэй. typeof ашиглан утгын төрлийг мэдэж болно.',example:'let name = "John";\nname = "Билгүүн";\nconsole.log(name);',output:'Билгүүн'},
   {id:'console',title:'Хэвлэх ба тооцоолох',tag:'console.log',note:'Текст, тоо, арифметик',color:'#b07822',description:'console.log() доторх утгыг консолд хэвлэнэ. + нь тоог нэмэх, текст залгахад хэрэглэгдэнэ. *, /, -, % нь тооцоолох үйлдлүүд.',example:'let price = 2500;\nlet count = 3;\nconsole.log("Нийт: " + price * count);',output:'Нийт: 7500'},
   {id:'conditions',title:'Нөхцөл шалгах',tag:'if / else',note:'Аль замаар явах вэ?',color:'#249078',description:'if-ийн нөхцөл үнэн бол эхний блок ажиллана. Үгүй бол else if-ийг дарааллаар шалгаж, аль нь ч үнэн биш бол else ажиллана.',example:'let score = 84;\nif (score >= 90) {\n  console.log("A");\n} else if (score >= 80) {\n  console.log("B");\n} else {\n  console.log("Дахин давтаарай");\n}',output:'B'},
-  {id:'logic',title:'Хосолсон нөхцөл',tag:'&& / ||',note:'БА, ЭСВЭЛ нөхцөл',color:'#9864b5',description:'&& (БА): хоёр нөхцөл хоёулаа үнэн байна. || (ЭСВЭЛ): аль нэг нөхцөл үнэн байхад хангалттай. Харьцуулахдаа ==, утга оноохдоо = хэрэглэнэ.',example:'let age = 12;\nlet height = 140;\nif (age >= 12 && height >= 140) {\n  console.log("Сууж болно");\n} else {\n  console.log("Сууж болохгүй");\n}',output:'Сууж болно'},
+  {id:'logic',title:'Хосолсон нөхцөл',tag:'&& / || / !',note:'БА, ЭСВЭЛ нөхцөл',color:'#9864b5',description:'&& (БА): хоёр нөхцөл хоёулаа үнэн байна. || (ЭСВЭЛ): аль нэг нөхцөл үнэн байхад хангалттай. ! (ҮГҮЙ) нь true-ийг false, false-ийг true болгоно. Харьцуулахдаа == эсвэл ===, утга оноохдоо = хэрэглэнэ.',example:'let age = 12;\nlet height = 140;\nif (age >= 12 && height >= 140) {\n  console.log("Сууж болно");\n} else {\n  console.log("Сууж болохгүй");\n}',output:'Сууж болно'},
   {id:'challenge',title:'Нэгтгэн хэрэглэх',tag:'challenge',note:'Бодит нөхцөлтэй бодлогууд',color:'#267ba1',description:'Хувьсагч, арифметик, нөхцөлөө нэгтгэн хэрэглээрэй. Эхлээд өгөгдөл, дараа нь нөхцөл, эцэст нь гаралтаа бодно.',example:'let month = 7;\nif (month >= 6 && month <= 8) {\n  console.log("Зун");\n} else {\n  console.log("Бусад улирал");\n}',output:'Зун'}
 ];
 const ex=(id,topic,title,level,minutes,prompt,starter,solution,tests,hints,requirements=[])=>({id,topic,title,level,minutes,prompt,starter,solution,tests:tests.map(([vars,output])=>({vars,output:Array.isArray(output)?output:[String(output)]})),hints,requirements});
-export const exercises = [
+const originalExercises = [
  ex('name','variables','Нэрээ өөрчилье','Эхлэл',3,
  ['name нэртэй хувьсагчид "John" гэсэн утга өг.','Дараагийн мөрөнд name-ийн утгыг "Билгүүн" болгож өөрчил. let-ийг дахин бичихгүй.','console.log(name) ашиглан шинэ нэрийг хэвлэ.'],
  'let name = "John";\n\n// Нэрийг өөрчлөөд хэвлээрэй.\n',
@@ -129,6 +129,325 @@ export const exercises = [
  'let hasHomework = false;\nif (hasHomework == true) {\n  console.log("Дараагийн дасгалдаа ороорой.");\n} else {\n  console.log("Эхлээд гэрийн даалгавраа хийгээрэй.");\n}',
  [[{hasHomework:false},'Эхлээд гэрийн даалгавраа хийгээрэй.'],[{hasHomework:true},'Дараагийн дасгалдаа ороорой.']],['hasHomework == true гэж үнэн эсэхийг шалгаж болно.','Хоёрхон боломж байна: if-ийн блок эсвэл else-ийн блок ажиллана.'],['if'])
 ];
+
+function practice(id, topic, title, level, minutes, prompt, code, tests, hints, requirements) {
+  const declarations = Object.entries(tests[0][0])
+    .map(([name, value]) => `let ${name} = ${JSON.stringify(value)};`)
+    .join('\n');
+  return ex(
+    id, topic, title, level, minutes, prompt,
+    declarations + '\n\n// Хариугаа энд бичээрэй.\n',
+    declarations + '\n\n' + code, tests, hints, requirements,
+  );
+}
+
+const newExercises = [
+  practice('print-city', 'variables', 'Хотын нэрээ хэвлэе', 'Эхлэл', 3,
+    ['city хувьсагчид хотын нэрийг текстээр хадгалсан байна.', 'city-ийн утгыг дангаар нь хэвлэ.'],
+    'console.log(city);',
+    [[{ city: 'Дархан' }, 'Дархан'], [{ city: 'Эрдэнэт' }, 'Эрдэнэт'], [{ city: 'Улаанбаатар' }, 'Улаанбаатар']],
+    ['console.log() дотор city гэж хашилтгүй бичээрэй.'], ['log:city']),
+
+  practice('print-distance', 'variables', 'Зайг тоогоор хэвлэе', 'Эхлэл', 3,
+    ['distance хувьсагчид километрээр хэмжсэн зайг тоогоор хадгалсан байна.', 'distance-ийн утгыг нэгж нэмэлгүй хэвлэ.'],
+    'console.log(distance);',
+    [[{ distance: 2.5 }, 2.5], [{ distance: 0 }, 0], [{ distance: 12 }, 12]],
+    ['Бутархай тоог кодонд 2.5 гэж цэгтэй бичдэг.'], ['log:distance']),
+
+  practice('print-flag', 'variables', 'Үнэн, худал утга хэвлэе', 'Эхлэл', 3,
+    ['isOpen нь хаалга нээлттэй эсэхийг хадгална.', 'isOpen-ийн true эсвэл false утгыг дангаар нь хэвлэ.'],
+    'console.log(isOpen);',
+    [[{ isOpen: true }, 'true'], [{ isOpen: false }, 'false']],
+    ['true ба false нь boolean утгууд. Кодонд хашилтгүй бичдэг.'], ['log:isOpen']),
+
+  practice('copy-color', 'variables', 'Өнгийн утгыг хуулъя', 'Эхлэл', 4,
+    ['color-ийн утгыг let ашиглан backupColor нэртэй шинэ хувьсагчид хадгал.', 'Дараа нь backupColor-ийн утгыг хэвлэ.'],
+    'let backupColor = color;\nconsole.log(backupColor);',
+    [[{ color: 'Цэнхэр' }, 'Цэнхэр'], [{ color: 'Ногоон' }, 'Ногоон'], [{ color: 'Улаан' }, 'Улаан']],
+    ['= тэмдгийн баруун талд хуулж авах хувьсагчийн нэрийг бич.'], ['let:backupColor', 'log:backupColor']),
+
+  practice('rename-team', 'variables', 'Багийн нэрийг шинэчилье', 'Эхлэл', 4,
+    ['team хувьсагчийн хуучин нэрийг эхлээд хэвлэ.', 'team-ийн утгыг nextTeam-ийн утгаар солиод team-ийг дахин хэвлэ.'],
+    'console.log(team);\nteam = nextTeam;\nconsole.log(team);',
+    [[{ team: 'Одод', nextTeam: 'Шонхор' }, ['Одод', 'Шонхор']], [{ team: 'Нар', nextTeam: 'Сар' }, ['Нар', 'Сар']], [{ team: 'Уул', nextTeam: 'Гол' }, ['Уул', 'Гол']]],
+    ['team аль хэдийн зарлагдсан тул утга оноохдоо let-ийг давтахгүй.'], ['assign:team', 'log:team']),
+
+  practice('store-original', 'variables', 'Анхны оноогоо хадгалъя', 'Эхлэл', 4,
+    ['points-ийн анхны утгыг originalPoints нэртэй шинэ хувьсагчид хадгал.', 'points-ийг 0 болго.', 'Эхний мөрөнд originalPoints, дараагийн мөрөнд points-ийг хэвлэ.'],
+    'let originalPoints = points;\npoints = 0;\nconsole.log(originalPoints);\nconsole.log(points);',
+    [[{ points: 14 }, ['14', '0']], [{ points: 3 }, ['3', '0']], [{ points: 21 }, ['21', '0']]],
+    ['points-ийг өөрчлөхөөс өмнө утгыг нь хуул.'], ['let:originalPoints', 'assign:points', 'log:originalPoints', 'log:points']),
+
+  practice('value-type', 'variables', 'Утгын төрлийг олъё', 'Эхлэл', 4,
+    ['typeof ашиглан value-ийн төрлийг олж, дангаар нь хэвлэ.', 'Төрлийн нэр нь number, string эсвэл boolean байна.'],
+    'console.log(typeof value);',
+    [[{ value: 17 }, 'number'], [{ value: '17' }, 'string'], [{ value: false }, 'boolean'], [{ value: 'false' }, 'string']],
+    ['typeof-ийн дараа хувьсагчийн нэрийг бичээрэй.'], ['typeof', 'log:value']),
+
+  practice('value-and-type', 'variables', 'Утга ба төрлийг хэвлэе', 'Эхлэл', 4,
+    ['Эхний мөрөнд item-ийн утгыг хэвлэ.', 'Хоёр дахь мөрөнд typeof ашиглан item-ийн төрлийг хэвлэ.'],
+    'console.log(item);\nconsole.log(typeof item);',
+    [[{ item: '12' }, ['12', 'string']], [{ item: 12 }, ['12', 'number']], [{ item: true }, ['true', 'boolean']], [{ item: 'Ном' }, ['Ном', 'string']]],
+    ['12 болон "12" ижил харагдаж болох ч typeof нь төрлийг нь ялгана.'], ['typeof', 'log:item']),
+
+  practice('type-change', 'variables', 'Утгын төрөл өөрчлөгдөх нь', 'Эхлэл', 4,
+    ['data-ийн төрлийг typeof ашиглан хэвлэ.', 'data-д replacement-ийн утгыг оноогоод data-ийн төрлийг дахин хэвлэ.'],
+    'console.log(typeof data);\ndata = replacement;\nconsole.log(typeof data);',
+    [[{ data: 5, replacement: '5' }, ['number', 'string']], [{ data: false, replacement: 1 }, ['boolean', 'number']], [{ data: 'тийм', replacement: true }, ['string', 'boolean']]],
+    ['let-ээр зарласан хувьсагчид өөр төрлийн утга оноож болно.'], ['typeof', 'assign:data', 'log:data']),
+
+  practice('swap-shelves', 'variables', 'Хоёр тавиурын нэрийг сольё', 'Дунд', 5,
+    ['left, right хоёр хувьсагчийн утгыг хооронд нь соль.', 'Сольсны дараа эхний мөрөнд left, дараагийн мөрөнд right-ийг хэвлэ.'],
+    'let savedLeft = left;\nleft = right;\nright = savedLeft;\nconsole.log(left);\nconsole.log(right);',
+    [[{ left: 'Ном', right: 'Дэвтэр' }, ['Дэвтэр', 'Ном']], [{ left: 'Шатар', right: 'Даам' }, ['Даам', 'Шатар']], [{ left: 'Цаас', right: 'Үзэг' }, ['Үзэг', 'Цаас']]],
+    ['left-ийн хуучин утгыг түр хадгалаад дараа нь left-д шинэ утга оноо.'], ['assign:left', 'assign:right', 'log:left', 'log:right']),
+
+  practice('club-label', 'console', 'Клубийн мэдээлэл хэвлэе', 'Эхлэл', 3,
+    ['club нь клубийн нэр, room нь өрөөний дугаар.', 'Хоёр хувьсагчийг ашиглан "Шатар · Өрөө 204" гэсэн хэлбэрээр нэг мөр хэвлэ.'],
+    'console.log(club + " · Өрөө " + room);',
+    [[{ club: 'Шатар', room: 204 }, 'Шатар · Өрөө 204'], [{ club: 'Зураг', room: 102 }, 'Зураг · Өрөө 102'], [{ club: 'Хөгжим', room: 305 }, 'Хөгжим · Өрөө 305']],
+    ['Тогтмол текст болон хувьсагчдыг + тэмдгээр холбо.'], ['log:club', 'log:room']),
+
+  practice('combine-stickers', 'console', 'Наалтуудаа нийлүүлье', 'Эхлэл', 3,
+    ['red нь улаан, blue нь цэнхэр наалтын тоо.', 'Хоёр тоог нэмээд нийт наалтын тоог дангаар нь хэвлэ.'],
+    'console.log(red + blue);',
+    [[{ red: 8, blue: 5 }, 13], [{ red: 0, blue: 6 }, 6], [{ red: 11, blue: 9 }, 20]],
+    ['+ тэмдэг хоёр тоог нэмнэ.']),
+
+  practice('pages-left', 'console', 'Унших хуудас хэд үлдэв?', 'Эхлэл', 3,
+    ['totalPages нь номын нийт хуудас, pagesRead нь уншсан хуудасны тоо.', 'Үлдсэн хуудасны тоог олоод "Үлдсэн хуудас: 85" гэсэн хэлбэрээр хэвлэ.'],
+    'console.log("Үлдсэн хуудас: " + (totalPages - pagesRead));',
+    [[{ totalPages: 120, pagesRead: 35 }, 'Үлдсэн хуудас: 85'], [{ totalPages: 72, pagesRead: 72 }, 'Үлдсэн хуудас: 0'], [{ totalPages: 50, pagesRead: 0 }, 'Үлдсэн хуудас: 50']],
+    ['Нийт хуудаснаас уншсан хуудсыг хасаарай.']),
+
+  practice('rectangle-area', 'console', 'Тэгш өнцөгтийн талбай', 'Эхлэл', 3,
+    ['width нь өргөн, length нь урт.', 'Тэгш өнцөгтийн талбайг тооцоолоод тоог дангаар нь хэвлэ.'],
+    'console.log(width * length);',
+    [[{ width: 4, length: 7 }, 28], [{ width: 3, length: 8 }, 24], [{ width: 2.5, length: 6 }, 15]],
+    ['Талбай олохдоо уртыг өргөнөөр үржүүлнэ. JavaScript-д үржүүлэх тэмдэг нь *.']),
+
+  practice('share-juice', 'console', 'Шүүсээ тэнцүү хуваая', 'Эхлэл', 4,
+    ['liters нь шүүсний хэмжээ, friends нь хүүхдийн тоо. friends нь 0-ээс их байна.', 'Нэг хүүхдэд хэдэн литр шүүс ногдохыг тооцоолоод тоог дангаар нь хэвлэ.'],
+    'console.log(liters / friends);',
+    [[{ liters: 6, friends: 4 }, 1.5], [{ liters: 8, friends: 4 }, 2], [{ liters: 1, friends: 2 }, 0.5]],
+    ['/ тэмдгээр нийт хэмжээг хүүхдийн тоонд хуваа.']),
+
+  practice('unpacked-pencils', 'console', 'Савлаагүй харандаа', 'Эхлэл', 4,
+    ['pencils нь нийт харандаа, capacity нь нэг хайрцагт багтах тоо. capacity нь 0-ээс их байна.', 'Аль болох олон бүтэн хайрцаг дүүргээд, хайрцагт ороогүй харандааны тоог дангаар нь хэвлэ.'],
+    'console.log(pencils % capacity);',
+    [[{ pencils: 23, capacity: 5 }, 3], [{ pencils: 20, capacity: 5 }, 0], [{ pencils: 4, capacity: 7 }, 4], [{ pencils: 29, capacity: 6 }, 5]],
+    ['% нь хуваасны дараа үлдсэн хэсгийг өгнө.']),
+
+  practice('square-perimeter', 'console', 'Квадратын хүрээний урт', 'Эхлэл', 4,
+    ['side нь квадратын нэг талын урт.', 'Периметрийг олоод "Периметр: 24 см" гэсэн хэлбэрээр хэвлэ.'],
+    'console.log("Периметр: " + (4 * side) + " см");',
+    [[{ side: 6 }, 'Периметр: 24 см'], [{ side: 2.5 }, 'Периметр: 10 см'], [{ side: 11 }, 'Периметр: 44 см']],
+    ['Квадратын дөрвөн тал ижил урттай.']),
+
+  practice('average-scores', 'console', 'Гурван онооны дундаж', 'Дунд', 4,
+    ['first, second, third нь гурван сорилын оноо.', 'Дундаж оноог олоод тоог дангаар нь хэвлэ.'],
+    'console.log((first + second + third) / 3);',
+    [[{ first: 8, second: 10, third: 6 }, 8], [{ first: 15, second: 12, third: 18 }, 15], [{ first: 0, second: 0, third: 9 }, 3]],
+    ['Эхлээд гурван оноог нэмэхийн тулд нийлбэрийг хаалтад бич.']),
+
+  practice('pack-minutes', 'console', 'Цагийг минутаар илэрхийлье', 'Дунд', 4,
+    ['hours нь цагийн тоо, minutes нь түүн дээр нэмэгдэх минут.', 'Нийт хэдэн минут болохыг тооцоолоод тоог дангаар нь хэвлэ.'],
+    'console.log(hours * 60 + minutes);',
+    [[{ hours: 2, minutes: 15 }, 135], [{ hours: 0, minutes: 45 }, 45], [{ hours: 3, minutes: 0 }, 180], [{ hours: 1, minutes: 59 }, 119]],
+    ['Нэг цаг 60 минут. Цагийг минутад шилжүүлсний дараа үлдсэн минутыг нэм.']),
+
+  practice('two-basket-total', 'console', 'Хоёр багцын нийт үнэ', 'Дунд', 5,
+    ['applePrice, appleCount нь нэг алимны үнэ, алимны тоо. pearPrice, pearCount нь нэг лийрийн үнэ, лийрийн тоо.', 'Хоёр төрлийн жимсний нийт үнийг олоод "Нийт: 6200₮" гэсэн хэлбэрээр хэвлэ.'],
+    'let total = applePrice * appleCount + pearPrice * pearCount;\nconsole.log("Нийт: " + total + "₮");',
+    [[{ applePrice: 1000, appleCount: 2, pearPrice: 1400, pearCount: 3 }, 'Нийт: 6200₮'], [{ applePrice: 1200, appleCount: 0, pearPrice: 800, pearCount: 2 }, 'Нийт: 1600₮'], [{ applePrice: 500, appleCount: 6, pearPrice: 750, pearCount: 0 }, 'Нийт: 3000₮']],
+    ['Жимс тус бүрийн нэгж үнийг тоо ширхгээр нь үржүүлээд үр дүнгүүдийг нэм.']),
+
+  practice('pass-score', 'conditions', 'Сорилд тэнцсэн үү?', 'Эхлэл', 4,
+    ['score нь сорилын оноо.', '60 болон түүнээс их бол "Тэнцсэн", бусад үед "Тэнцээгүй" гэж хэвлэ. if / else ашигла.'],
+    'if (score >= 60) {\n  console.log("Тэнцсэн");\n} else {\n  console.log("Тэнцээгүй");\n}',
+    [[{ score: 72 }, 'Тэнцсэн'], [{ score: 59 }, 'Тэнцээгүй'], [{ score: 60 }, 'Тэнцсэн'], [{ score: 0 }, 'Тэнцээгүй']],
+    ['Яг 60 оноотой сурагч тэнцэх тул >= ашигла.'], ['if']),
+
+  practice('check-lamp', 'conditions', 'Гэрэл ассан уу?', 'Эхлэл', 4,
+    ['isLit нь гэрэл ассан эсэхийг илэрхийлнэ.', 'true бол "Гэрэл ассан", false бол "Гэрэл унтарсан" гэж хэвлэ. if / else ашигла.'],
+    'if (isLit) {\n  console.log("Гэрэл ассан");\n} else {\n  console.log("Гэрэл унтарсан");\n}',
+    [[{ isLit: false }, 'Гэрэл унтарсан'], [{ isLit: true }, 'Гэрэл ассан']],
+    ['isLit өөрөө boolean утгатай учраас if (isLit) гэж бичиж болно.'], ['if']),
+
+  practice('check-pin', 'conditions', 'Код таарч байна уу?', 'Эхлэл', 4,
+    ['enteredCode нь оруулсан код, savedCode нь хадгалсан код. Кодыг текстээр хадгална.', 'Кодууд яг ижил бол "Код зөв", бусад үед "Код буруу" гэж хэвлэ. if / else ашигла.'],
+    'if (enteredCode === savedCode) {\n  console.log("Код зөв");\n} else {\n  console.log("Код буруу");\n}',
+    [[{ enteredCode: '024', savedCode: '024' }, 'Код зөв'], [{ enteredCode: '24', savedCode: '024' }, 'Код буруу'], [{ enteredCode: '835', savedCode: '835' }, 'Код зөв'], [{ enteredCode: '835', savedCode: '853' }, 'Код буруу']],
+    ['=== тэмдэг хоёр утга яг ижил эсэхийг шалгана.'], ['if']),
+
+  practice('water-level', 'conditions', 'Сав халих уу?', 'Эхлэл', 4,
+    ['water нь саванд хийсэн усны хэмжээ, capacity нь савны багтаамж.', 'Усны хэмжээ багтаамжаас их бол "Халина", бусад үед "Багтана" гэж хэвлэ. if / else ашигла.'],
+    'if (water > capacity) {\n  console.log("Халина");\n} else {\n  console.log("Багтана");\n}',
+    [[{ water: 12, capacity: 10 }, 'Халина'], [{ water: 10, capacity: 10 }, 'Багтана'], [{ water: 7, capacity: 10 }, 'Багтана'], [{ water: 5, capacity: 4 }, 'Халина']],
+    ['Усны хэмжээ багтаамжтай яг тэнцүү үед ус багтана.'], ['if']),
+
+  practice('compare-heights', 'conditions', 'Хэн нь өндөр вэ?', 'Дунд', 5,
+    ['firstHeight, secondHeight нь хоёр хүүхдийн өндөр (см).', 'Эхнийх нь өндөр бол "Эхнийх өндөр", хоёр дахь нь өндөр бол "Хоёр дахь нь өндөр", тэнцүү бол "Ижил өндөр" гэж хэвлэ.', 'if / else if / else ашигла.'],
+    'if (firstHeight > secondHeight) {\n  console.log("Эхнийх өндөр");\n} else if (firstHeight < secondHeight) {\n  console.log("Хоёр дахь нь өндөр");\n} else {\n  console.log("Ижил өндөр");\n}',
+    [[{ firstHeight: 147, secondHeight: 150 }, 'Хоёр дахь нь өндөр'], [{ firstHeight: 152, secondHeight: 145 }, 'Эхнийх өндөр'], [{ firstHeight: 150, secondHeight: 150 }, 'Ижил өндөр']],
+    ['Их, бага хоёр нөхцөлийг шалгасны дараа тэнцүү тохиолдол үлдэнэ.'], ['else-if']),
+
+  practice('traffic-signal', 'conditions', 'Гэрлэн дохио', 'Дунд', 5,
+    ['color нь гэрлэн дохионы өнгө. Утгуудыг жижиг үсгээр өгнө.', '"улаан" бол "Зогс", "шар" бол "Хүлээ", "ногоон" бол "Яв" гэж хэвлэ.', 'Бусад өнгөнд "Танихгүй өнгө" гэж хэвлэ. if / else if / else ашигла.'],
+    'if (color === "улаан") {\n  console.log("Зогс");\n} else if (color === "шар") {\n  console.log("Хүлээ");\n} else if (color === "ногоон") {\n  console.log("Яв");\n} else {\n  console.log("Танихгүй өнгө");\n}',
+    [[{ color: 'шар' }, 'Хүлээ'], [{ color: 'улаан' }, 'Зогс'], [{ color: 'ногоон' }, 'Яв'], [{ color: 'хөх' }, 'Танихгүй өнгө']],
+    ['Өнгө бүрийг color === "..." гэсэн тусдаа нөхцөлөөр шалга.'], ['else-if']),
+
+  practice('day-greeting', 'conditions', 'Цагт тохирсон мэндчилгээ', 'Дунд', 5,
+    ['hour нь 0–23 хүртэлх бүхэл цаг.', '0–11 цагт "Өглөөний мэнд", 12–17 цагт "Өдрийн мэнд", 18–23 цагт "Оройн мэнд" гэж хэвлэ.', 'if / else if / else ашигла.'],
+    'if (hour < 12) {\n  console.log("Өглөөний мэнд");\n} else if (hour < 18) {\n  console.log("Өдрийн мэнд");\n} else {\n  console.log("Оройн мэнд");\n}',
+    [[{ hour: 14 }, 'Өдрийн мэнд'], [{ hour: 0 }, 'Өглөөний мэнд'], [{ hour: 11 }, 'Өглөөний мэнд'], [{ hour: 12 }, 'Өдрийн мэнд'], [{ hour: 17 }, 'Өдрийн мэнд'], [{ hour: 18 }, 'Оройн мэнд'], [{ hour: 23 }, 'Оройн мэнд']],
+    ['Эхлээд 12-оос бага цагуудыг ялгаад дараа нь 18-аас бага эсэхийг шалга.'], ['else-if']),
+
+  practice('race-medal', 'conditions', 'Уралдааны медаль', 'Дунд', 5,
+    ['place нь уралдаанд эзэлсэн байр.', '1-р байранд "Алт", 2-р байранд "Мөнгө", 3-р байранд "Хүрэл", бусад байранд "Медальгүй" гэж хэвлэ.', 'if / else if / else ашигла.'],
+    'if (place === 1) {\n  console.log("Алт");\n} else if (place === 2) {\n  console.log("Мөнгө");\n} else if (place === 3) {\n  console.log("Хүрэл");\n} else {\n  console.log("Медальгүй");\n}',
+    [[{ place: 2 }, 'Мөнгө'], [{ place: 1 }, 'Алт'], [{ place: 3 }, 'Хүрэл'], [{ place: 4 }, 'Медальгүй'], [{ place: 10 }, 'Медальгүй']],
+    ['Байр бүрийг === тэмдгээр харьцуул.'], ['else-if']),
+
+  practice('book-size', 'conditions', 'Номын зузааныг ангилъя', 'Дунд', 5,
+    ['pages нь номын хуудасны тоо.', '1–99 хуудастай бол "Нимгэн", 100–249 бол "Дунд", 250 болон түүнээс олон бол "Зузаан" гэж хэвлэ.', 'if / else if / else ашигла.'],
+    'if (pages < 100) {\n  console.log("Нимгэн");\n} else if (pages < 250) {\n  console.log("Дунд");\n} else {\n  console.log("Зузаан");\n}',
+    [[{ pages: 130 }, 'Дунд'], [{ pages: 99 }, 'Нимгэн'], [{ pages: 100 }, 'Дунд'], [{ pages: 249 }, 'Дунд'], [{ pages: 250 }, 'Зузаан']],
+    ['100, 250 гэсэн зааг дээр яг ямар хариу гарахыг жишээгээр шалга.'], ['else-if']),
+
+  practice('water-state', 'conditions', 'Ус ямар төлөвт байна вэ?', 'Дунд', 5,
+    ['temperature нь усны температурыг °C-ээр илэрхийлнэ.', 'Энэ дасгалд 0 болон түүнээс бага бол "Мөс", 0-ээс их бөгөөд 100-аас бага бол "Шингэн ус", 100 болон түүнээс их бол "Уур" гэж үзнэ.', 'if / else if / else ашиглан тохирох төлөвийг хэвлэ.'],
+    'if (temperature <= 0) {\n  console.log("Мөс");\n} else if (temperature < 100) {\n  console.log("Шингэн ус");\n} else {\n  console.log("Уур");\n}',
+    [[{ temperature: 21 }, 'Шингэн ус'], [{ temperature: -5 }, 'Мөс'], [{ temperature: 0 }, 'Мөс'], [{ temperature: 0.5 }, 'Шингэн ус'], [{ temperature: 99.5 }, 'Шингэн ус'], [{ temperature: 100 }, 'Уур']],
+    ['Эхний нөхцөл худал болсон үед температур 0-ээс их гэдгийг аль хэдийн мэднэ.'], ['else-if']),
+
+  practice('library-entry', 'logic', 'Номын санд нэвтрэх', 'Дунд', 4,
+    ['isOpen нь номын сан нээлттэй эсэх, hasCard нь карттай эсэхийг илэрхийлнэ.', 'Номын сан нээлттэй бөгөөд карттай бол "Орж болно", бусад үед "Орж болохгүй" гэж хэвлэ. && ашигла.'],
+    'if (isOpen && hasCard) {\n  console.log("Орж болно");\n} else {\n  console.log("Орж болохгүй");\n}',
+    [[{ isOpen: true, hasCard: true }, 'Орж болно'], [{ isOpen: true, hasCard: false }, 'Орж болохгүй'], [{ isOpen: false, hasCard: true }, 'Орж болохгүй'], [{ isOpen: false, hasCard: false }, 'Орж болохгүй']],
+    ['&& холбоосын хоёр талд boolean утга шууд бичиж болно.'], ['if', 'logical:&&']),
+
+  practice('bring-raincoat', 'logic', 'Цув авч гарах уу?', 'Дунд', 4,
+    ['isRaining нь бороо орж байгаа эсэх, rainExpected нь бороо орох төлөвтэй эсэхийг илэрхийлнэ.', 'Аль нэг нь true бол "Цуваа ав", хоёулаа false бол "Цув хэрэггүй" гэж хэвлэ. || ашигла.'],
+    'if (isRaining || rainExpected) {\n  console.log("Цуваа ав");\n} else {\n  console.log("Цув хэрэггүй");\n}',
+    [[{ isRaining: false, rainExpected: true }, 'Цуваа ав'], [{ isRaining: true, rainExpected: false }, 'Цуваа ав'], [{ isRaining: true, rainExpected: true }, 'Цуваа ав'], [{ isRaining: false, rainExpected: false }, 'Цув хэрэггүй']],
+    ['|| холбоосын аль нэг тал үнэн байхад нөхцөл биелнэ.'], ['if', 'logical:||']),
+
+  practice('seat-available', 'logic', 'Суудал сул уу?', 'Дунд', 4,
+    ['isReserved нь суудал захиалгатай эсэхийг илэрхийлнэ.', '! ашиглан захиалгагүй эсэхийг шалга. Захиалгагүй бол "Сул суудал", захиалгатай бол "Захиалгатай" гэж хэвлэ.'],
+    'if (!isReserved) {\n  console.log("Сул суудал");\n} else {\n  console.log("Захиалгатай");\n}',
+    [[{ isReserved: false }, 'Сул суудал'], [{ isReserved: true }, 'Захиалгатай']],
+    ['! тэмдэг true-ийг false, false-ийг true болгоно.'], ['if', 'not']),
+
+  practice('valid-volume', 'logic', 'Дууны түвшин зөв үү?', 'Дунд', 5,
+    ['volume нь дууны түвшин.', '0–100 хооронд, хоёр заагийг багтаавал "Зөв түвшин", бусад үед "Буруу түвшин" гэж хэвлэ. && ашигла.'],
+    'if (volume >= 0 && volume <= 100) {\n  console.log("Зөв түвшин");\n} else {\n  console.log("Буруу түвшин");\n}',
+    [[{ volume: 45 }, 'Зөв түвшин'], [{ volume: -1 }, 'Буруу түвшин'], [{ volume: 0 }, 'Зөв түвшин'], [{ volume: 100 }, 'Зөв түвшин'], [{ volume: 101 }, 'Буруу түвшин']],
+    ['Доод ба дээд хязгаарыг тусдаа нөхцөлөөр бич.'], ['if', 'logical:&&']),
+
+  practice('outside-quiet-hours', 'logic', 'Хөгжим тоглож болох цаг', 'Дунд', 5,
+    ['hour нь 0–23 хүртэлх бүхэл цаг.', '8-аас өмнө эсвэл 20 цагаас эхлэн "Чимээгүй цаг" гэж хэвлэ.', 'Бусад үед "Хөгжим тоглож болно" гэж хэвлэ. || ашигла.'],
+    'if (hour < 8 || hour >= 20) {\n  console.log("Чимээгүй цаг");\n} else {\n  console.log("Хөгжим тоглож болно");\n}',
+    [[{ hour: 21 }, 'Чимээгүй цаг'], [{ hour: 7 }, 'Чимээгүй цаг'], [{ hour: 8 }, 'Хөгжим тоглож болно'], [{ hour: 19 }, 'Хөгжим тоглож болно'], [{ hour: 20 }, 'Чимээгүй цаг']],
+    ['8 цаг чимээгүй цагт орохгүй, харин 20 цаг орно.'], ['if', 'logical:||']),
+
+  practice('borrow-tablet', 'logic', 'Таблет зээлж болох уу?', 'Дунд', 5,
+    ['hasPermission нь зөвшөөрөлтэй эсэх, hasOverdue нь хугацаа хэтэрсэн зээлтэй эсэхийг илэрхийлнэ.', 'Зөвшөөрөлтэй бөгөөд хугацаа хэтэрсэн зээлгүй бол "Зээлж болно", бусад үед "Зээлж болохгүй" гэж хэвлэ. && болон ! ашигла.'],
+    'if (hasPermission && !hasOverdue) {\n  console.log("Зээлж болно");\n} else {\n  console.log("Зээлж болохгүй");\n}',
+    [[{ hasPermission: true, hasOverdue: false }, 'Зээлж болно'], [{ hasPermission: true, hasOverdue: true }, 'Зээлж болохгүй'], [{ hasPermission: false, hasOverdue: false }, 'Зээлж болохгүй'], [{ hasPermission: false, hasOverdue: true }, 'Зээлж болохгүй']],
+    ['!hasOverdue нь хугацаа хэтэрсэн зээлгүй үед үнэн байна.'], ['if', 'logical:&&', 'not']),
+
+  practice('sports-registration', 'logic', 'Спортын өдөрт бүртгүүлэх', 'Дунд', 5,
+    ['grade нь ангийн дугаар, hasForm нь зөвшөөрлийн хуудастай эсэхийг илэрхийлнэ.', '6-р эсвэл 7-р ангийн бөгөөд зөвшөөрлийн хуудастай бол "Бүртгэнэ", бусад үед "Бүртгэхгүй" гэж хэвлэ. || болон && ашигла.'],
+    'if ((grade === 6 || grade === 7) && hasForm) {\n  console.log("Бүртгэнэ");\n} else {\n  console.log("Бүртгэхгүй");\n}',
+    [[{ grade: 6, hasForm: true }, 'Бүртгэнэ'], [{ grade: 7, hasForm: true }, 'Бүртгэнэ'], [{ grade: 6, hasForm: false }, 'Бүртгэхгүй'], [{ grade: 7, hasForm: false }, 'Бүртгэхгүй'], [{ grade: 8, hasForm: true }, 'Бүртгэхгүй']],
+    ['Ангийг шалгах хоёр нөхцөлийг хаалтад бүлэглэ.'], ['if', 'logical:||', 'logical:&&']),
+
+  practice('practice-reminder', 'logic', 'Давтлагын сануулга', 'Дунд', 5,
+    ['finishedMath, finishedEnglish нь математик, англи хэлний давтлагаа хийж дуусгасан эсэхийг илэрхийлнэ.', 'Аль нэг давтлага дутуу бол "Давтлага үлдсэн", хоёуланг дуусгасан бол "Давтлага дууссан" гэж хэвлэ. ! болон || ашигла.'],
+    'if (!finishedMath || !finishedEnglish) {\n  console.log("Давтлага үлдсэн");\n} else {\n  console.log("Давтлага дууссан");\n}',
+    [[{ finishedMath: true, finishedEnglish: false }, 'Давтлага үлдсэн'], [{ finishedMath: false, finishedEnglish: true }, 'Давтлага үлдсэн'], [{ finishedMath: false, finishedEnglish: false }, 'Давтлага үлдсэн'], [{ finishedMath: true, finishedEnglish: true }, 'Давтлага дууссан']],
+    ['!finishedMath гэвэл математикийн давтлага дутуу эсэхийг шалгана.'], ['if', 'logical:||', 'not']),
+
+  practice('multiple-of-both', 'logic', '3 ба 5-д зэрэг хуваагдах уу?', 'Дунд', 5,
+    ['number нь эерэг бүхэл тоо.', '3 болон 5-д хоёуланд нь үлдэгдэлгүй хуваагдвал "Хоёуланд нь хуваагдана", бусад үед "Хоёуланд нь хуваагдахгүй" гэж хэвлэ.', '% болон && ашигла.'],
+    'if (number % 3 === 0 && number % 5 === 0) {\n  console.log("Хоёуланд нь хуваагдана");\n} else {\n  console.log("Хоёуланд нь хуваагдахгүй");\n}',
+    [[{ number: 15 }, 'Хоёуланд нь хуваагдана'], [{ number: 9 }, 'Хоёуланд нь хуваагдахгүй'], [{ number: 20 }, 'Хоёуланд нь хуваагдахгүй'], [{ number: 7 }, 'Хоёуланд нь хуваагдахгүй'], [{ number: 30 }, 'Хоёуланд нь хуваагдана']],
+    ['Хуваагч тус бүрээр % үйлдэл хийгээд үлдэгдлийг 0-тэй харьцуул.'], ['if', 'logical:&&']),
+
+  practice('choose-activity', 'logic', 'Завсарлагааны тоглоом сонгоё', 'Дунд', 5,
+    ['isWindy, isSnowing нь салхитай, цастай эсэхийг илэрхийлнэ. hasBall нь бөмбөгтэй эсэхийг илэрхийлнэ.', 'Салхитай эсвэл цастай бол "Дотор тоглоно" гэж хэвлэ.', 'Бусад үед бөмбөгтэй бол "Сагс тоглоно", бөмбөггүй бол "Алхъя" гэж хэвлэ. if / else if / else болон || ашигла.'],
+    'if (isWindy || isSnowing) {\n  console.log("Дотор тоглоно");\n} else if (hasBall) {\n  console.log("Сагс тоглоно");\n} else {\n  console.log("Алхъя");\n}',
+    [[{ isWindy: false, isSnowing: false, hasBall: true }, 'Сагс тоглоно'], [{ isWindy: true, isSnowing: false, hasBall: true }, 'Дотор тоглоно'], [{ isWindy: false, isSnowing: true, hasBall: false }, 'Дотор тоглоно'], [{ isWindy: false, isSnowing: false, hasBall: false }, 'Алхъя']],
+    ['Цаг агаарын нөхцөлийг эхэлж шалга.'], ['else-if', 'logical:||']),
+
+  practice('refill-water', 'challenge', 'Саванд ус нэмэх үү?', 'Дунд', 5,
+    ['current нь саванд байгаа ус, target нь хүргэх хэмжээ. Хоёуланг нь литрээр өгнө.', 'Ус хүрэлцэхгүй бол "Нэмэх ус: 3 л" гэсэн хэлбэрээр хэдэн литр нэмэхийг хэвлэ.', 'Одоогийн ус хүрэлцэж байвал "Ус хангалттай" гэж хэвлэ.'],
+    'if (current < target) {\n  console.log("Нэмэх ус: " + (target - current) + " л");\n} else {\n  console.log("Ус хангалттай");\n}',
+    [[{ current: 4, target: 7 }, 'Нэмэх ус: 3 л'], [{ current: 7, target: 7 }, 'Ус хангалттай'], [{ current: 9, target: 7 }, 'Ус хангалттай'], [{ current: 1.5, target: 4 }, 'Нэмэх ус: 2.5 л']],
+    ['Дутуу байвал зорилтот хэмжээнээс одоогийн хэмжээг хас.'], ['if']),
+
+  practice('contest-team-size', 'challenge', 'Багийн гишүүн дутуу юу?', 'Дунд', 5,
+    ['members нь багийн одоогийн гишүүдийн тоо, required нь тэмцээнд оролцоход шаардагдах тоо.', 'Хоёр тоо тэнцүү бол "Баг бэлэн" гэж хэвлэ.', 'Дутуу бол "Дутуу: 2", илүү бол "Илүү: 2" гэсэн хэлбэрээр зөрүүг хэвлэ. if / else if / else ашигла.'],
+    'if (members < required) {\n  console.log("Дутуу: " + (required - members));\n} else if (members > required) {\n  console.log("Илүү: " + (members - required));\n} else {\n  console.log("Баг бэлэн");\n}',
+    [[{ members: 3, required: 5 }, 'Дутуу: 2'], [{ members: 7, required: 5 }, 'Илүү: 2'], [{ members: 4, required: 4 }, 'Баг бэлэн'], [{ members: 0, required: 6 }, 'Дутуу: 6'], [{ members: 8, required: 5 }, 'Илүү: 3']],
+    ['Зөрүүг эерэг тоогоор хэвлэхийн тулд их тооноос бага тоог хас.'], ['else-if']),
+
+  practice('bus-seats-left', 'challenge', 'Автобусанд багтах уу?', 'Дунд', 5,
+    ['seats нь автобусны нийт суудал, occupied нь эзэлсэн суудал, groupSize нь шинээр суух хүүхдийн тоо.', 'Бүх хүүхэд багтвал суусны дараах сул суудлыг "Сул суудал: 2" гэсэн хэлбэрээр хэвлэ.', 'Суудал хүрэлцэхгүй бол "Суудал хүрэлцэхгүй" гэж хэвлэ.'],
+    'let available = seats - occupied;\nif (groupSize <= available) {\n  console.log("Сул суудал: " + (available - groupSize));\n} else {\n  console.log("Суудал хүрэлцэхгүй");\n}',
+    [[{ seats: 20, occupied: 12, groupSize: 6 }, 'Сул суудал: 2'], [{ seats: 20, occupied: 12, groupSize: 8 }, 'Сул суудал: 0'], [{ seats: 20, occupied: 12, groupSize: 9 }, 'Суудал хүрэлцэхгүй'], [{ seats: 12, occupied: 7, groupSize: 2 }, 'Сул суудал: 3']],
+    ['Эхлээд нийт суудлаас эзэлсэн суудлыг хасаж, одоогийн сул суудлыг ол.'], ['if']),
+
+  practice('print-fee', 'challenge', 'Хэвлэх үйлчилгээний төлбөр', 'Дунд', 5,
+    ['pages нь хэвлэх хуудасны тоо, isColor нь өнгөтөөр хэвлэх эсэхийг илэрхийлнэ.', 'Өнгөт хуудас бүр 400₮, хар цагаан хуудас бүр 150₮.', 'Нийт үнийг "Хэвлэх үнэ: 1200₮" гэсэн хэлбэрээр хэвлэ.'],
+    'let rate;\nif (isColor) {\n  rate = 400;\n} else {\n  rate = 150;\n}\nconsole.log("Хэвлэх үнэ: " + (pages * rate) + "₮");',
+    [[{ pages: 3, isColor: true }, 'Хэвлэх үнэ: 1200₮'], [{ pages: 3, isColor: false }, 'Хэвлэх үнэ: 450₮'], [{ pages: 8, isColor: false }, 'Хэвлэх үнэ: 1200₮'], [{ pages: 0, isColor: true }, 'Хэвлэх үнэ: 0₮']],
+    ['Нэг хуудасны үнийг эхэлж сонгоод, дараа нь хуудасны тоогоор үржүүл.'], ['if']),
+
+  practice('reward-points', 'challenge', 'Урамшууллын оноо', 'Дунд', 5,
+    ['points нь тоглоомоос авсан үндсэн оноо, hasBonus нь урамшуулал идэвхтэй эсэхийг илэрхийлнэ.', 'Үндсэн оноо 50 болон түүнээс их бөгөөд урамшуулал идэвхтэй бол 10 оноо нэм. Бусад үед үндсэн оноог хэвээр тооцно.', 'Эцсийн оноог "Нийт оноо: 65" гэсэн хэлбэрээр хэвлэ. && ашигла.'],
+    'if (points >= 50 && hasBonus) {\n  points = points + 10;\n}\nconsole.log("Нийт оноо: " + points);',
+    [[{ points: 55, hasBonus: true }, 'Нийт оноо: 65'], [{ points: 50, hasBonus: true }, 'Нийт оноо: 60'], [{ points: 49, hasBonus: true }, 'Нийт оноо: 49'], [{ points: 55, hasBonus: false }, 'Нийт оноо: 55']],
+    ['Нэмэх үйлдлийг if блок дотор, хэвлэх үйлдлийг блокийн дараа бичиж болно.'], ['if', 'logical:&&']),
+
+  practice('chess-rounds', 'challenge', 'Шатрын тэмцээний оноо', 'Дунд', 6,
+    ['wins нь хожлын тоо, draws нь тэнцээний тоо. Хожил бүр 3, тэнцээ бүр 1 оноо өгнө.', 'Нийт оноо 10 болон түүнээс их бол "Шалгарсан", 7–9 бол "Нөөцөд", 7-оос бага бол "Шалгараагүй" гэж хэвлэ.', 'if / else if / else ашигла.'],
+    'let total = wins * 3 + draws;\nif (total >= 10) {\n  console.log("Шалгарсан");\n} else if (total >= 7) {\n  console.log("Нөөцөд");\n} else {\n  console.log("Шалгараагүй");\n}',
+    [[{ wins: 2, draws: 2 }, 'Нөөцөд'], [{ wins: 2, draws: 0 }, 'Шалгараагүй'], [{ wins: 2, draws: 1 }, 'Нөөцөд'], [{ wins: 3, draws: 0 }, 'Нөөцөд'], [{ wins: 3, draws: 1 }, 'Шалгарсан'], [{ wins: 4, draws: 0 }, 'Шалгарсан']],
+    ['Онооны нийлбэрээ нэг хувьсагчид хадгалаад босгуудтай харьцуул.'], ['else-if']),
+
+  practice('pencil-packs', 'challenge', 'Харандааг бүтэн багцлая', 'Дунд', 6,
+    ['pencils нь нийт харандааны тоо, packSize нь нэг багцад орох тоо. packSize нь 0-ээс их байна.', 'Үлдэгдэлгүй багцлагдвал "Бүтэн багц: 4" гэсэн хэлбэрээр багцын тоог хэвлэ.', 'Харандаа үлдвэл "Үлдсэн харандаа: 2" гэсэн хэлбэрээр үлдэгдлийг хэвлэ.'],
+    'let remaining = pencils % packSize;\nif (remaining === 0) {\n  console.log("Бүтэн багц: " + (pencils / packSize));\n} else {\n  console.log("Үлдсэн харандаа: " + remaining);\n}',
+    [[{ pencils: 24, packSize: 6 }, 'Бүтэн багц: 4'], [{ pencils: 26, packSize: 6 }, 'Үлдсэн харандаа: 2'], [{ pencils: 0, packSize: 6 }, 'Бүтэн багц: 0'], [{ pencils: 3, packSize: 5 }, 'Үлдсэн харандаа: 3'], [{ pencils: 15, packSize: 5 }, 'Бүтэн багц: 3']],
+    ['% ашиглан үлдэгдлийг ол. Үлдэгдэл 0 бол / үйлдлээр багцын тоог олж болно.'], ['if']),
+
+  practice('museum-group-fee', 'challenge', 'Музейн бүлгийн төлбөр', 'Дунд', 6,
+    ['visitors нь зочдын тоо, isSchoolGroup нь сургуулийн бүлэг эсэхийг илэрхийлнэ.', '10 болон түүнээс олон зочинтой сургуулийн бүлэгт нэг хүний үнэ 2000₮, бусад тохиолдолд 3000₮.', '&& ашиглаад нийт төлбөрийг "Нийт төлбөр: 24000₮" гэсэн хэлбэрээр хэвлэ.'],
+    'let price = 3000;\nif (visitors >= 10 && isSchoolGroup) {\n  price = 2000;\n}\nconsole.log("Нийт төлбөр: " + (visitors * price) + "₮");',
+    [[{ visitors: 12, isSchoolGroup: true }, 'Нийт төлбөр: 24000₮'], [{ visitors: 10, isSchoolGroup: true }, 'Нийт төлбөр: 20000₮'], [{ visitors: 9, isSchoolGroup: true }, 'Нийт төлбөр: 27000₮'], [{ visitors: 12, isSchoolGroup: false }, 'Нийт төлбөр: 36000₮']],
+    ['Хөнгөлөлтөд зочдын тоо болон бүлгийн төрөл хоёулаа хамаарна.'], ['if', 'logical:&&']),
+
+  practice('trip-distance', 'challenge', 'Дугуйн аяллын төлөвлөгөө', 'Дунд', 6,
+    ['morningKm, afternoonKm нь өглөө, үдээс хойш туулсан зай. goalKm нь өдрийн зорилтот зай. Бүгд километрээр өгөгдөнө.', 'Нийт зай зорилттой тэнцүү бол "Зорилтоо биелүүлсэн" гэж хэвлэ.', 'Дутуу бол "Дутуу зай: 3 км", давсан бол "Илүү зай: 3 км" гэсэн хэлбэрээр зөрүүг хэвлэ. if / else if / else ашигла.'],
+    'let totalKm = morningKm + afternoonKm;\nif (totalKm < goalKm) {\n  console.log("Дутуу зай: " + (goalKm - totalKm) + " км");\n} else if (totalKm > goalKm) {\n  console.log("Илүү зай: " + (totalKm - goalKm) + " км");\n} else {\n  console.log("Зорилтоо биелүүлсэн");\n}',
+    [[{ morningKm: 7, afternoonKm: 5, goalKm: 15 }, 'Дутуу зай: 3 км'], [{ morningKm: 8, afternoonKm: 7, goalKm: 15 }, 'Зорилтоо биелүүлсэн'], [{ morningKm: 10, afternoonKm: 8, goalKm: 15 }, 'Илүү зай: 3 км'], [{ morningKm: 3.5, afternoonKm: 2, goalKm: 5 }, 'Илүү зай: 0.5 км']],
+    ['Өглөө, үдээс хойших зайг нэмээд өдрийн зорилттой харьцуул.'], ['else-if']),
+
+  practice('valid-points', 'challenge', 'Тоглоомын оноог шалгая', 'Дунд', 6,
+    ['value нь оноо байж болох утга. Утга нь тоо, текст эсвэл boolean байж болно.', 'Зөвхөн number төрөлтэй, 0 болон түүнээс их утгыг зөвшөөр. Зөв бол 5 оноо нэмээд "Шинэ оноо: 17" гэсэн хэлбэрээр хэвлэ.', 'Бусад үед "Оноо буруу" гэж хэвлэ. typeof болон && ашигла.'],
+    'if (typeof value === "number" && value >= 0) {\n  console.log("Шинэ оноо: " + (value + 5));\n} else {\n  console.log("Оноо буруу");\n}',
+    [[{ value: 12 }, 'Шинэ оноо: 17'], [{ value: 0 }, 'Шинэ оноо: 5'], [{ value: -1 }, 'Оноо буруу'], [{ value: '12' }, 'Оноо буруу'], [{ value: false }, 'Оноо буруу'], [{ value: 3 }, 'Шинэ оноо: 8']],
+    ['typeof value === "number" гэж төрлийг шалгаад, утга 0-ээс багагүй эсэхийг шалга.'], ['if', 'typeof', 'logical:&&']),
+];
+
+const allExercises = [...originalExercises, ...newExercises];
+export const exercises = topics.flatMap(({ id }) =>
+  allExercises.filter(exercise => exercise.topic === id),
+);
+
 const q=(id,topic,prompt,code,options,answer,explanation)=>({id,topic,prompt,code,options,answer,explanation});
 export const questions=[
  q('v1','variables','Консолд юу хэвлэгдэх вэ?','let name = "John";\nname = "Билгүүн";\nconsole.log(name);',['John','Билгүүн','name','Алдаа'],1,'Хувьсагчийн утгыг өөрчилсөн тул сүүлийн утга болох Билгүүн хэвлэгдэнэ.'),

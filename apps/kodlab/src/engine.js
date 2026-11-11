@@ -19,7 +19,13 @@ export function checkStructure(code,requirements=[]) {
   if(kind==='assign'){passed=nodes.some(n=>(n.type==='AssignmentExpression'&&n.left.name===value)||(n.type==='UpdateExpression'&&n.argument.name===value));label=`${value}-ийн утгыг өөрчилсөн`;}
   if(kind==='log'){passed=nodes.some(n=>n.type==='CallExpression'&&n.callee.object?.name==='console'&&n.callee.property?.name==='log'&&n.arguments.some(a=>{const find=n=>n?.type==='Identifier'&&n.name===value||n&&typeof n==='object'&&Object.values(n).some(v=>Array.isArray(v)?v.some(find):typeof v==='object'&&find(v));return find(a)}));label=`console.log()-д ${value}-ийн утгыг ашигласан`;}
   if(kind==='if'){passed=nodes.some(n=>n.type==='IfStatement');label='if нөхцөл ашигласан';}
+  if(kind==='else-if'){passed=nodes.some(n=>n.type==='IfStatement'&&n.alternate?.type==='IfStatement');label='else if нөхцөл ашигласан';}
   if(kind==='logical'){passed=nodes.some(n=>n.type==='LogicalExpression'&&n.operator===value);label=`${value} холбоос ашигласан`;}
+  if(kind==='typeof'||kind==='not'){
+   const operator=kind==='typeof'?'typeof':'!';
+   passed=nodes.some(n=>n.type==='UnaryExpression'&&n.operator===operator);
+   label=`${operator} ашигласан`;
+  }
   return {passed,label};
  });
 }

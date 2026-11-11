@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Check, Cloud, Code2, Monitor } from "lucide-react";
+import { exercises as javascriptExercises } from "@/apps/kodlab/src/content.js";
 import LegacyPythonLink from "@/components/LegacyPythonLink";
 import { exercises as pythonExercises } from "@/lib/python/course";
 import { exercises as nextExercises } from "@/lib/course/lessons";
@@ -38,7 +39,7 @@ const lessons: LessonCardData[] = [
     name: "JavaScript",
     mark: "JS",
     grade: "6, 7, 8-р анги",
-    count: "24 дасгал",
+    count: `${javascriptExercises.length} дасгал`,
     description: "Эхний кодоо бичиж, логик сэтгэлгээгээ хөгжүүлээрэй.",
     topics: ["Хувьсагч", "Хэвлэх", "if / else"],
     code: 'let name = "Билгүүн";\nconsole.log("Сайн уу, " + name);',

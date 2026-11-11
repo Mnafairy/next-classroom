@@ -12,5 +12,12 @@ test('one extra output line fails',()=>assert.equal(sameOutput(['B','extra'],['B
 test('no output fails',()=>assert.equal(sameOutput([],['B']),false));
 test('syntax error caught before execution',()=>assert.throws(()=>withInputs('let n = ;',{}),SyntaxError));
 test('structure check ignores operators inside strings/comments',()=>{assert.equal(checkStructure('let a = "&&"; // if (true) {}',['if','logical:&&']).some(c=>c.passed),false);});
+test('new structure checks distinguish else if, typeof, and logical negation', () => {
+  const requirements = ['else-if', 'typeof', 'not'];
+  const correct = 'if (typeof value === "boolean") { console.log(!value); } else if (value) {}';
+  const different = 'if (value !== "typeof") {} else { if (value) {} }';
+  assert.deepEqual(checkStructure(correct, requirements).map(check => check.passed), [true, true, true]);
+  assert.deepEqual(checkStructure(different, requirements).map(check => check.passed), [false, false, false]);
+});
 test('quiz unanswered and incorrect options count zero',()=>assert.deepEqual(scoreQuiz(questions,{[questions[0].id]:questions[0].answer,[questions[1].id]:3}),{correct:1,total:20}));
 test('quiz question IDs and answer indexes are valid',()=>{assert.equal(new Set(questions.map(q=>q.id)).size,20);for(const q of questions){assert.ok(q.answer>=0&&q.answer<q.options.length);assert.equal(q.options.length,4);}for(const q of quizzes)assert.equal(questions.filter(x=>q.topics.includes(x.topic)).length,q.id==='all'?20:5);});

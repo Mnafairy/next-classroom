@@ -11,7 +11,7 @@ Five 40-minute lessons cover `h2`, `p`, `img`, and `div`, CSS colors and text, s
 ## КодЛаб · JavaScript (Grades 6–8)
 
 The Mongolian JavaScript lab is available at **`/kodlab`**, alongside Python at
-`/python` and the Next.js course at `/next-classroom`. It includes all 24 exercises,
+`/python` and the Next.js course at `/next-classroom`. It includes 74 exercises,
 20 knowledge-test questions, the code playground, and separate student profiles in MongoDB. A new student ID starts fresh; the same ID resumes its saved work on another device once database access is configured.
 
 The source is in [`apps/kodlab`](apps/kodlab/README.md). Root `npm install` or
