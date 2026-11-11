@@ -1,0 +1,388 @@
+.shell {
+  --ink: #192d29;
+  --muted: #4d625c;
+  --line: #d7e3dc;
+  --green: #12634d;
+  --tint: #e6f3eb;
+  min-height: 100vh;
+  background: #f4f8f5;
+  color: var(--ink);
+}
+
+.header,
+.main {
+  width: min(100%, 1560px);
+  margin-inline: auto;
+  padding-inline: clamp(16px, 3vw, 44px);
+}
+
+.header,
+.titleRow,
+.account,
+.grade,
+.header a {
+  display: flex;
+  align-items: center;
+}
+
+.header {
+  justify-content: space-between;
+  min-height: 64px;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.875rem;
+}
+
+.header a,
+.account,
+.grade {
+  gap: 9px;
+}
+.header a {
+  color: var(--green);
+  font-weight: 700;
+}
+.account > span {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.main {
+  padding-block: clamp(22px, 4vw, 46px) 52px;
+}
+.titleRow {
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.course {
+  color: var(--green);
+  font-weight: 750;
+  font-size: 0.875rem;
+}
+.titleRow h1 {
+  margin: 5px 0 0;
+  font-size: clamp(1.55rem, 3.3vw, 2.6rem);
+  font-weight: 770;
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+}
+
+.shell button,
+.shell select {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: white;
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.shell button:not(:disabled),
+.shell select,
+.resource summary {
+  cursor: pointer;
+}
+.shell button:hover:not(:disabled) {
+  border-color: var(--green);
+}
+.shell button:disabled {
+  opacity: 0.6;
+}
+.shell :is(button, select, a, summary, pre, textarea):focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+.grade {
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
+.lessons {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.lessons button {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-align: left;
+  line-height: 1.2;
+}
+
+.lessons button[aria-current],
+.bar button[aria-pressed="true"],
+.mobileTabs button[aria-pressed="true"] {
+  background: var(--tint);
+  border-color: #8bb9a5;
+  color: var(--green);
+}
+
+.lessonNumber {
+  display: grid;
+  place-items: center;
+  flex: 0 0 25px;
+  height: 25px;
+  border-radius: 50%;
+  color: var(--green);
+  background: var(--tint);
+  font-size: 0.79rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.lessons button[aria-current] .lessonNumber {
+  color: white;
+  background: var(--green);
+}
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(245px, 0.75fr) minmax(0, 2.5fr);
+  gap: 16px;
+  align-items: start;
+}
+.guide,
+.panel {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: white;
+}
+
+.guide {
+  padding: clamp(16px, 2vw, 23px);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+.stepCount {
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: var(--green);
+}
+.guide h2 {
+  margin: 5px 0 8px;
+  font-size: 1.19rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+.guide p {
+  overflow-wrap: anywhere;
+}
+.task {
+  background: #f3f7ed;
+  padding: 11px 13px;
+  border-radius: 8px;
+  margin-block: 14px;
+}
+.task h3,
+.observe strong,
+.check strong {
+  display: block;
+  margin-bottom: 3px;
+  font-weight: 750;
+}
+.observe,
+.check {
+  margin-block: 12px;
+}
+.observe strong {
+  color: var(--green);
+}
+.resource {
+  border-top: 1px solid var(--line);
+  padding-block: 9px;
+  color: var(--muted);
+}
+.resource summary {
+  color: var(--ink);
+  font-weight: 700;
+}
+.resource p,
+.example {
+  margin-top: 8px;
+}
+.example > span {
+  color: var(--green);
+  font-weight: 700;
+}
+.example pre {
+  max-height: 200px;
+  overflow: auto;
+  padding: 9px;
+  margin: 4px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font:
+    0.75rem/1.55 var(--font-geist-mono),
+    monospace;
+  color: var(--ink);
+  background: #f6f8f6;
+}
+
+.example iframe {
+  width: 100%;
+  height: 230px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.guideActions,
+.footer,
+.actions,
+.sync {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.guideActions {
+  margin-top: 8px;
+}
+.guideActions button,
+.actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.guideActions .primary {
+  background: var(--green);
+  color: white;
+  border-color: var(--green);
+}
+.guideActions .primary:hover:not(:disabled) {
+  background: #0c513e;
+}
+.lab {
+  min-width: 0;
+}
+.mobileTabs {
+  display: none;
+}
+.panes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.panel {
+  overflow: hidden;
+}
+.bar {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  background: #f8faf8;
+  border-bottom: 1px solid var(--line);
+}
+
+.bar button {
+  font-family: var(--font-geist-mono), monospace;
+}
+.previewWidth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.83rem;
+  font-weight: 700;
+}
+.editor,
+.preview {
+  display: block;
+  width: 100%;
+  height: clamp(365px, 52vh, 620px);
+}
+.editor {
+  border: 0;
+  padding: 16px 14px;
+  color: var(--ink);
+  background: white;
+  resize: none;
+  font:
+    0.92rem/1.65 var(--font-geist-mono),
+    monospace;
+  tab-size: 2;
+}
+
+.editor:focus-visible {
+  outline-offset: -3px;
+}
+.preview {
+  position: relative;
+  overflow: auto;
+  background: #e7efe9;
+}
+.preview iframe {
+  display: block;
+  height: 100%;
+  min-height: 100%;
+  border: 0;
+  background: white;
+  margin-inline: auto;
+}
+.empty {
+  position: absolute;
+  inset: 20px 12px auto;
+  margin: 0;
+  color: var(--muted);
+  text-align: center;
+  pointer-events: none;
+  font-size: 0.89rem;
+}
+.footer {
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.sync {
+  font-size: 0.83rem;
+  color: var(--muted);
+}
+
+@media (max-width: 1120px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+  .guide {
+    max-width: 100%;
+  }
+  .example iframe {
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 650px) {
+  .header {
+    min-height: 56px;
+    flex-wrap: wrap;
+    padding-block: 8px;
+  }
+  .titleRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .lessons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .lessons button {
+    min-height: 42px;
+  }
+  .mobileTabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 9px;
+  }
+  .panes {
+    display: block;
+  }
+  .panel[data-active="false"] {
+    display: none;
+  }
+  .editor,
+  .preview {
+    height: 350px;
+  }
+}

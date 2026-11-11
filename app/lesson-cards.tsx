@@ -4,7 +4,7 @@ import { gradeHref, gradePlans } from "@/lib/curriculum";
 import styles from "./page.module.css";
 
 type CardPreview = {
-  theme: "python" | "javascript" | "next";
+  theme: "python" | "javascript" | "next" | "web";
   topics: readonly string[];
   file: string;
   code: string;

@@ -41,6 +41,24 @@ const courses = {
     output: "Сайн уу, дэлхий!",
     features: ["Алхамчилсан хичээл", "Кодын шалгалт", "Шууд харах үр дүн"],
   },
+  htmlcss: {
+    name: "HTML & CSS",
+    mark: "<>",
+    grade: "6, 7, 8-р анги",
+    placeholder: "6A-01",
+    maxLength: 40,
+    title: "HTML & CSS · Карт бүтээе",
+    description:
+      "HTML-ээр гарчиг, тайлбар, зураг нэм. CSS-ээр өнгө, зай, хүрээг тохируулж, үр дүнг шууд хараарай.",
+    file: "index.html",
+    code: "<h2>Шатрын клуб</h2>",
+    output: "Шатрын клуб",
+    features: [
+      "5 хичээл · тус бүр 40 минут",
+      "Утас, компьютерийн харагдац",
+      "HTML файл татах",
+    ],
+  },
 };
 
 export default function CourseEntry({

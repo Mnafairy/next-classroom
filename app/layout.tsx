@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "КодЛаб · Хичээл сонгох",
   description:
-    "Python, JavaScript, Next.js хичээлээ сонгоод код бичиж сурцгаая.",
+    "HTML & CSS, Python, JavaScript, Next.js хичээлээ сонгоод код бичиж сурцгаая.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

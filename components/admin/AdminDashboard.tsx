@@ -164,12 +164,10 @@ export default function AdminDashboard({
         "Сурагчийн ID",
         "Нэр",
         "Анги",
-        "Python дууссан",
-        "Python нийт",
-        "JavaScript дууссан",
-        "JavaScript нийт",
-        "Next.js дууссан",
-        "Next.js нийт",
+        ...courses.flatMap((course) => [
+          `${courseLabels[course]} дууссан`,
+          `${courseLabels[course]} нийт`,
+        ]),
         "Сүүлд хадгалсан",
       ],
       ...filtered.map((s) => [

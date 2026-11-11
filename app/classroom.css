@@ -108,6 +108,10 @@
   background: #f3d24f;
   color: #3d330d;
 }
+.entry-htmlcss .classroom-course-label > span {
+  background: #e6f3eb;
+  color: #12634d;
+}
 .classroom-course-label strong {
   font-size: 14px;
   color: var(--lab-ink);

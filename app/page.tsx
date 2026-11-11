@@ -3,10 +3,24 @@ import { ArrowRight, Check, Cloud, Code2, Monitor } from "lucide-react";
 import LegacyPythonLink from "@/components/LegacyPythonLink";
 import { exercises as pythonExercises } from "@/lib/python/course";
 import { exercises as nextExercises } from "@/lib/course/lessons";
+import { lessons as webLessons } from "@/lib/web-lab/lessons";
 import { GradeCards, LessonCard, type LessonCardData } from "./lesson-cards";
 import styles from "./page.module.css";
 
 const lessons: LessonCardData[] = [
+  {
+    name: "HTML & CSS",
+    mark: "<>",
+    grade: "6, 7, 8-р анги",
+    count: `${webLessons.length} хичээл`,
+    description: "Гарчиг, тайлбар, зурагтай өөрийн картаа бүтээгээрэй.",
+    topics: ["HTML таг", "CSS загвар", "Шууд харагдац"],
+    code: '<div class="card">\n  <h2>Шатрын клуб</h2>\n</div>',
+    file: "index.html",
+    outcome: "Кодоо бичихэд карт шууд өөрчлөгдөнө.",
+    href: "/web-lab",
+    theme: "web",
+  },
   {
     name: "Python",
     mark: "Py",

@@ -1,4 +1,4 @@
-export const courses = ["python", "javascript", "nextjs"] as const;
+export const courses = ["python", "javascript", "nextjs", "htmlcss"] as const;
 export type Course = (typeof courses)[number];
 export function normalizeStudentId(value: unknown): string {
   if (typeof value !== "string") throw new Error("Invalid student ID");

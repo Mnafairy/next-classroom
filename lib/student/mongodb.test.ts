@@ -9,6 +9,7 @@ import { MongoClient } from "mongodb";
 import { POST } from "../../app/api/progress/route";
 import { GET as adminGet } from "../../app/api/admin/route";
 import { eligibleStudent } from "../exam/service";
+import { courses } from "./identity";
 
 test(
   "real MongoDB: save/reload, course/student isolation, stale writes and concurrent first saves",
@@ -71,7 +72,7 @@ test(
         })),
       );
       for (const id of ["1", "12", "UNKNOWN"])
-        for (const course of ["python", "javascript", "nextjs"]) {
+        for (const course of courses) {
           assert.equal((await call("load", id, course)).status, 403);
           assert.equal((await call("save", id, course)).status, 403);
         }
@@ -129,7 +130,7 @@ test(
         { _id: "batzorig.b", active: true },
         { _id: "inactive.teacher", active: false },
       ]);
-      for (const course of ["python", "javascript", "nextjs"]) {
+      for (const course of courses) {
         for (const id of ["unknown.teacher", "inactive.teacher"])
           for (const action of ["load", "save"])
             assert.equal((await call(action, id, course)).status, 403);
@@ -174,7 +175,7 @@ test(
         await db
           .collection("student_progress")
           .countDocuments({ studentId: "ORGILSAIKHAN.CH" }),
-        3,
+        courses.length,
       );
     } finally {
       await probe.close();

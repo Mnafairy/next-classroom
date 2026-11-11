@@ -148,7 +148,7 @@
   gap: 20px;
 }
 .lessons {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 .gradeCards {
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -187,6 +187,10 @@
 .next {
   --accent: #203b53;
   --soft: #edf2f5;
+}
+.web {
+  --accent: #12634d;
+  --soft: #e6f3eb;
 }
 .cardTop {
   display: flex;
@@ -376,6 +380,7 @@
   .gradeCards {
     gap: 14px;
   }
+  .lessons,
   .gradeCards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

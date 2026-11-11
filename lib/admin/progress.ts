@@ -6,6 +6,7 @@ import { questions as pythonQuestions } from "../python/questions";
 import { exercises as nextExercises } from "../course/lessons";
 import { exercises as jsExercises } from "../../apps/kodlab/src/content.js";
 import type { Course } from "../student/identity";
+import { lessons as webLessons } from "../web-lab/lessons";
 import type { CourseSummary, StudentDetail } from "./types";
 
 export const catalog: Record<Course, { id: string; title: string }[]> = {
@@ -14,6 +15,7 @@ export const catalog: Record<Course, { id: string; title: string }[]> = {
     ({ id, title }: { id: string; title: string }) => ({ id, title }),
   ),
   nextjs: nextExercises.map(({ id, title }) => ({ id, title })),
+  htmlcss: webLessons.map(({ id, title }) => ({ id, title })),
 };
 export const object = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
@@ -123,7 +125,7 @@ export function detail(
           ? ("started" as const)
           : ("empty" as const),
   }));
-  if (course !== "nextjs") {
+  if (course === "python" || course === "javascript") {
     const hasPlay =
       course === "python"
         ? typeof object(data.playground).code === "string"
@@ -150,7 +152,7 @@ export function detail(
     files["exercise.py"] = text(object(draft).code);
     if (object(draft).inputs)
       files["Оролт.txt"] = text(object(draft).inputs, 10000);
-  } else if (course === "nextjs") {
+  } else if (course === "nextjs" || course === "htmlcss") {
     for (const [name, value] of Object.entries(
       object(object(draft).files),
     ).slice(0, 12))

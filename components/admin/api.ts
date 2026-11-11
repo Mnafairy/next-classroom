@@ -41,6 +41,7 @@ export const courseLabels = {
   python: "Python",
   javascript: "JavaScript",
   nextjs: "Next.js",
+  htmlcss: "HTML & CSS",
 };
 export const dateLabel = (date: string | null) =>
   date

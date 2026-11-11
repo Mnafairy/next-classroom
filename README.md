@@ -1,8 +1,12 @@
 # КодЛаб · Хичээл сонгох
 
-The main page is a Mongolian lesson chooser: Python (Grades 9–10) at `/python`, JavaScript (Grades 6–8) at `/kodlab`, and Next.js at `/next-classroom`. Students choose their lesson before entering the existing lesson experience. All three courses ask for a student ID and synchronize progress through the MongoDB backend. Each lesson has a return link to the chooser.
+The main page is a Mongolian lesson chooser: HTML & CSS (Grades 6–8) at `/web-lab`, Python (Grades 9–10) at `/python`, JavaScript (Grades 6–8) at `/kodlab`, and Next.js at `/next-classroom`. These courses ask for a student ID and synchronize progress through the MongoDB backend. Each course has a return link to the chooser.
 
 Existing Python hash bookmarks such as `/python#/visualize/if` forward to `/python#/visualize/if`. Moving Python keeps its storage keys and saved student work on the same origin. The Next.js course instructions remain in [docs/next-classroom.md](docs/next-classroom.md).
+
+## HTML & CSS Card Lab (Grades 6–8)
+
+Five 40-minute lessons introduce `div`, `h2`, `p`, and `img`, CSS colors, the box model, responsive layouts, and an independent card project. Students type in the HTML and CSS editors and see the result in an isolated preview. They can test at phone and desktop widths, switch devices using their student ID, and download an HTML file with the styles and sample image embedded.
 
 ## КодЛаб · JavaScript (Grades 6–8)
 
