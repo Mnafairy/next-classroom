@@ -40,28 +40,25 @@ test(
     process.env.MONGODB_URI = uri;
     process.env.MONGODB_DB = "kodlab_test";
     const probe = new MongoClient(uri, { serverSelectionTimeoutMS: 10000 });
-    const call = async (
+    const send = async (body: Record<string, unknown>) => {
+      const response = await POST(
+        new Request("http://localhost/api/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }),
+      );
+      return { status: response.status, data: await response.json() };
+    };
+    const call = (
       action: string,
       studentId = "001",
       course = "python",
       revision = 0,
       progress = {},
-    ) => {
-      const response = await POST(
-        new Request("http://localhost/api/progress", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action,
-            studentId,
-            course,
-            revision,
-            progress,
-          }),
-        }),
-      );
-      return { status: response.status, data: await response.json() };
-    };
+    ) => send({ action, studentId, course, revision, progress });
+    const resolveTeacher = (name: string) =>
+      send({ action: "resolve-teacher", name });
     try {
       await probe.connect();
       const db = probe.db("kodlab_test");
@@ -122,14 +119,23 @@ test(
         1,
       );
 
-      const accounts = db.collection<{ _id: string; active: boolean }>(
-        "admin_accounts",
-      );
+      const accounts = db.collection<{
+        _id: string;
+        name: string;
+        active: boolean;
+      }>("admin_accounts");
       await accounts.insertMany([
-        { _id: "orgilsaikhan.ch", active: true },
-        { _id: "batzorig.b", active: true },
-        { _id: "inactive.teacher", active: false },
+        { _id: "orgilsaikhan.ch", name: "Туршилтын Багш", active: true },
+        { _id: "batzorig.b", name: "Өөр Багш", active: true },
+        { _id: "inactive.teacher", name: "Идэвхгүй Багш", active: false },
       ]);
+      const teacher = await resolveTeacher("  ТУРШИЛТЫН   багш  ");
+      assert.deepEqual(teacher, {
+        status: 200,
+        data: { id: "ORGILSAIKHAN.CH" },
+      });
+      assert.equal((await resolveTeacher("Бүртгэлгүй Багш")).status, 403);
+      assert.equal((await resolveTeacher("Идэвхгүй Багш")).status, 403);
       for (const course of courses) {
         for (const id of ["unknown.teacher", "inactive.teacher"])
           for (const action of ["load", "save"])
@@ -145,7 +151,7 @@ test(
           200,
         );
         assert.deepEqual(
-          (await call("load", "ORGILSAIKHAN.CH", course)).data.progress,
+          (await call("load", teacher.data.id, course)).data.progress,
           practice,
         );
         assert.equal(
@@ -163,9 +169,19 @@ test(
       await assert.rejects(() => eligibleStudent("ORGILSAIKHAN.CH"));
 
       await accounts.updateOne(
+        { _id: "batzorig.b" },
+        { $set: { name: "Туршилтын Багш" } },
+      );
+      assert.equal((await resolveTeacher("Туршилтын Багш")).status, 403);
+      assert.equal((await call("load", "batzorig.b")).status, 200);
+      await accounts.updateOne(
         { _id: "orgilsaikhan.ch" },
         { $set: { active: false } },
       );
+      assert.deepEqual(await resolveTeacher("Туршилтын Багш"), {
+        status: 200,
+        data: { id: "BATZORIG.B" },
+      });
       for (const action of ["load", "save"])
         assert.equal(
           (await call(action, "orgilsaikhan.ch", "python", 1)).status,

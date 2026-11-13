@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { enterLesson } from "@/lib/student/entry";
+import { MAX_TEACHER_NAME_LENGTH } from "@/lib/student/identity";
 import {
   ArrowLeft,
   ArrowRight,
@@ -18,7 +20,6 @@ const courses = {
     mark: "Py",
     grade: "9, 10-р анги",
     placeholder: "10A-01",
-    maxLength: 40,
     title: "Бодлогоос эхэлнэ.\nКодоор бүтээнэ.",
     description:
       "Хувьсагч, нөхцөл, давталтыг жижиг бодлогоор сурч, бичсэн кодынхоо үр дүнг шууд хараарай.",
@@ -32,7 +33,6 @@ const courses = {
     mark: "N",
     grade: "Веб хөгжүүлэлт",
     placeholder: "10A-01",
-    maxLength: 40,
     title: "Жижиг компонент.\nӨөрийн гэсэн веб.",
     description:
       "Компонент, props, үйлдэл, төлөвийг алхам алхмаар сурч, өөрийн интерактив вебийг бүтээгээрэй.",
@@ -46,7 +46,6 @@ const courses = {
     mark: "<>",
     grade: "6, 7, 8-р анги",
     placeholder: "6A-01",
-    maxLength: 40,
     title: "HTML & CSS · Карт бүтээе",
     description:
       "HTML-ээр гарчиг, тайлбар, зураг нэм. CSS-ээр өнгө, зай, хүрээг тохируулж, кодоо ажиллуулан шалгаарай.",
@@ -136,7 +135,7 @@ export default function CourseEntry({
           <p className="classroom-eyebrow">ТАНЫ СУРАЛЦАХ ОРОН ЗАЙ</p>
           <h2 id="entry-heading">Хичээлдээ тавтай морил.</h2>
           <p className="classroom-entry-description">
-            Сурагчийн ID эсвэл багшийн нэвтрэх нэрээ оруулаарай.
+            Сурагч бол ID-гаа, багш бол бүтэн нэрээ бичээрэй.
           </p>
           <form
             aria-busy={busy}
@@ -147,7 +146,7 @@ export default function CourseEntry({
               setError("");
               setExamActive(false);
               try {
-                await onLogin(id);
+                await enterLesson(id, onLogin);
               } catch (error) {
                 setExamActive(
                   error instanceof Error &&
@@ -169,14 +168,16 @@ export default function CourseEntry({
               }
             }}
           >
-            <label htmlFor="student-id">Сурагчийн ID эсвэл багшийн нэр</label>
+            <label htmlFor="student-id">
+              Сурагчийн ID эсвэл багшийн бүтэн нэр
+            </label>
             <input
               ref={input}
               id="student-id"
               name="studentId"
               value={id}
               required
-              maxLength={info.maxLength}
+              maxLength={MAX_TEACHER_NAME_LENGTH}
               autoComplete="username"
               autoCapitalize="none"
               spellCheck={false}
@@ -191,7 +192,7 @@ export default function CourseEntry({
               }}
             />
             <p id="entry-help" className="classroom-field-help">
-              Багш бол orgilsaikhan.ch зэрэг өөрийн нэвтрэх нэрээ ашиглаарай.
+              Багш бүртгэл дэх овог, нэр эсвэл нэвтрэх нэрээ ашиглаж болно.
             </p>
             <p id="entry-error" role="alert" className="classroom-entry-error">
               {error}
@@ -222,12 +223,14 @@ export default function CourseEntry({
             <div>
               <strong>Эхэлсэн газраасаа үргэлжлүүлнэ</strong>
               <p>
-                Код, ахиц тань ID-гаар хадгалагдана. Өөр компьютер дээр ч ижил
-                ID-гаар ороорой.
+                Код, ахиц тань хадгалагдана. Өөр компьютер дээр ч өөрийн ID
+                эсвэл нэрээр ороорой.
               </p>
             </div>
           </div>
-          <p className="classroom-id-note">Зөвхөн өөрийн ID-г ашиглаарай.</p>
+          <p className="classroom-id-note">
+            Зөвхөн өөрийн ID эсвэл нэрийг ашиглаарай.
+          </p>
         </section>
       </main>
       <footer className="classroom-entry-footer">

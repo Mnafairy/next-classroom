@@ -21,6 +21,9 @@ test("API rejects malformed input before accessing MongoDB", async () => {
     {},
     { action: "load", course: "bad", studentId: "001" },
     { action: "load", course: "python", studentId: { $ne: null } },
+    { action: "resolve-teacher", name: { $ne: null } },
+    { action: "resolve-teacher", name: "<b>Teacher</b>" },
+    { action: "resolve-teacher", name: "a".repeat(202) },
     {
       action: "save",
       course: "python",

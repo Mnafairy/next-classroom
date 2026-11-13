@@ -1,3 +1,4 @@
+import FlowLab from "./_components/FlowLab";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GradeCards } from "../lesson-cards";
@@ -28,6 +29,9 @@ export default function CurriculumPage() {
         </Link>
       </div>
       <GradeCards heading="h2" />
+      <div style={{ marginTop: 40 }}>
+        <FlowLab />
+      </div>
       <details className={styles.note}>
         <summary>Жилийн хөтөлбөрийн хамрах хүрээ</summary>
         <p>

@@ -1,12 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import {
-  coverageLabel,
-  findGrade,
-  gradePlans,
-  lessonHref,
-} from "@/lib/curriculum";
+import { ArrowLeft } from "lucide-react";
+import { findGrade, gradePlans, lessonHref } from "@/lib/curriculum";
+import LessonExplorer from "../_components/LessonExplorer";
 import styles from "../curriculum.module.css";
 import { practiceTestHref } from "@/lib/curriculum/practice";
 
@@ -33,8 +29,7 @@ export default async function GradePage({
   const plan = findGrade(grade);
   if (!plan) notFound();
 
-  let order = 0;
-
+  const firstLesson = plan.units[0]?.lessons[0];
   return (
     <>
       <Link href="/curriculum" className={styles.back} prefetch={false}>
@@ -45,8 +40,17 @@ export default async function GradePage({
         <h1>{plan.grade}-р анги</h1>
         <p>{plan.summary}</p>
         <div className={styles.actionRow}>
+          {firstLesson && (
+            <Link
+              className={styles.primaryButton}
+              href={lessonHref(plan.grade, firstLesson.id)}
+              prefetch={false}
+            >
+              Эхний хичээлийг эхлэх →
+            </Link>
+          )}
           <Link
-            className={styles.primaryButton}
+            className={styles.textLink}
             href={practiceTestHref(plan.grade)}
             prefetch={false}
           >
@@ -57,34 +61,20 @@ export default async function GradePage({
           </span>
         </div>
       </div>
-      <div className={styles.sequence}>
-        {plan.units.map((unit) => (
-          <section key={unit.title}>
-            <h2>{unit.title}</h2>
-            <ul className={styles.lessonList}>
-              {unit.lessons.map((lesson) => (
-                <li key={lesson.id}>
-                  <Link
-                    href={lessonHref(plan.grade, lesson.id)}
-                    prefetch={false}
-                  >
-                    <span className={styles.ordinal} aria-hidden="true">
-                      {String(++order).padStart(2, "0")}
-                    </span>
-                    <span className={styles.lessonLabel}>
-                      <strong>{lesson.title}</strong>
-                      <span>
-                        {lesson.periods} цаг · {coverageLabel[lesson.coverage]}{" "}
-                        · 6 нэмэлт дасгал
-                      </span>
-                    </span>
-                    <ArrowRight size={18} aria-hidden="true" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+      <LessonExplorer
+        plan={{
+          grade: plan.grade,
+          units: plan.units.map((unit) => ({
+            title: unit.title,
+            lessons: unit.lessons.map(({ id, title, periods }) => ({
+              id,
+              title,
+              periods,
+            })),
+          })),
+        }}
+      />
+      <div>
         {plan.pacing && (
           <details className={styles.note}>
             <summary>Багшид зориулсан цагийн тэмдэглэл</summary>

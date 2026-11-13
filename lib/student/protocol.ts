@@ -1,4 +1,9 @@
-import { courses, normalizeStudentId, type Course } from "./identity";
+import {
+  courses,
+  normalizeStudentId,
+  normalizeTeacherName,
+  type Course,
+} from "./identity";
 
 export type ProgressSnapshot = Record<string, unknown>;
 export type ProgressRequest = {
@@ -14,7 +19,12 @@ export const isProgressSnapshot = (value: unknown): value is ProgressSnapshot =>
 
 export function parseProgressRequest(
   input: Record<string, unknown>,
-): ProgressRequest {
+): ProgressRequest | { action: "resolve-teacher"; name: string } {
+  if (input.action === "resolve-teacher") {
+    const name = normalizeTeacherName(input.name);
+    if (!name) throw new Error("Invalid teacher name");
+    return { action: "resolve-teacher", name };
+  }
   const course = courses.find((course) => course === input.course);
   if (!course) throw new Error("Invalid course");
   const studentId = normalizeStudentId(input.studentId);

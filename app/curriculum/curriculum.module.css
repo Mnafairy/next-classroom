@@ -708,3 +708,15 @@
     padding: 12px;
   }
 }
+
+/* Keep the curriculum aligned with the exercise labs' roomy workspace. */
+.header,
+.main {
+  width: min(1440px, 100%);
+}
+.hero {
+  max-width: 850px;
+}
+.block {
+  scroll-margin-top: 24px;
+}

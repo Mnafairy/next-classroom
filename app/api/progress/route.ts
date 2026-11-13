@@ -1,12 +1,9 @@
-import { isRegisteredLearner } from "@/lib/student/registry";
+import { isRegisteredLearner, teacherIdByName } from "@/lib/student/registry";
 import { studentExamActive } from "@/lib/exam/access";
 import { summarize } from "@/lib/admin/progress";
 import { readJsonObject, sameOrigin } from "@/lib/http/request";
 import { progressCollection } from "@/lib/student/database";
-import {
-  parseProgressRequest,
-  type ProgressRequest,
-} from "@/lib/student/protocol";
+import { parseProgressRequest } from "@/lib/student/protocol";
 
 export const runtime = "nodejs";
 const MAX_BYTES = 4 * 1024 * 1024;
@@ -19,15 +16,21 @@ const json = (data: unknown, status = 200) =>
 export async function POST(request: Request) {
   // ID-only lesson access for students and teachers; does not create an admin session.
   if (!sameOrigin(request)) return json({ error: "Forbidden" }, 403);
-  let body: ProgressRequest;
+  let body: ReturnType<typeof parseProgressRequest>;
   try {
     body = parseProgressRequest(await readJsonObject(request, MAX_BYTES));
   } catch (error) {
     if (error instanceof Response) return error;
     return json({ error: "Invalid request" }, 400);
   }
-  const { course, studentId } = body;
   try {
+    if (body.action === "resolve-teacher") {
+      const id = await teacherIdByName(body.name);
+      return id
+        ? json({ id })
+        : json({ error: "Teacher name not found or ambiguous" }, 403);
+    }
+    const { course, studentId } = body;
     if (await studentExamActive(studentId))
       return json(
         {

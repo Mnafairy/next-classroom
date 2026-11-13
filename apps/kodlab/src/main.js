@@ -6,6 +6,8 @@ import {courseGradeLabel,topics,exercises,quizzes,questions} from './content.js'
 import {state,save,storageAvailable,studentId,selectCloudStudent,signOutStudent,cloudStatus,recoverCloudProgress} from './store.js';
 import {inspect,withInputs,checkStructure,sameOutput,scoreQuiz,errorText} from './engine.js';
 import {execute,cancelRuns} from './runtime.js';
+import {enterLesson} from '../../../lib/student/entry.ts';
+import {MAX_TEACHER_NAME_LENGTH} from '../../../lib/student/identity.ts';
 import './style.css';
 import '../../../app/classroom.css';
 import './classroom.css';
@@ -119,9 +121,9 @@ function renderStudentGate(){
  <section class="classroom-story" aria-labelledby="course-heading"><div class="classroom-course-label"><span>JS</span><strong>JavaScript</strong><i></i>${courseGradeLabel}</div><h1 id="course-heading">Эхний кодоос<br>шинэ санаа руу.</h1><p>Хувьсагч үүсгэж, тооцоолол хийгээд, нөхцөл шалгаж сураарай. Кодынхоо үр дүнг шууд харж туршаарай.</p>
  <div class="classroom-code" aria-label="Код ба үр дүнгийн жишээ"><div class="classroom-code-file">${icon('code-2')}<span>hello.js</span><span>Жишээ</span></div><pre>${esc('let name = "Билгүүн";\nconsole.log("Сайн уу, " + name);')}</pre><div class="classroom-code-output"><span>ҮР ДҮН</span><pre>Сайн уу, Билгүүн</pre>${icon('check')}</div></div>
  <ul class="classroom-features"><li>${icon('check')}${exercises.length} дасгал</li><li>${icon('check')}Мэдлэгийн сорил</li><li>${icon('check')}Чөлөөт код</li></ul></section>
- <section class="classroom-entry-card" aria-labelledby="entry-heading"><div class="classroom-entry-icon">${icon('code-2')}</div><p class="classroom-eyebrow">ТАНЫ СУРАЛЦАХ ОРОН ЗАЙ</p><h2 id="entry-heading">Хичээлдээ тавтай морил.</h2><p class="classroom-entry-description">Сурагчийн ID эсвэл багшийн нэвтрэх нэрээ оруулаарай.</p>
- <form id="student-entry-form"><label for="student-id">Сурагчийн ID эсвэл багшийн нэр</label><input id="student-id" name="studentId" placeholder="Жишээ: 8A-01" maxlength="40" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-describedby="student-id-help student-id-error"><p id="student-id-help" class="classroom-field-help">Багш бол orgilsaikhan.ch зэрэг өөрийн нэвтрэх нэрээ ашиглаарай.</p><p id="student-id-error" class="classroom-entry-error" role="alert"></p><button class="classroom-enter" type="submit">Хичээлд орох ${icon('arrow-right')}</button></form>
- <div class="classroom-save-note">${icon('check-circle-2')}<div><strong>Эхэлсэн газраасаа үргэлжлүүлнэ</strong><p>Код, ахиц тань ID-гаар хадгалагдана. Өөр компьютер дээр ч ижил ID-гаар ороорой.</p></div></div><p class="classroom-id-note">Зөвхөн өөрийн ID-г ашиглаарай.</p></section></main>
+ <section class="classroom-entry-card" aria-labelledby="entry-heading"><div class="classroom-entry-icon">${icon('code-2')}</div><p class="classroom-eyebrow">ТАНЫ СУРАЛЦАХ ОРОН ЗАЙ</p><h2 id="entry-heading">Хичээлдээ тавтай морил.</h2><p class="classroom-entry-description">Сурагч бол ID-гаа, багш бол бүтэн нэрээ бичээрэй.</p>
+ <form id="student-entry-form"><label for="student-id">Сурагчийн ID эсвэл багшийн бүтэн нэр</label><input id="student-id" name="studentId" placeholder="Жишээ: 8A-01" maxlength="${MAX_TEACHER_NAME_LENGTH}" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-describedby="student-id-help student-id-error"><p id="student-id-help" class="classroom-field-help">Багш бүртгэл дэх овог, нэр эсвэл нэвтрэх нэрээ ашиглаж болно.</p><p id="student-id-error" class="classroom-entry-error" role="alert"></p><button class="classroom-enter" type="submit">Хичээлд орох ${icon('arrow-right')}</button></form>
+ <div class="classroom-save-note">${icon('check-circle-2')}<div><strong>Эхэлсэн газраасаа үргэлжлүүлнэ</strong><p>Код, ахиц тань хадгалагдана. Өөр компьютер дээр ч өөрийн ID эсвэл нэрээр ороорой.</p></div></div><p class="classroom-id-note">Зөвхөн өөрийн ID эсвэл нэрийг ашиглаарай.</p></section></main>
  <footer class="classroom-entry-footer"><span>Кодоо бич. Турш. Дахин оролд.</span><span>КодЛаб · JavaScript</span></footer></div>`;
  decorate();
 }
@@ -131,9 +133,10 @@ app.addEventListener('submit',async e=>{
  try{
   const button=e.target.querySelector('button[type="submit"]');
   if(button.disabled)return;button.disabled=true;button.textContent="Ахиц ачаалж байна…";input.readOnly=true;e.target.setAttribute("aria-busy","true");
-  await selectCloudStudent(input.value);quizResult=null;hint=0;output=[];checks=[];runError='';
+  await enterLesson(input.value,selectCloudStudent);quizResult=null;hint=0;output=[];checks=[];runError='';
   const restored=exercises.find(ex=>ex.id===state.active)||exercises[0];
-  history.replaceState(null,'',state.attempt?'#/tests':'#/exercises/'+restored.id);route();
+  if(!location.hash)history.replaceState(null,'',state.attempt?'#/tests':'#/exercises/'+restored.id);
+  route();
   if(!storageAvailable)toast('Энэ браузерт хадгалах боломжгүй. Тайлангаа татаж аваарай.');
  }catch(error){
   const button=e.target.querySelector('button[type="submit"]');button.disabled=false;button.textContent='Хичээлд орох';input.readOnly=false;e.target.setAttribute('aria-busy','false');input.setAttribute('aria-invalid','true');
