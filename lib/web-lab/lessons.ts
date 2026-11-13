@@ -181,11 +181,45 @@ export const lessons = [
     answer:
       "CSS дүрмийг өөрчилнө. HTML нь агуулгыг өгч, CSS нь тэр агуулгын загварыг тохируулна.",
   },
+  {
+    id: "button-classes",
+    title: "Товч ба CSS class",
+    color: "#4865dc",
+    goal: "Гурван товчинд тус бүр өөр class өгч, өөр өөр загвар гаргана.",
+    explanation:
+      "button таг товч үүсгэнэ. Тагийн дотор товчин дээр харагдах үгийг бичнэ. class атрибут нь CSS дүрмээр сонгоход ашиглах нэр өгдөг. Товч бүр өөр class нэртэй байвал өнгө, хүрээ, буланг нь тус тусад нь тохируулж болно.",
+    concepts: [
+      {
+        code: '<button class="btn-1">Эхлэх</button>',
+        text: 'HTML-д class="btn-1" гэж бичихэд товч CSS-д ашиглах нэртэй болно. Class нэрийн өмнө HTML-д цэг бичихгүй.',
+      },
+      {
+        code: ".btn-1 {\n  background-color: #2457db;\n  color: #ffffff;\n}",
+        text: "CSS-д .btn-1 гэж цэгтэй бичиж, энэ нэрийг авсан товчийг сонгоно. background-color нь дэвсгэр, color нь бичвэрийн өнгийг өөрчилнө.",
+      },
+      {
+        code: '<button class="btn-2">Дэлгэрэнгүй</button>',
+        text: "Хоёр дахь товчинд btn-2 гэж өөр нэр өг. .btn-2 гэсэн шинэ CSS дүрэм бичвэл хоёр товчны загварыг тус тусад нь удирдана.",
+      },
+    ],
+    mistakes: [
+      "HTML болон CSS доторх class нэр үсэг, зураас бүрээрээ таарах ёстой. btn-2, btn2 хоёр ялгаатай.",
+      "CSS-д button гэж бичвэл бүх button таг сонгогдоно. Нэг төрлийн товч сонгохдоо .btn-1 гэх мэт class сонгогч хэрэглэ.",
+      "Шинэ class-ийн дүрмийг бичихээс өмнө өмнөх дүрмийн } хаалтыг шалга.",
+    ],
+    practice:
+      "Гурван товчоо ажиллуулаад .btn-3 дүрмийн дэвсгэрийн өнгийг соль. Дугуй товчны өнгө солигдож, нөгөө хоёр товчны өнгө хэвээр байгааг ажигла.",
+    question:
+      'class="btn-3" гэж нэрлэсэн товчны буланг дугуйлахад CSS-д ямар сонгогч ашиглах вэ?',
+    answer:
+      ".btn-3 сонгогч ашиглана. Түүний хаалт дотор border-radius шинж чанарыг бичнэ.",
+  },
 ] as const;
 
 export type LessonId = (typeof lessons)[number]["id"];
 export type Check = { label: string; selector: string } & (
   | { kind: "element" }
+  | { kind: "count"; value: number }
   | { kind: "text"; value: string }
   | { kind: "content" }
   | { kind: "image" }
@@ -221,6 +255,167 @@ const margin =
   ".card {\n  background-color: #fff4da;\n  color: #24354d;\n  font-size: 18px;\n  padding: 20px;\n  border: 2px solid #d5a65a;\n  border-radius: 12px;\n  margin: 20px;\n}";
 const imageWidth = `${margin}\n\n.card img {\n  width: 200px;\n}`;
 const imageCorners = `${margin}\n\n.card img {\n  width: 200px;\n  border-radius: 8px;\n}`;
+
+const buttonHeading = "<h2>Клубийн товчнууд</h2>";
+const plainButton = `${buttonHeading}\n<button>Эхлэх</button>`;
+const primaryButton = `${buttonHeading}\n<button class="btn-1">Эхлэх</button>`;
+const outlineButton = `${primaryButton}\n<button class="btn-2">Дэлгэрэнгүй</button>`;
+const pillButton = `${outlineButton}\n<button class="btn-3">Хадгалах</button>`;
+const primaryCss = `.btn-1 {
+  background-color: #2457db;
+  color: #ffffff;
+  border: 0;
+  padding: 8px 16px;
+}`;
+const outlineCss = `${primaryCss}
+
+.btn-2 {
+  background-color: transparent;
+  color: #08766b;
+  border: 2px solid #08766b;
+  padding: 8px 16px;
+}`;
+const pillCss = `${outlineCss}
+
+.btn-3 {
+  background-color: #6a3da8;
+  color: #ffffff;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 16px;
+}`;
+const primaryButtonText = {
+  kind: "text",
+  selector: "button.btn-1",
+  value: "Эхлэх",
+  label: "Эхлэх товч btn-1 class-тай",
+} as const satisfies Check;
+const outlineButtonText = {
+  kind: "text",
+  selector: "button.btn-2",
+  value: "Дэлгэрэнгүй",
+  label: "Дэлгэрэнгүй товч btn-2 class-тай",
+} as const satisfies Check;
+const pillButtonText = {
+  kind: "text",
+  selector: "button.btn-3",
+  value: "Хадгалах",
+  label: "Хадгалах товч btn-3 class-тай",
+} as const satisfies Check;
+
+function buttonStyle(
+  selector: string,
+  property: string,
+  value: string,
+  label: string,
+): Check {
+  return { kind: "style", selector, property, value, label };
+}
+
+const primaryButtonStyles = [
+  buttonStyle(
+    primaryButtonText.selector,
+    "background-color",
+    "rgb(36, 87, 219)",
+    "Эхлэх товч цэнхэр дэвсгэртэй",
+  ),
+  buttonStyle(
+    primaryButtonText.selector,
+    "color",
+    "rgb(255, 255, 255)",
+    "Эхлэх товчны бичвэр цагаан",
+  ),
+  buttonStyle(
+    primaryButtonText.selector,
+    "border-top-width",
+    "0px",
+    "Эхлэх товч хүрээгүй",
+  ),
+  buttonStyle(
+    primaryButtonText.selector,
+    "padding",
+    "8px 16px",
+    "Эхлэх товчны дотор зай 8px 16px",
+  ),
+];
+const outlineButtonStyles = [
+  buttonStyle(
+    outlineButtonText.selector,
+    "background-color",
+    "rgba(0, 0, 0, 0)",
+    "Дэлгэрэнгүй товч тунгалаг дэвсгэртэй",
+  ),
+  buttonStyle(
+    outlineButtonText.selector,
+    "color",
+    "rgb(8, 118, 107)",
+    "Дэлгэрэнгүй товчны бичвэр ногоон",
+  ),
+  buttonStyle(
+    outlineButtonText.selector,
+    "border-top-width",
+    "2px",
+    "Дэлгэрэнгүй товчны хүрээ 2px зузаан",
+  ),
+  buttonStyle(
+    outlineButtonText.selector,
+    "border-top-style",
+    "solid",
+    "Дэлгэрэнгүй товчны хүрээ тасралтгүй зураастай",
+  ),
+  buttonStyle(
+    outlineButtonText.selector,
+    "border-top-color",
+    "rgb(8, 118, 107)",
+    "Дэлгэрэнгүй товчны хүрээ ногоон",
+  ),
+  buttonStyle(
+    outlineButtonText.selector,
+    "padding",
+    "8px 16px",
+    "Дэлгэрэнгүй товчны дотор зай 8px 16px",
+  ),
+];
+const pillButtonStyles = [
+  buttonStyle(
+    pillButtonText.selector,
+    "background-color",
+    "rgb(106, 61, 168)",
+    "Хадгалах товч нил ягаан дэвсгэртэй",
+  ),
+  buttonStyle(
+    pillButtonText.selector,
+    "color",
+    "rgb(255, 255, 255)",
+    "Хадгалах товчны бичвэр цагаан",
+  ),
+  buttonStyle(
+    pillButtonText.selector,
+    "border-top-width",
+    "0px",
+    "Хадгалах товч хүрээгүй",
+  ),
+  buttonStyle(
+    pillButtonText.selector,
+    "border-radius",
+    "999px",
+    "Хадгалах товчны булан 999px дугуйрсан",
+  ),
+  buttonStyle(
+    pillButtonText.selector,
+    "padding",
+    "8px 16px",
+    "Хадгалах товчны дотор зай 8px 16px",
+  ),
+];
+const styledButtons = [
+  primaryButtonText,
+  outlineButtonText,
+  pillButtonText,
+  ...primaryButtonStyles,
+  ...outlineButtonStyles,
+  ...pillButtonStyles,
+];
 
 export const exercises = [
   {
@@ -696,6 +891,170 @@ export const exercises = [
         value: "0px",
         label: "Карт дугуй булантай",
       },
+    ],
+  },
+  {
+    id: "button-tag",
+    topic: "button-classes",
+    title: "Эхний товчоо нэмье",
+    minutes: 4,
+    file: "index.html",
+    explanation:
+      "button нь дарах боломжтой HTML элемент. Товчин дээр харагдах бичвэрийг нээх, хаах тагийн дунд бичдэг.",
+    prompt: [
+      "Гарчгийн доор <button> болон </button> таг бич.",
+      "Хоёр тагийн дунд Эхлэх гэж бич.",
+      "Ажиллуулж товчоо хараад хариугаа шалга.",
+    ],
+    hints: ["</h2> тагийн дараагийн мөрөнд товчоо бичээрэй."],
+    starter: pageFiles(buttonHeading),
+    solution: pageFiles(plainButton),
+    checks: [
+      {
+        kind: "text",
+        selector: "button",
+        value: "Эхлэх",
+        label: "Эхлэх гэсэн button тагтай",
+      },
+    ],
+  },
+  {
+    id: "button-primary",
+    topic: "button-classes",
+    title: "Цэнхэр дэвсгэртэй товч",
+    minutes: 6,
+    file: "index.html",
+    explanation:
+      "HTML-д өгсөн class нэрээр CSS-д тухайн товчийг сонгоно. HTML-д нэрээ хашилтад, CSS-д нэрийн өмнө цэгтэй бичнэ.",
+    prompt: [
+      'index.html дотор Эхлэх товчинд class="btn-1" нэм.',
+      "style.css дотор .btn-1 дүрэм үүсгэ. Дэвсгэрийг #2457db, бичвэрийг #ffffff өнгөтэй болго.",
+      "Хүрээг border: 0; гэж арилгаад padding: 8px 16px; гэж дотор зай өг.",
+    ],
+    hints: [
+      'Атрибутыг нээх таг дотор бичнэ. <button class="btn-1">',
+      ".btn-1 { } дотор background-color, color, border, padding бичээрэй.",
+    ],
+    starter: pageFiles(plainButton),
+    solution: pageFiles(primaryButton, primaryCss),
+    checks: [primaryButtonText, ...primaryButtonStyles],
+  },
+  {
+    id: "button-outline-class",
+    topic: "button-classes",
+    title: "Хоёр дахь товчинд өөр class өгье",
+    minutes: 4,
+    file: "index.html",
+    explanation:
+      "Хоёр дахь товчинд өөр class өгвөл дараагийн алхамд түүнд өөр CSS дүрэм бичиж болно.",
+    prompt: [
+      "Эхлэх товчны доорх мөрөнд Дэлгэрэнгүй гэсэн хоёр дахь button нэм.",
+      'Шинэ товчинд class="btn-2" өг. Эхлэх товчны btn-1 class-ийг хэвээр үлдээ.',
+      "Ажиллуулаад хоёр товч хэрхэн ялгаатай харагдаж байгааг ажигла.",
+    ],
+    hints: ['Шинэ товчны нээх тагийг <button class="btn-2"> гэж бич.'],
+    starter: pageFiles(primaryButton, primaryCss),
+    solution: pageFiles(outlineButton, primaryCss),
+    checks: [primaryButtonText, outlineButtonText, ...primaryButtonStyles],
+  },
+  {
+    id: "button-outline-style",
+    topic: "button-classes",
+    title: "Ногоон хүрээтэй товч",
+    minutes: 5,
+    file: "style.css",
+    explanation:
+      "Тунгалаг дэвсгэр, өнгөт хүрээ хоёр нийлж хүрээтэй товчны загвар үүсгэнэ.",
+    prompt: [
+      "style.css дотор .btn-1 дүрмийн дараа .btn-2 гэсэн тусдаа дүрэм нэм.",
+      "Дэвсгэрийг transparent, бичвэрийн өнгийг #08766b болго.",
+      "Хүрээг 2px solid #08766b, дотор зайг 8px 16px болго. Цэнхэр товчны загварыг хэвээр үлдээ.",
+    ],
+    hints: [
+      ".btn-2 { } дотор background-color: transparent; гэж бич.",
+      "Хүрээний зузаан, хэлбэр, өнгийг border шинж чанарт нэг мөрөөр өгч болно.",
+    ],
+    starter: pageFiles(outlineButton, primaryCss),
+    solution: pageFiles(outlineButton, outlineCss),
+    checks: [
+      primaryButtonText,
+      outlineButtonText,
+      ...primaryButtonStyles,
+      ...outlineButtonStyles,
+    ],
+  },
+  {
+    id: "button-pill-class",
+    topic: "button-classes",
+    title: "Гурав дахь товчны class",
+    minutes: 4,
+    file: "index.html",
+    explanation:
+      "Товчны бичвэр нь хэрэглэгчид харагдана. Class нэрийг CSS дотроос тухайн товчийг сонгоход ашиглана.",
+    prompt: [
+      "Дэлгэрэнгүй товчны дараа Хадгалах гэсэн шинэ button нэм.",
+      'Гурав дахь товчинд class="btn-3" өг.',
+      "Ажиллуулаад гурван товч гарсан эсэхийг хар.",
+    ],
+    hints: [
+      "Шинэ товчоо өмнөх товчны </button> тагийн дараа бич.",
+      'Шинэ товчны нээх тагийг <button class="btn-3"> гэж бич.',
+    ],
+    starter: pageFiles(outlineButton, outlineCss),
+    solution: pageFiles(pillButton, outlineCss),
+    checks: [primaryButtonText, outlineButtonText, pillButtonText],
+  },
+  {
+    id: "button-pill-style",
+    topic: "button-classes",
+    title: "Дугуй үзүүртэй товч",
+    minutes: 5,
+    file: "style.css",
+    explanation:
+      "border-radius-д том утга өгөхөд товчны үзүүр дугуй болно. .btn-3 дүрэм зөвхөн энэ class-тай товчинд үйлчилнэ.",
+    prompt: [
+      "style.css-ийн төгсгөлд .btn-3 гэсэн дүрэм үүсгэ.",
+      "Дэвсгэрийг #6a3da8, бичвэрийг #ffffff болго. Хүрээг 0 болгож, дотор зайг 8px 16px өг.",
+      "border-radius-ийг 999px болго. Бусад хоёр товчны загварыг хэвээр үлдээ.",
+    ],
+    hints: [
+      ".btn-3 { } дотор border-radius: 999px; гэж бич.",
+      "Ажиллуулсны дараа Хадгалах товч дугуй үзүүртэй болсон эсэхийг хар.",
+    ],
+    starter: pageFiles(pillButton, outlineCss),
+    solution: pageFiles(pillButton, pillCss),
+    checks: styledButtons,
+  },
+  {
+    id: "button-gallery",
+    topic: "button-classes",
+    title: "Бие дааж гурван өөр товч бүтээе",
+    minutes: 10,
+    file: "index.html",
+    explanation:
+      "Нэг хуудсанд гурван өөр class ашиглан товч бүрийн загварыг тусад нь тохируул. Нэг товчноос эхэлж, бэлэн болох бүрд ажиллуулж хар.",
+    prompt: [
+      "index.html-д Эхлэх, Дэлгэрэнгүй, Хадгалах гэсэн гурван button нэм. Дарааллаар нь btn-1, btn-2, btn-3 class өг.",
+      "style.css-д гурван тусдаа class дүрэм бич. Бүх товчны дотор зайг 8px 16px болго.",
+      "Эхлэх товчинд #2457db дэвсгэр, #ffffff бичвэр, border: 0; өг.",
+      "Дэлгэрэнгүй товчинд transparent дэвсгэр, #08766b бичвэр, 2px solid #08766b хүрээ өг.",
+      "Хадгалах товчинд #6a3da8 дэвсгэр, #ffffff бичвэр, border: 0; болон 999px дугуй булан өг.",
+      "Ажиллуулж гурван товчоо зэрэг хар. Хариу шалгах товчоор class болон загваруудаа шалга.",
+    ],
+    hints: [
+      "CSS-ийн гурван сонгогч нь .btn-1, .btn-2, .btn-3.",
+      "Нэг дүрмийн } хаалтыг бичсэний дараа дараагийн сонгогчоо шинэ мөрнөөс эхлүүл.",
+    ],
+    starter: pageFiles(buttonHeading),
+    solution: pageFiles(pillButton, pillCss),
+    checks: [
+      {
+        kind: "count",
+        selector: "button",
+        value: 3,
+        label: "Гурван button тагтай",
+      },
+      ...styledButtons,
     ],
   },
 ] as const satisfies readonly Exercise[];

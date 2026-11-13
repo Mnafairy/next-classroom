@@ -474,7 +474,7 @@ export default function Workspace({
                   </div>
                   <p className={styles.explanation}>
                     {free
-                      ? "Сурсан div, h2, p, img тагуудаа ашиглан өөрийн санааг турш. HTML болон CSS-ээ бичээд ажиллуулаарай."
+                      ? "Сурсан div, h2, p, img, button тагуудаа ашиглан өөрийн санааг турш. HTML болон CSS-ээ бичээд ажиллуулаарай."
                       : exercise.explanation}
                   </p>
                   <ol className={styles.prompts}>

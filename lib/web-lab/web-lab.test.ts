@@ -68,22 +68,74 @@ test("image sources accept direct HTTPS and embedded raster images", () => {
   );
 });
 
-test("all exercises have a real starter page and card examples use only the teaching tags", () => {
-  assert.equal(lessons.length, 5);
-  assert.equal(exercises.length, 13);
+test("all exercises have a real starter page and examples use only the teaching tags", () => {
+  assert.equal(lessons.length, 6);
+  assert.equal(exercises.length, 20);
   for (const exercise of exercises) {
     assert.match(exercise.starter["index.html"], /<!doctype html>/i);
     const rendered = cardDocument(exercise.solution, sampleImage, document);
     for (const node of new JSDOM(
       rendered.html,
     ).window.document.body.querySelectorAll("*")) {
-      assert.ok(["div", "h2", "p", "img"].includes(node.localName));
+      assert.ok(["div", "h2", "p", "img", "button"].includes(node.localName));
     }
     assert.doesNotMatch(
       exercise.solution["style.css"],
       /@media|display:\s*(flex|grid)/,
     );
   }
+});
+
+test("button exercises build on the previous step and check three differently styled classes", () => {
+  const steps = exercises.filter(({ topic }) => topic === "button-classes");
+  assert.equal(steps.length, 7);
+  const render = (files: ReturnType<typeof pageFiles>) =>
+    new JSDOM(cardDocument(files, sampleImage, document).html).window.document;
+
+  for (const [index, exercise] of steps.entries()) {
+    if (index > 0 && exercise.id !== "button-gallery")
+      assert.deepEqual(exercise.starter, steps[index - 1].solution);
+    const failed = checkExercise(exercise, render(exercise.solution)).filter(
+      ({ passed }) => !passed,
+    );
+    assert.deepEqual(failed, [], exercise.id);
+    assert.ok(
+      checkExercise(exercise, render(exercise.starter)).some(
+        ({ passed }) => !passed,
+      ),
+      exercise.id,
+    );
+  }
+
+  const final = steps.find(({ id }) => id === "button-gallery");
+  assert.ok(final);
+  const buttons = [...render(final.solution).querySelectorAll("button")];
+  assert.deepEqual(
+    buttons.map(({ textContent, className }) => [textContent, className]),
+    [
+      ["Эхлэх", "btn-1"],
+      ["Дэлгэрэнгүй", "btn-2"],
+      ["Хадгалах", "btn-3"],
+    ],
+  );
+
+  const wrong = render({
+    ...final.solution,
+    "index.html": final.solution["index.html"].replace(
+      'class="btn-3"',
+      'class="btn-1" onclick="alert(1)"',
+    ),
+  });
+  assert.equal(wrong.querySelector("[onclick]"), null);
+  assert.ok(checkExercise(final, wrong).some(({ passed }) => !passed));
+  const extra = render({
+    ...final.solution,
+    "index.html": final.solution["index.html"].replace(
+      "</body>",
+      "<button>Илүү товч</button></body>",
+    ),
+  });
+  assert.equal(checkExercise(final, extra)[0].passed, false);
 });
 
 test("old lesson drafts migrate to the matching exercise with their exact code", () => {
@@ -124,7 +176,7 @@ test("old lesson drafts migrate to the matching exercise with their exact code",
     "card-font-size",
   ]);
   const teacher = detail("htmlcss", progress, "card-image");
-  assert.equal(teacher.summary.total, 13);
+  assert.equal(teacher.summary.total, exercises.length);
   assert.equal(teacher.selected?.files["index.html"], code);
 });
 

@@ -6,6 +6,13 @@ export function checkExercise(
   document: Document,
 ): CheckResult[] {
   return exercise.checks.map((check: Check) => {
+    if (check.kind === "count") {
+      return {
+        label: check.label,
+        passed:
+          document.querySelectorAll(check.selector).length === check.value,
+      };
+    }
     const element = document.querySelector(check.selector);
     if (!element) return { label: check.label, passed: false };
     let passed = false;

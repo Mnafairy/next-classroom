@@ -1,7 +1,7 @@
 import { sampleImageName } from "./lessons";
 import type { Files } from "./progress";
 
-const tags = new Set(["div", "h2", "p", "img"]);
+const tags = new Set(["div", "h2", "p", "img", "button"]);
 const embeddedImage =
   /^data:image\/(?:avif|gif|jpeg|png|webp);base64,[a-z0-9+/]+={0,2}$/i;
 
