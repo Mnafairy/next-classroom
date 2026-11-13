@@ -7,6 +7,23 @@
   --lab-blue: #315be8;
   --lab-teal: #147d73;
 }
+
+textarea::selection,
+pre::selection,
+pre ::selection,
+.guided-code input::selection {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* CodeMirror draws selections behind the text and active-line background. */
+.cm-editor .cm-selectionBackground {
+  background: #3b82f659 !important;
+}
+.cm-editor:has(.cm-selectionBackground) .cm-activeLine {
+  background: transparent !important;
+}
+
 .classroom-entry {
   min-height: 100dvh;
   display: flex;
