@@ -77,7 +77,7 @@ test("image sources accept direct HTTPS and embedded raster images", () => {
 
 test("all exercises have a real starter page and examples use only the teaching tags", () => {
   assert.equal(lessons.length, 7);
-  assert.equal(exercises.length, 25);
+  assert.equal(exercises.length, 29);
   for (const exercise of exercises) {
     assert.match(exercise.starter["index.html"], /<!doctype html>/i);
     if (exercise.topic === "mini-games") continue;
@@ -91,6 +91,51 @@ test("all exercises have a real starter page and examples use only the teaching 
       exercise.solution["style.css"],
       /@media|display:\s*(flex|grid)/,
     );
+  }
+});
+
+test("choice games teach HTML, CSS, and JavaScript in order and retain existing submissions", () => {
+  const ids = ["coin-toss", "rock-paper-scissors"] as const;
+  const files = pageFiles(
+    "<h2>Миний тоглоом</h2>",
+    ".game { color: blue; }",
+    'return "Миний хариу";',
+  );
+  const progress = readProgress({
+    ...initialProgress,
+    active: ids[1],
+    completed: ids,
+    drafts: { [ids[0]]: { files }, [ids[1]]: { files } },
+  });
+  assert.equal(progress.active, ids[1]);
+  assert.deepEqual(progress.completed, ids);
+
+  for (const id of ids) {
+    const index = exercises.findIndex((exercise) => exercise.id === id);
+    const steps = exercises
+      .slice(index - 2, index + 1)
+      .map(({ id }) => findExercise(id));
+    assert.deepEqual(
+      steps.map(({ id }) => id),
+      [`${id}-html`, `${id}-css`, id],
+    );
+    assert.deepEqual(
+      steps.map(({ file }) => file),
+      ["index.html", "style.css", "answer.js"],
+    );
+    assert.deepEqual(
+      steps.map(({ game }) => game),
+      [undefined, undefined, id],
+    );
+    assert.equal(
+      steps[1].starter["index.html"],
+      steps[0].solution["index.html"],
+    );
+    assert.deepEqual(
+      { ...steps[2].starter, "answer.js": undefined },
+      { ...steps[1].solution, "answer.js": undefined },
+    );
+    assert.deepEqual(exerciseDraft(progress, id).files, files);
   }
 });
 

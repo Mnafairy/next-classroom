@@ -216,11 +216,7 @@ const rps = choiceGame(
   games["rock-paper-scissors"].rolls,
 );
 
-function choiceChecks(
-  choices: readonly string[],
-  button: string,
-  color: string,
-): Check[] {
+function choiceHtmlChecks(choices: readonly string[], button: string): Check[] {
   return [
     {
       kind: "count",
@@ -245,6 +241,11 @@ function choiceChecks(
       value: button,
       label: "Тоглох товчтой",
     },
+  ];
+}
+
+function choiceCssChecks(color: string): Check[] {
+  return [
     ...ballChecks,
     {
       kind: "style",
@@ -255,6 +256,19 @@ function choiceChecks(
     },
   ];
 }
+
+const coinHtmlChecks = choiceHtmlChecks(games["coin-toss"].rolls, "Зоос шидэх");
+const coinCssChecks = choiceCssChecks("rgb(162, 99, 22)");
+const coinCss = gameCss.replace("#18181b", "#a26316");
+const rpsHtmlChecks = choiceHtmlChecks(
+  games["rock-paper-scissors"].rolls,
+  "Тоглох",
+);
+const rpsCssChecks = choiceCssChecks("rgb(53, 85, 160)");
+const rpsCss = gameCss.replace("#18181b", "#3555a0");
+const choiceCssStarter = gameCss
+  .replace("#18181b", "/* өнгө */")
+  .replace("50%", "/* утга */");
 
 export const gameExercises = [
   {
@@ -350,69 +364,130 @@ export const gameExercises = [
     checks: [...htmlChecks, ...ballChecks],
   },
   {
-    id: "coin-toss",
+    id: "coin-toss-html",
     topic,
-    title: "Зоос шидэх · Талыг нь таа",
-    minutes: 12,
+    title: "Зоос шидэх · HTML бүтэц",
+    minutes: 5,
     file: "index.html",
-    game: "coin-toss",
-    explanation:
-      "Тоглогч зоосны талыг таана. Бэлэн код тоглогчийн сонголтыг choice, зоосны гарсан талыг roll гэж дамжуулна.",
+    explanation: "Тоглогч зоосны аль талыг таахаа жагсаалтаас сонгоно.",
     prompt: [
-      "HTML-ийн хоосон сонголтуудад Сүлд, Тоо гэж дарааллаар бич. Товчны class-д play гэж бич.",
-      "CSS-д .eight-ball-ийн дэвсгэрийг #a26316, border-radius-ийг 50% болго.",
-      "answer.js дээр choice болон roll тэнцүү бол «Таалаа!», бусад үед «Таасангүй.» гэж буцаа.",
+      "select тагийн class-д choice гэж бич.",
+      "Хоосон option тагуудад Сүлд, Тоо гэж дарааллаар бич.",
+      "Зоос шидэх товчны class-д play гэж бич.",
     ],
-    hints: ["1 нь Сүлд, 2 нь Тоо. Хоёр тоог choice === roll гэж харьцуул."],
+    hints: ['Эхний сонголтыг <option value="1">Сүлд</option> гэж бич.'],
     starter: pageFiles(
       coin
+        .replace('class="choice"', 'class=""')
         .replace(">Сүлд<", "><")
         .replace(">Тоо<", "><")
         .replace('class="play"', 'class=""'),
-      gameCss.replace("#18181b", "/* өнгө */").replace("50%", "/* утга */"),
+    ),
+    solution: pageFiles(coin),
+    checks: coinHtmlChecks,
+  },
+  {
+    id: "coin-toss-css",
+    topic,
+    title: "Зоос шидэх · CSS загвар",
+    minutes: 5,
+    file: "style.css",
+    explanation: "Дугуй хэлбэр, алтлаг дэвсгэрээр зоосыг дүрсэл.",
+    prompt: [
+      ".eight-ball-ийн border-radius-д 50% утга өг.",
+      ".eight-ball-ийн background-color-д #a26316 өнгө өг.",
+    ],
+    hints: ["Хоёр утгыг .eight-ball дүрмийн дотор бөглөөрэй."],
+    starter: pageFiles(coin, choiceCssStarter),
+    solution: pageFiles(coin, coinCss),
+    checks: [...coinHtmlChecks, ...coinCssChecks],
+  },
+  {
+    id: "coin-toss",
+    topic,
+    title: "Зоос шидэх · JavaScript нөхцөл",
+    minutes: 6,
+    file: "answer.js",
+    game: "coin-toss",
+    explanation:
+      "Бэлэн код тоглогчийн сонголтыг choice, зоосны гарсан талыг roll гэж дамжуулна.",
+    prompt: [
+      "choice болон roll тэнцүү бол «Таалаа!», бусад үед «Таасангүй.» гэж return ашиглан буцаа.",
+      "Ажиллуулаад нэг талыг сонгож, зоосоо хэд хэдэн удаа шид.",
+    ],
+    hints: ["1 нь Сүлд, 2 нь Тоо. Хоёр тоог choice === roll гэж харьцуул."],
+    starter: pageFiles(
+      coin,
+      coinCss,
       'if (false) { // Нөхцөлөө бич.\n  return "";\n} else {\n  return "";\n}',
     ),
     solution: pageFiles(
       coin,
-      gameCss.replace("#18181b", "#a26316"),
+      coinCss,
       'if (choice === roll) {\n  return "Таалаа!";\n} else {\n  return "Таасангүй.";\n}',
     ),
-    checks: choiceChecks(
-      games["coin-toss"].rolls,
-      "Зоос шидэх",
-      "rgb(162, 99, 22)",
+    checks: [...coinHtmlChecks, ...coinCssChecks],
+  },
+  {
+    id: "rock-paper-scissors-html",
+    topic,
+    title: "Чулуу, даавуу, хайч · HTML бүтэц",
+    minutes: 5,
+    file: "index.html",
+    explanation: "Тоглогч гурван нүүдлийн аль нэгийг жагсаалтаас сонгоно.",
+    prompt: [
+      "select тагийн class-д choice гэж бич.",
+      "Хоосон option тагуудад Чулуу, Даавуу, Хайч гэж дарааллаар бич.",
+      "Тоглох товчны class-д play гэж бич.",
+    ],
+    hints: ['Гурав дахь сонголтыг <option value="3">Хайч</option> гэж бич.'],
+    starter: pageFiles(
+      rps
+        .replace('class="choice"', 'class=""')
+        .replace(">Чулуу<", "><")
+        .replace(">Даавуу<", "><")
+        .replace(">Хайч<", "><")
+        .replace('class="play"', 'class=""'),
     ),
+    solution: pageFiles(rps),
+    checks: rpsHtmlChecks,
+  },
+  {
+    id: "rock-paper-scissors-css",
+    topic,
+    title: "Чулуу, даавуу, хайч · CSS загвар",
+    minutes: 5,
+    file: "style.css",
+    explanation: "Тоглоомын хариу харагдах хэсгийг цэнхэр тойрог болго.",
+    prompt: [
+      ".eight-ball-ийн border-radius-д 50% утга өг.",
+      ".eight-ball-ийн background-color-д #3555a0 өнгө өг.",
+    ],
+    hints: ["Хоёр утгыг .eight-ball дүрмийн дотор бөглөөрэй."],
+    starter: pageFiles(rps, choiceCssStarter),
+    solution: pageFiles(rps, rpsCss),
+    checks: [...rpsHtmlChecks, ...rpsCssChecks],
   },
   {
     id: "rock-paper-scissors",
     topic,
-    title: "Чулуу, даавуу, хайч",
-    minutes: 15,
-    file: "index.html",
+    title: "Чулуу, даавуу, хайч · JavaScript нөхцөл",
+    minutes: 9,
+    file: "answer.js",
     game: "rock-paper-scissors",
     explanation:
       "Төхөөрөмжийн нүүдэл roll, тоглогчийн нүүдэл choice гэсэн тоогоор функцэд ирнэ.",
     prompt: [
-      "HTML-ийн хоосон сонголтуудад Чулуу, Даавуу, Хайч гэж дарааллаар бич. Товчны class-д play гэж бич.",
-      "CSS-д .eight-ball-ийн дэвсгэрийг #3555a0, border-radius-ийг 50% болго.",
       "1 нь чулуу, 2 нь даавуу, 3 нь хайч. Ижил бол «Тэнцлээ.», тоглогч давбал «Хожлоо!», үлдсэн үед «Хожигдлоо.» гэж буцаа.",
       "Чулуу хайчийг, даавуу чулууг, хайч даавууг давна.",
     ],
     hints: [
       "Хожих нэг нөхцөл нь choice === 1 && roll === 3. Хожих гурван нөхцөлийг || тэмдгээр холбо.",
     ],
-    starter: pageFiles(
-      rps
-        .replace(">Чулуу<", "><")
-        .replace(">Даавуу<", "><")
-        .replace(">Хайч<", "><")
-        .replace('class="play"', 'class=""'),
-      gameCss.replace("#18181b", "/* өнгө */").replace("50%", "/* утга */"),
-      emptyBranches,
-    ),
+    starter: pageFiles(rps, rpsCss, emptyBranches),
     solution: pageFiles(
       rps,
-      gameCss.replace("#18181b", "#3555a0"),
+      rpsCss,
       `if (choice === roll) {
   return "Тэнцлээ.";
 } else if (
@@ -423,10 +498,6 @@ export const gameExercises = [
   return "Хожигдлоо.";
 }`,
     ),
-    checks: choiceChecks(
-      games["rock-paper-scissors"].rolls,
-      "Тоглох",
-      "rgb(53, 85, 160)",
-    ),
+    checks: [...rpsHtmlChecks, ...rpsCssChecks],
   },
 ] as const;
