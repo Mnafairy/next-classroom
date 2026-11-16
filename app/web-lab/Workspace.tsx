@@ -26,7 +26,18 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import Dialog from "@/components/python/Dialog";
 import { messages } from "@/lib/student/cloud";
 import { cardDocument } from "@/lib/web-lab/document";
-import { checkExercise, type CheckResult } from "@/lib/web-lab/checks";
+import {
+  checkExercise,
+  checkGame,
+  type CheckResult,
+} from "@/lib/web-lab/checks";
+import {
+  connectGame,
+  evaluateGame,
+  games,
+  type GameId,
+  type GameResult,
+} from "@/lib/web-lab/games";
 import {
   exercises,
   findExercise,
@@ -57,7 +68,13 @@ type Props = {
   onSwitchStudent: () => void;
 };
 type View = "exercises" | "lessons" | "play";
-type Run = { id: number; exerciseId: ExerciseId; files: Files; check: boolean };
+type Run = {
+  id: number;
+  exerciseId: ExerciseId;
+  files: Files;
+  check: boolean;
+  game?: { id: GameId; result: GameResult };
+};
 
 export default function Workspace({
   student,
@@ -93,6 +110,8 @@ export default function Workspace({
   }, [progress]);
   const free = view === "play";
   const files = free ? progress.playground : draft.files;
+  const fileNames: (keyof Files)[] = ["index.html", "style.css"];
+  if (files["answer.js"] !== undefined) fileNames.push("answer.js");
   const completed = progress.completed.includes(exercise.id);
   const index = exercises.findIndex(({ id }) => id === exercise.id);
   const percent = Math.round(
@@ -156,26 +175,44 @@ export default function Workspace({
     serial.current++;
   }
 
-  function execute(check = false) {
+  async function execute(check = false) {
     const id = ++serial.current;
     setChecks(null);
     setFeedback("");
     setChecking(check);
     setOutputTab(check ? "checks" : "preview");
-    setRun({ id, exerciseId: exercise.id, files: { ...files }, check });
+    const game = !free && exercise.game;
+    const result = game
+      ? { id: game, result: await evaluateGame(game, files["answer.js"] ?? "") }
+      : undefined;
+    if (id !== serial.current) return;
+    setRun({
+      id,
+      exerciseId: exercise.id,
+      files: { ...files },
+      check,
+      game: result,
+    });
   }
 
   function loaded(frame: HTMLIFrameElement) {
-    if (!run?.check || serial.current !== run.id || !frame.contentDocument)
-      return;
+    const preview = frame.contentDocument;
+    if (!run || !preview) return;
+    if (run.game) {
+      const { id, result } = run.game;
+      connectGame(
+        preview,
+        "answers" in result ? result.answers : [],
+        games[id].rolls,
+      );
+    }
+    if (!run.check || serial.current !== run.id) return;
     const current = latest.current;
     const currentDraft = exerciseDraft(current, run.exerciseId);
     if (JSON.stringify(currentDraft.files) !== JSON.stringify(run.files))
       return;
-    const results = checkExercise(
-      findExercise(run.exerciseId),
-      frame.contentDocument,
-    );
+    const results = checkExercise(findExercise(run.exerciseId), preview);
+    if (run.game) results.push(...checkGame(run.game.id, run.game.result));
     const passed = results.every((result) => result.passed);
     setChecks(results);
     setChecking(false);
@@ -222,14 +259,23 @@ export default function Workspace({
     clearRun();
   }
 
-  function download() {
-    const html = cardDocument(files, sampleImage, document).html;
+  async function download() {
+    const game = !free && exercise.game;
+    const result = game && (await evaluateGame(game, files["answer.js"] ?? ""));
+    const html = cardDocument(
+      files,
+      sampleImage,
+      document,
+      game && result && "answers" in result
+        ? { id: game, answers: result.answers }
+        : undefined,
+    ).html;
     const url = URL.createObjectURL(
       new Blob([html], { type: "text/html;charset=utf-8" }),
     );
     const link = document.createElement("a");
     link.href = url;
-    link.download = "my-card.html";
+    link.download = game ? `${game}.html` : "my-card.html";
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -495,13 +541,15 @@ export default function Workspace({
                         <figcaption>ХҮЛЭЭГДЭЖ БУЙ ҮР ДҮН</figcaption>
                         <div
                           className={
-                            exercise.solution["index.html"].includes("<img")
+                            exercise.solution["index.html"].includes("<img") ||
+                            (exercise.topic === "mini-games" &&
+                              exercise.solution["style.css"])
                               ? styles.targetCard
                               : styles.targetText
                           }
                         >
                           <iframe
-                            title="Хүлээгдэж буй карт"
+                            title="Хүлээгдэж буй үр дүн"
                             sandbox=""
                             srcDoc={expected}
                           />
@@ -569,7 +617,7 @@ export default function Workspace({
                         role="group"
                         aria-label="Кодын файл"
                       >
-                        {(["index.html", "style.css"] as const).map((name) => (
+                        {fileNames.map((name) => (
                           <button
                             type="button"
                             key={name}
@@ -584,7 +632,11 @@ export default function Workspace({
                                   : styles.fileCss
                               }
                             >
-                              {name === "index.html" ? "<>" : "#"}
+                              {name === "index.html"
+                                ? "<>"
+                                : name === "style.css"
+                                  ? "#"
+                                  : "JS"}
                             </span>
                             {name}
                           </button>
@@ -620,7 +672,7 @@ export default function Workspace({
                     <WebEditor
                       key={`${free ? "play" : exercise.id}/${file}`}
                       file={file}
-                      code={files[file]}
+                      code={files[file] ?? ""}
                       onChange={edit}
                       onRun={() => execute()}
                     />
@@ -694,12 +746,19 @@ export default function Workspace({
                         aria-hidden={outputTab !== "preview"}
                       >
                         {run ? (
-                          <ResultPreview
-                            key={run.id}
-                            html={preview}
-                            visible={outputTab === "preview"}
-                            onLoad={loaded}
-                          />
+                          <>
+                            {run.game && "error" in run.game.result && (
+                              <p className={styles.feedback} role="status">
+                                {run.game.result.error}
+                              </p>
+                            )}
+                            <ResultPreview
+                              key={run.id}
+                              html={preview}
+                              visible={outputTab === "preview"}
+                              onLoad={loaded}
+                            />
+                          </>
                         ) : (
                           <div className={styles.empty}>
                             <Monitor size={28} aria-hidden="true" />
@@ -876,6 +935,12 @@ export default function Workspace({
                 <>
                   <h3>style.css</h3>
                   <pre tabIndex={0}>{exercise.solution["style.css"]}</pre>
+                </>
+              )}
+              {exercise.solution["answer.js"] && (
+                <>
+                  <h3>answer.js</h3>
+                  <pre tabIndex={0}>{exercise.solution["answer.js"]}</pre>
                 </>
               )}
             </div>

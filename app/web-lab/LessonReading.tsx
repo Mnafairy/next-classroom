@@ -58,7 +58,7 @@ export default function LessonReading({
           </div>
           <figure className={styles.lessonPreview}>
             <figcaption>Энэ хичээлээр хийх бүтээл</figcaption>
-            <iframe title="Хичээлийн жишээ карт" sandbox="" srcDoc={preview} />
+            <iframe title="Хичээлийн жишээ" sandbox="" srcDoc={preview} />
           </figure>
         </section>
         <section

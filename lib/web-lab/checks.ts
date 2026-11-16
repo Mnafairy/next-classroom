@@ -1,5 +1,19 @@
 import type { CardExercise, Check } from "./lessons";
+import { games, type GameId, type GameResult } from "./games";
 export type CheckResult = { label: string; passed: boolean };
+
+export function checkGame(game: GameId, result: GameResult): CheckResult[] {
+  if ("error" in result) return [{ label: result.error, passed: false }];
+  const { rolls, expected } = games[game];
+  return expected.flatMap((row, choice) =>
+    row.map((answer, roll) => ({
+      label: rolls.length
+        ? `${rolls[choice]} / ${rolls[roll]} → ${answer}`
+        : `roll = ${roll + 1} → ${answer}`,
+      passed: result.answers[choice]?.[roll] === answer,
+    })),
+  );
+}
 
 export function checkExercise(
   exercise: CardExercise,

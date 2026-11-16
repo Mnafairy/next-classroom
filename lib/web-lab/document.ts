@@ -1,7 +1,17 @@
-import { sampleImageName } from "./lessons";
-import type { Files } from "./progress";
+import { sampleImageName, type Files } from "./files";
+import { connectGame, games, type GameId } from "./games";
 
-const tags = new Set(["div", "h2", "p", "img", "button"]);
+const tags = new Set([
+  "div",
+  "h2",
+  "p",
+  "img",
+  "button",
+  "label",
+  "input",
+  "select",
+  "option",
+]);
 const embeddedImage =
   /^data:image\/(?:avif|gif|jpeg|png|webp);base64,[a-z0-9+/]+={0,2}$/i;
 
@@ -25,6 +35,7 @@ export function cardDocument(
   files: Files,
   sampleImage: string,
   document: Document,
+  game?: { id: GameId; answers: readonly (readonly string[])[] },
 ) {
   const template = document.createElement("template");
   template.innerHTML = files["index.html"];
@@ -43,10 +54,17 @@ export function cardDocument(
       ? imageSource(element.getAttribute("src"), sampleImage)
       : undefined;
     for (const { name } of [...element.attributes]) {
-      if (name !== "class" && !(isImage && name === "alt"))
-        element.removeAttribute(name);
+      if (
+        name === "class" ||
+        (isImage && name === "alt") ||
+        (element.localName === "input" && name === "placeholder") ||
+        (element.localName === "option" && name === "value")
+      )
+        continue;
+      element.removeAttribute(name);
     }
     if (src) element.setAttribute("src", src);
+    if (element.localName === "input") element.setAttribute("type", "text");
   }
 
   // Keep an HTML end tag typed into the CSS editor inside the style element.
@@ -54,13 +72,19 @@ export function cardDocument(
   const hasContent = Boolean(
     template.content.firstElementChild || template.content.textContent?.trim(),
   );
+  const nonce = game
+    ? [...crypto.getRandomValues(new Uint8Array(16))].join("-")
+    : "";
+  const script = game
+    ? `<script nonce="${nonce}">(${connectGame.toString()})(document, ${JSON.stringify(game.answers).replace(/</g, "\\u003c")}, ${JSON.stringify(games[game.id].rolls)});</script>`
+    : "";
   const html = `<!doctype html>
 <html lang="mn">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data: https:; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data: https:; base-uri 'none'; form-action 'none'${game ? `; script-src 'nonce-${nonce}'` : ""}">
 <title>Миний карт · КодЛаб</title>
 <style>
 * { box-sizing: border-box; }
@@ -71,6 +95,7 @@ ${css}
 </head>
 <body>
 ${template.innerHTML}
+${script}
 </body>
 </html>`;
   return { html, hasContent };

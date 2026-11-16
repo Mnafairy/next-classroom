@@ -3,8 +3,17 @@ import ts from "typescript";
 type Value = string | number | boolean;
 export type Inputs = Record<string, Value>;
 
-// Interpret only the taught expression/if subset. Student code is never eval'd.
 export function runExamCode(code: string, inputs: Inputs = {}) {
+  return interpret(code, inputs, "exam").output;
+}
+
+export function runAnswerCode(code: string, inputs: Inputs) {
+  const { returned } = interpret(code, inputs, "answer");
+  return typeof returned === "string" ? returned : "";
+}
+
+// Interpret only the taught expression/if subset. Student code is never eval'd.
+function interpret(code: string, inputs: Inputs, mode: "exam" | "answer") {
   if (code.length > 12000) throw new Error("Код 12,000 тэмдэгтээс хэтэрсэн.");
   const file = ts.createSourceFile(
     "exam.js",
@@ -19,13 +28,26 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
     file.parseDiagnostics.length
   )
     throw new Error("Кодын хаалт, хашилт болон бичлэгээ шалгаарай.");
-  const scopes: Map<string, Value | undefined>[] = [];
+  if (mode === "answer") {
+    const [branch] = file.statements;
+    if (
+      file.statements.length !== 1 ||
+      !ts.isIfStatement(branch) ||
+      !branch.elseStatement
+    )
+      throw new Error("if / else if / else нөхцөлөө нэг бүтцэд бичээрэй.");
+  }
+  const scopes: Map<string, Value | undefined>[] =
+    mode === "answer" ? [new Map(Object.entries(inputs))] : [];
   function binding(name: string) {
     for (let i = scopes.length - 1; i >= 0; i--)
       if (scopes[i].has(name)) return scopes[i];
     return undefined;
   }
-  function block(statements: ts.NodeArray<ts.Statement>, depth: number) {
+  function block(
+    statements: ts.NodeArray<ts.Statement>,
+    depth: number,
+  ): Value | undefined {
     const scope = new Map<string, Value | undefined>();
     for (const node of statements)
       if (ts.isVariableStatement(node))
@@ -37,8 +59,14 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
           scope.set(name, undefined);
         }
     scopes.push(scope);
-    for (const child of statements) statement(child, depth);
-    scopes.pop();
+    try {
+      for (const child of statements) {
+        const returned = statement(child, depth);
+        if (returned !== undefined) return returned;
+      }
+    } finally {
+      scopes.pop();
+    }
   }
   const replaced = new Set<string>();
   const output: string[] = [];
@@ -136,11 +164,10 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
       "Энэ шалгалтад let, =, арифметик, if / else, &&, ||, console.log ашиглаарай.",
     );
   }
-  function statement(node: ts.Statement, depth = 0) {
+  function statement(node: ts.Statement, depth = 0): Value | undefined {
     step(depth);
     if (ts.isBlock(node)) {
-      block(node.statements, depth + 1);
-      return;
+      return block(node.statements, depth + 1);
     }
     if (ts.isEmptyStatement(node)) return;
     if (ts.isVariableStatement(node)) {
@@ -163,10 +190,12 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
     }
     if (ts.isIfStatement(node)) {
       if (expression(node.expression, depth + 1))
-        statement(node.thenStatement, depth + 1);
-      else if (node.elseStatement) statement(node.elseStatement, depth + 1);
+        return statement(node.thenStatement, depth + 1);
+      if (node.elseStatement) return statement(node.elseStatement, depth + 1);
       return;
     }
+    if (mode === "answer" && ts.isReturnStatement(node) && node.expression)
+      return expression(node.expression, depth + 1);
     if (ts.isExpressionStatement(node)) {
       const e = node.expression;
       if (
@@ -200,9 +229,10 @@ export function runExamCode(code: string, inputs: Inputs = {}) {
       "Давталт, функц, import болон вебийн үйлдэл энэ шалгалтад ашиглахгүй.",
     );
   }
-  block(file.statements, 0);
-  for (const name of Object.keys(inputs))
-    if (!replaced.has(name))
-      throw new Error(`Эхний ${name} хувьсагчийг хадгалаарай.`);
-  return output;
+  const returned = block(file.statements, 0);
+  if (mode === "exam")
+    for (const name of Object.keys(inputs))
+      if (!replaced.has(name))
+        throw new Error(`Эхний ${name} хувьсагчийг хадгалаарай.`);
+  return { output, returned };
 }

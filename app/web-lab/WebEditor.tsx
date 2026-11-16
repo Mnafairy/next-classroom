@@ -3,9 +3,16 @@
 import CodeMirror from "@uiw/react-codemirror";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
+import { javascript } from "@codemirror/lang-javascript";
 import { EditorView, keymap } from "@codemirror/view";
 import { useMemo } from "react";
 import type { Files } from "@/lib/web-lab/lessons";
+
+const language = {
+  "index.html": html,
+  "style.css": css,
+  "answer.js": javascript,
+};
 
 export default function WebEditor({
   file,
@@ -20,7 +27,7 @@ export default function WebEditor({
 }) {
   const extensions = useMemo(
     () => [
-      file === "index.html" ? html() : css(),
+      language[file](),
       EditorView.lineWrapping,
       EditorView.contentAttributes.of({
         "aria-label": `${file} код бичих талбар`,

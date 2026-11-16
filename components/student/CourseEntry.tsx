@@ -5,6 +5,10 @@ import { useRef, useState } from "react";
 import { enterLesson } from "@/lib/student/entry";
 import { MAX_TEACHER_NAME_LENGTH } from "@/lib/student/identity";
 import {
+  exercises as webExercises,
+  lessons as webLessons,
+} from "@/lib/web-lab/lessons";
+import {
   ArrowLeft,
   ArrowRight,
   Check,
@@ -46,15 +50,15 @@ const courses = {
     mark: "<>",
     grade: "6, 7, 8-р анги",
     placeholder: "6A-01",
-    title: "HTML & CSS · Карт бүтээе",
+    title: "HTML & CSS · Мини төсөл бүтээгээрэй",
     description:
-      "HTML-ээр карт, товч бүтээ. CSS-ээр өнгө, зай, хүрээ болон товч бүрийн class загварыг тохируулаарай.",
+      "HTML, CSS ашиглан карт, товч, мини тоглоом бүтээ. Тоглоомын хариуг if / else нөхцөлөөр сонго.",
     file: "index.html",
     code: "<h2>Шатрын клуб</h2>",
     output: "Шатрын клуб",
     features: [
-      "6 хичээл · карт, товч, CSS class",
-      "20 алхамчилсан дасгал",
+      `${webLessons.length} хичээл · карт, товч, мини тоглоом`,
+      `${webExercises.length} алхамчилсан дасгал`,
       "HTML файл татах",
     ],
   },

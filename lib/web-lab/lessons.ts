@@ -1,26 +1,8 @@
-export const sampleImageName = "chess.jpg";
-export const starterHtml = `<!doctype html>
-<html lang="mn">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Миний карт · КодЛаб</title>
-</head>
-<body>
-  <!-- Картаа энд бичээрэй. -->
-</body>
-</html>`;
+import { pageFiles, starterHtml, type Files } from "./files";
+import { gameExercises, gameLesson } from "./game-lessons";
+import type { GameId } from "./games";
 
-export type Files = { "index.html": string; "style.css": string };
-export function pageFiles(body: string, css = ""): Files {
-  return {
-    "index.html": starterHtml.replace(
-      "<!-- Картаа энд бичээрэй. -->",
-      body.replace(/\n/g, "\n  "),
-    ),
-    "style.css": css,
-  };
-}
+export { pageFiles, sampleImageName, starterHtml, type Files } from "./files";
 
 export const lessons = [
   {
@@ -214,6 +196,7 @@ export const lessons = [
     answer:
       ".btn-3 сонгогч ашиглана. Түүний хаалт дотор border-radius шинж чанарыг бичнэ.",
   },
+  gameLesson,
 ] as const;
 
 export type LessonId = (typeof lessons)[number]["id"];
@@ -238,6 +221,7 @@ type Exercise = {
   starter: Files;
   solution: Files;
   checks: readonly Check[];
+  game?: GameId;
 };
 const heading = "<h2>Шатрын клуб</h2>";
 const description = `${heading}\n<p>Баасан гараг бүр уулздаг.</p>`;
@@ -1057,10 +1041,11 @@ export const exercises = [
       ...styledButtons,
     ],
   },
+  ...gameExercises,
 ] as const satisfies readonly Exercise[];
 
 export type ExerciseId = (typeof exercises)[number]["id"];
-export type CardExercise = (typeof exercises)[number];
-export function findExercise(id: string) {
+export type CardExercise = Exercise & { id: ExerciseId };
+export function findExercise(id: string): CardExercise {
   return exercises.find((exercise) => exercise.id === id) ?? exercises[0];
 }

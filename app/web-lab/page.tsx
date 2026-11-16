@@ -5,9 +5,9 @@ import { sampleImageName } from "@/lib/web-lab/lessons";
 import WebLab from "./WebLab";
 
 export const metadata: Metadata = {
-  title: "HTML & CSS · Карт бүтээе · КодЛаб",
+  title: "HTML & CSS · КодЛаб",
   description:
-    "6–8-р ангийн HTML, CSS хичээл. Кодоо бичиж, картаа шууд хараарай.",
+    "6–8-р ангийн HTML, CSS хичээл. Карт, товч, мини тоглоом бүтээгээрэй.",
 };
 
 export default async function WebLabPage() {

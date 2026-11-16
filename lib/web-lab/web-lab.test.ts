@@ -3,8 +3,15 @@ import test from "node:test";
 import { JSDOM } from "jsdom";
 import { detail } from "../admin/progress";
 import { cardDocument } from "./document";
-import { checkExercise } from "./checks";
-import { exercises, lessons, pageFiles, starterHtml } from "./lessons";
+import { checkExercise, checkGame } from "./checks";
+import { connectGame, evaluateGame, games } from "./games";
+import {
+  exercises,
+  findExercise,
+  lessons,
+  pageFiles,
+  starterHtml,
+} from "./lessons";
 import {
   exerciseDraft,
   initialProgress,
@@ -69,10 +76,11 @@ test("image sources accept direct HTTPS and embedded raster images", () => {
 });
 
 test("all exercises have a real starter page and examples use only the teaching tags", () => {
-  assert.equal(lessons.length, 6);
-  assert.equal(exercises.length, 20);
+  assert.equal(lessons.length, 7);
+  assert.equal(exercises.length, 25);
   for (const exercise of exercises) {
     assert.match(exercise.starter["index.html"], /<!doctype html>/i);
+    if (exercise.topic === "mini-games") continue;
     const rendered = cardDocument(exercise.solution, sampleImage, document);
     for (const node of new JSDOM(
       rendered.html,
@@ -84,6 +92,100 @@ test("all exercises have a real starter page and examples use only the teaching 
       /@media|display:\s*(flex|grid)/,
     );
   }
+});
+
+test("game solutions pass their layout and all outcomes, and starters need work", async () => {
+  const render = (files: ReturnType<typeof pageFiles>) =>
+    new JSDOM(cardDocument(files, sampleImage, document).html).window.document;
+  for (const { id } of exercises.filter(
+    ({ topic }) => topic === "mini-games",
+  )) {
+    const exercise = findExercise(id);
+    const checks = checkExercise(exercise, render(exercise.solution));
+    const starter = checkExercise(exercise, render(exercise.starter));
+    if (exercise.game) {
+      const solution = await evaluateGame(
+        exercise.game,
+        exercise.solution["answer.js"] ?? "",
+      );
+      assert.deepEqual(solution, { answers: games[exercise.game].expected });
+      checks.push(...checkGame(exercise.game, solution));
+      starter.push(
+        ...checkGame(
+          exercise.game,
+          await evaluateGame(
+            exercise.game,
+            exercise.starter["answer.js"] ?? "",
+          ),
+        ),
+      );
+    }
+    assert.deepEqual(
+      checks.filter(({ passed }) => !passed),
+      [],
+      id,
+    );
+    assert.ok(
+      starter.some(({ passed }) => !passed),
+      id,
+    );
+  }
+});
+
+test("the eight ball uses the supplied controls, preserves drafts and plays in a standalone download", async () => {
+  const exercise = findExercise("eight-ball-logic");
+  const progress = readProgress({
+    ...initialProgress,
+    drafts: { [exercise.id]: { files: exercise.solution } },
+  });
+  const files = exerciseDraft(progress, exercise.id).files;
+  assert.equal(
+    detail("htmlcss", progress, exercise.id).selected?.files["answer.js"],
+    files["answer.js"],
+  );
+  const answers = await evaluateGame("eight-ball", files["answer.js"] ?? "");
+  assert.ok("answers" in answers);
+  const preview = new JSDOM(cardDocument(files, sampleImage, document).html);
+  connectGame(preview.window.document, answers.answers, []);
+  const download = new JSDOM(
+    cardDocument(
+      {
+        ...files,
+        "index.html": files["index.html"].replace(
+          'type="text"',
+          'type="password" onfocus="alert(1)"',
+        ),
+      },
+      sampleImage,
+      document,
+      { id: "eight-ball", answers: answers.answers },
+    ).html,
+    { runScripts: "dangerously" },
+  );
+  for (const { window } of [preview, download]) {
+    const question = window.document.querySelector("input");
+    const button = window.document.querySelector("button");
+    const answer = window.document.querySelector(".answer");
+    assert.ok(question && button && answer);
+    assert.equal(question.type, "text");
+    assert.equal(question.getAttribute("onfocus"), null);
+    button.click();
+    assert.equal(answer.textContent, "Асуултаа бичээрэй.");
+    question.value = "Өнөөдөр азтай өдөр үү?";
+    question.dispatchEvent(
+      new window.KeyboardEvent("keydown", { key: "Enter" }),
+    );
+    assert.ok(answers.answers[0].includes(answer.textContent ?? ""));
+    window.close();
+  }
+  assert.ok("error" in (await evaluateGame("eight-ball", "return 'Тийм!';")));
+  assert.ok(
+    "error" in
+      (await evaluateGame(
+        "eight-ball",
+        "if (true) { while (true) {} } else { return ''; }",
+      )),
+  );
 });
 
 test("button exercises build on the previous step and check three differently styled classes", () => {

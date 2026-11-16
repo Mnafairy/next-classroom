@@ -34,6 +34,7 @@ function readFiles(value: unknown, fallback = starterFiles): Files {
   if (!isProgressSnapshot(value)) return fallback;
   const html = value["index.html"];
   const css = value["style.css"];
+  const answer = value["answer.js"];
   return {
     "index.html":
       typeof html === "string" && html.trim()
@@ -43,6 +44,12 @@ function readFiles(value: unknown, fallback = starterFiles): Files {
       typeof css === "string"
         ? css.slice(0, maxCodeLength)
         : fallback["style.css"],
+    ...(fallback["answer.js"] !== undefined && {
+      "answer.js":
+        typeof answer === "string"
+          ? answer.slice(0, maxCodeLength)
+          : fallback["answer.js"],
+    }),
   };
 }
 
