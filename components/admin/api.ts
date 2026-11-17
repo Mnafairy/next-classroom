@@ -1,3 +1,5 @@
+import { timeoutSignal } from "@/lib/http/timeout";
+
 export async function adminRequest<T>(
   path: string,
   options?: RequestInit,
@@ -5,7 +7,7 @@ export async function adminRequest<T>(
   const response = await fetch(path, {
     ...options,
     cache: "no-store",
-    signal: options?.signal || AbortSignal.timeout(15000),
+    signal: options?.signal || timeoutSignal(15000),
     headers: { "Content-Type": "application/json", ...options?.headers },
   });
   const body = await response.json();

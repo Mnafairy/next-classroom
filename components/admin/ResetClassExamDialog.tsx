@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { EXAM_MINUTES } from "@/lib/exam/content";
 import type { ClassExamResetResult, ExamResetTarget } from "@/lib/exam/types";
+import { timeoutSignal } from "@/lib/http/timeout";
 import { adminRequest } from "./api";
 import AdminDialog from "./AdminDialog";
 
@@ -36,7 +37,7 @@ export default function ResetClassExamDialog({
             groupId: selection.id,
             targets: selection.targets,
           }),
-          signal: AbortSignal.timeout(60000),
+          signal: timeoutSignal(60000),
         },
       );
       onReset(result);

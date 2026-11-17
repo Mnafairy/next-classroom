@@ -1,3 +1,5 @@
+import { timeoutSignal } from "../http/timeout";
+
 const TIMEOUT_MESSAGE =
   "Шалгалтын холболт удааширлаа. Интернэтээ шалгаад дахин оролдоно уу. Өмнө эхэлсэн шалгалт байвал хадгалсан ажлаас үргэлжилнэ.";
 const CONNECTION_MESSAGE =
@@ -16,7 +18,7 @@ async function send(body?: Record<string, unknown>) {
       cache: "no-store",
       headers: body ? { "Content-Type": "application/json" } : undefined,
       body: body ? JSON.stringify(body) : undefined,
-      signal: AbortSignal.timeout(body?.action === "start" ? 30000 : 15000),
+      signal: timeoutSignal(body?.action === "start" ? 30000 : 15000),
     });
   } catch (error) {
     if (

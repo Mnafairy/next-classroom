@@ -1,3 +1,4 @@
+import { timeoutSignal } from "../http/timeout";
 import { messages } from "./cloud";
 import { normalizeStudentId, normalizeTeacherName } from "./identity";
 
@@ -25,7 +26,7 @@ export async function enterLesson(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "resolve-teacher", name }),
-    signal: AbortSignal.timeout(15000),
+    signal: timeoutSignal(15000),
   });
   if (response.status === 403)
     throw new Error(

@@ -1,3 +1,4 @@
+import { timeoutSignal } from "../http/timeout";
 import type { Course } from "./identity";
 import {
   isProgressSnapshot,
@@ -82,7 +83,7 @@ export function createCloudProgress(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(15000),
+      signal: timeoutSignal(15000),
     });
     if (!response.ok)
       throw Object.assign(
