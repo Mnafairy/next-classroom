@@ -18,6 +18,21 @@ for (const exercise of exercises.filter((item) => item.kind === "code")) {
   });
 }
 const colorExercise = findExercise("color-props")!;
+test("the numeric map exercise requires an arrow callback", () => {
+  const exercise = findExercise("map-numbers")!;
+  const files = {
+    [PAGE]: exercise.solution[PAGE].replace(
+      "(number) => number * 2",
+      "function (number) { return number * 2; }",
+    ),
+  };
+  const checks = validateSources(exercise, files);
+  assert.equal(checks[0].passed, true);
+  assert.equal(
+    checks.find(({ label }) => label.includes("numbers.map()"))?.passed,
+    false,
+  );
+});
 test("equivalent quote style and props object access are accepted", () => {
   const files = {
     ...colorExercise.solution,

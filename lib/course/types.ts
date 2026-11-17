@@ -24,6 +24,7 @@ export type RuntimeReport = {
   buttons: ButtonSnapshot[];
   probes: ButtonSnapshot[][];
   cards?: CardSnapshot[];
+  output?: string[];
   cardProbes?: CardSnapshot[][];
   initialInteraction?: InteractionSnapshot;
   interactions?: InteractionSnapshot[];
@@ -75,6 +76,11 @@ export type Exercise = {
   props?: "label" | "color";
   styled?: boolean;
   expectedCards?: CardContent[];
+  output?: {
+    element: "p" | "li";
+    lines: string[];
+    map?: "numbers" | "products";
+  };
   cardProps?: boolean;
   activeFile?: string;
   interactions?: InteractionStep[];

@@ -1,6 +1,7 @@
 import { ArrowUpRight, Check, Copy } from "lucide-react";
 import { useState } from "react";
 import type { Exercise } from "@/lib/course/types";
+import FlowLab from "@/app/curriculum/_components/FlowLab";
 
 export default function LessonContent({ exercise }: { exercise: Exercise }) {
   const [copied, setCopied] = useState(false);
@@ -60,6 +61,18 @@ export default function LessonContent({ exercise }: { exercise: Exercise }) {
             </pre>
           </div>
         </details>
+        {exercise.output?.map && (
+          <details lang="mn">
+            <summary>Интерактив урсгал диаграмм</summary>
+            <FlowLab
+              mapMode={
+                exercise.output.map === "numbers"
+                  ? "map-numbers"
+                  : "map-products"
+              }
+            />
+          </details>
+        )}
       </div>
     </section>
   );

@@ -1,4 +1,10 @@
 import type { Exercise, Files, Module } from "./types";
+import {
+  productPageSource,
+  shopNumbers,
+  shopPageSource,
+  shopProducts,
+} from "../curriculum/shop-map";
 
 export const BUTTON = "/app/components/Button.tsx";
 export const CARD = "/app/components/Card.tsx";
@@ -35,6 +41,11 @@ export const modules: Module[] = [
     title: "Remember with state",
     subtitle: "Counters and independent Likes",
     icon: "sliders",
+  },
+  {
+    title: "11-р анги · map()",
+    subtitle: "Тоон массиваас барааны жагсаалт хүртэл",
+    icon: "layers",
   },
 ];
 
@@ -214,6 +225,27 @@ const likeFiles = (card: string): Files => ({
   [BUTTON]: eventButton,
   [PAGE]: likeCardsPage,
 });
+
+const numberMapPage = `const numbers = [${shopNumbers.join(", ")}];
+const doubled = numbers.map((number) => number * 2);
+
+export default function Home() {
+  return (
+    <section>
+      <h1>map() ба тоон массив</h1>
+      <p>Эх массив: [{numbers.join(", ")}]</p>
+      <p>Үр дүн: [{doubled.join(", ")}]</p>
+    </section>
+  );
+}`;
+const productValuesPage = productPageSource.replace(
+  "    </main>",
+  '      <p>Гурав дахь бараа: {products[2].inStock ? "Бэлэн" : "Дууссан"}</p>\n    </main>',
+);
+const productMapPage = shopPageSource.replace(
+  "{product.price} ₮</li>",
+  '{product.price} ₮ ({product.inStock ? "Бэлэн" : "Дууссан"})</li>',
+);
 
 export const exercises: Exercise[] = [
   {
@@ -1269,6 +1301,156 @@ export const exercises: Exercise[] = [
     hints: [
       "Use likes + 1 in setLikes, and likes in the label expression.",
       "Keep useState inside Card. Both Card instances use the same code but receive separate state.",
+    ],
+  },
+  {
+    id: "map-numbers",
+    module: 7,
+    shortTitle: "Тоон массивыг хувиргах",
+    title: "map() · Тоо бүрийг хоёр дахин өсгөх",
+    duration: "8 мин",
+    eyebrow: "08 / MAP",
+    kind: "code",
+    activeFile: PAGE,
+    starter: { [PAGE]: numberMapPage.replace("number * 2", "__RESULT__") },
+    solution: { [PAGE]: numberMapPage },
+    paragraphs: [
+      "1. numbers нь [2, 4, 6] гэсэн массив. numbers.map(...) эхний дуудалтад 2, дараагийн дуудалтад 4, гурав дахь дуудалтад 6-г number параметрт дамжуулна.",
+      "2. (number) => number * 2 гэдэг arrow function нэг тоо аваад хоёр дахин өсгөсөн утгыг буцаана. Сумны дараа ганц илэрхийлэл бичвэл JavaScript утгыг нь шууд буцаана. { } блок ашиглавал return бичнэ.",
+      '3. Буцаасан 4, 8, 12 нь doubled массивд ижил дарааллаар орно. JSX дотор join(", ") нь утгуудыг таслалаар тусгаарласан текст болгон харуулна. Эх массив [2, 4, 6] хэвээр байна.',
+    ],
+    concept: {
+      title: "Элемент бүрийг хувиргах",
+      body: "map() нь элемент бүрийн буцаасан утгыг цуглуулж шинэ массив үүсгэнэ.",
+    },
+    task: "Arrow function дотор number-ийг хоёроор үржүүл. Run дарахад [2, 4, 6] ба [4, 8, 12] гэсэн хоёр мөр харагдана.",
+    example:
+      "const prices = [100, 200, 300];\nconst totals = prices.map((price) => price + 50);\n// [150, 250, 350]",
+    exampleFile: "JavaScript",
+    blanks: [
+      {
+        token: "__RESULT__",
+        label: "Буцаах утга",
+        answer: "number * 2",
+        width: 13,
+      },
+    ],
+    output: {
+      element: "p",
+      lines: ["Эх массив: [2, 4, 6]", "Үр дүн: [4, 8, 12]"],
+      map: "numbers",
+    },
+    hints: ["number нь тухайн дуудалтын ганц тоо.", "number * 2 гэж бич."],
+  },
+  {
+    id: "map-product-values",
+    module: 7,
+    shortTitle: "Барааны өгөгдлийг унших",
+    title: "Объект ба массивын утгыг JSX-д харуулах",
+    duration: "10 мин",
+    eyebrow: "08 / OBJECTS & ARRAYS",
+    kind: "code",
+    activeFile: PAGE,
+    starter: {
+      [PAGE]: productValuesPage
+        .replace(
+          "const secondProduct = products[1]",
+          "const secondProduct = products[__INDEX__]",
+        )
+        .replace("notebook.name", "notebook.__NAME__")
+        .replace("secondProduct.price", "secondProduct.__PRICE__")
+        .replace("products[2].inStock", "products[2].__STOCK__"),
+    },
+    solution: { [PAGE]: productValuesPage },
+    paragraphs: [
+      "1. notebook объект нэг барааны мэдээллийг хадгална. name нь текст, price нь тоо, inStock нь true эсвэл false, id нь барааны давтагдахгүй код.",
+      "2. Цэгээр талбар уншина. notebook.name нь «Дэвтэр». products массивын индекс 0-ээс эхэлдэг тул products[1] нь хоёр дахь объект буюу бал.",
+      "3. Хаалтыг эхлээд унш. products[1].price дотор [1] нь объектыг сонгоод .price нь 1500 гэсэн утгыг авна. products.length нь массивын элементийн тоо.",
+      "4. JSX дотор {notebook.name} гэх мэт хаалт JavaScript утгыг HTML дээр харуулна. Үлдэгдлийн утга true үед «Бэлэн», false үед «Дууссан» гэж гарах нөхцөлийг ажигла.",
+    ],
+    concept: {
+      title: "Нэг объект, олон объект",
+      body: "Массиваас индексээр нэг бараа сонго. Дараа нь цэгээр тухайн барааны талбарыг унш.",
+    },
+    task: "Дэвтрийн нэр, хоёр дахь барааны индекс ба үнэ, гурав дахь барааны үлдэгдлийн талбарыг бөглөөд HTML үр дүнг шалга.",
+    example:
+      'const eraser = { name: "Баллуур", price: 800 };\nconst supplies = [eraser];\n// JSX\n<p>{supplies[0].name} — {eraser.price} ₮</p>',
+    exampleFile: "app/page.tsx",
+    blanks: [
+      {
+        token: "__INDEX__",
+        label: "Хоёр дахь барааны индекс",
+        answer: "1",
+        width: 4,
+      },
+      { token: "__NAME__", label: "Нэрийн талбар", answer: "name" },
+      { token: "__PRICE__", label: "Үнийн талбар", answer: "price" },
+      { token: "__STOCK__", label: "Үлдэгдлийн талбар", answer: "inStock" },
+    ],
+    output: {
+      element: "p",
+      lines: [
+        "Дэвтэр — 3500 ₮",
+        "Нийт бараа: 3",
+        "Хоёр дахь бараа: Бал — 1500 ₮",
+        "Гурав дахь бараа: Дууссан",
+      ],
+    },
+    hints: [
+      "products[1] нь балын объект.",
+      "Объектын талбаруудын нэрийг дээд хэсгээс шалга. price нь үнэ, inStock нь үлдэгдэл.",
+    ],
+  },
+  {
+    id: "map-shop-list",
+    module: 7,
+    shortTitle: "map()-аар барааны жагсаалт гаргах",
+    title: "Next.js · Бараа бүрийг JSX мөр болгох",
+    duration: "12 мин",
+    eyebrow: "08 / JSX LISTS",
+    kind: "code",
+    activeFile: PAGE,
+    starter: {
+      [PAGE]: productMapPage
+        .replace("products.map", "products.__METHOD__")
+        .replace("product.id", "product.__KEY__")
+        .replace("product.name", "product.__NAME__")
+        .replace("product.price", "product.__PRICE__")
+        .replace("product.inStock", "product.__STOCK__"),
+    },
+    solution: { [PAGE]: productMapPage },
+    paragraphs: [
+      "1. {products.map(...)} нь JSX дотор JavaScript ажиллуулна. map() бараа тус бүрийг (product) => (...) arrow function-д өгнө. Эхний дуудалтад product нь дэвтрийн объект.",
+      "2. Сумны дараах дугуй хаалт олон мөртэй JSX-ийг нэг илэрхийлэл болгоно. Дуудалт бүр нэг <li> буцаана. React буцаасан элементүүдийн массивыг <ul> дотор жагсаалт болгон харуулна.",
+      "3. key={product.id} нь React-д мөрийг бараатай нь холбож, дараалал солигдсон ч ижил барааг танихад тусална. Мөр дотор нэр, үнэ, үлдэгдлийг одоогийн product объектоос унш.",
+      "4. Check answer амжилттай болсны дараа шинэ бараа нэмж Run дар. Шинэ JSX мөр өгөгдлөөс автоматаар үүсэхийг ажигла.",
+    ],
+    concept: {
+      title: "Бараа бүрээс нэг JSX элемент",
+      body: "Next.js хуудсанд map() ашиглан өгөгдлийн массиваас HTML жагсаалт гарга.",
+    },
+    task: "Массивын арга болон key, нэр, үнэ, үлдэгдлийн талбаруудыг бөглө. Гурван бараа дарааллаараа нэг нэг мөр болж харагдана.",
+    example:
+      'const colors = [{ id: "red", name: "Улаан" }];\n// JSX\n<ul>{colors.map((color) => <li key={color.id}>{color.name}</li>)}</ul>',
+    exampleFile: "app/page.tsx",
+    blanks: [
+      { token: "__METHOD__", label: "Массивын арга", answer: "map" },
+      { token: "__KEY__", label: "Мөрийн түлхүүр", answer: "id" },
+      { token: "__NAME__", label: "Нэрийн талбар", answer: "name" },
+      { token: "__PRICE__", label: "Үнийн талбар", answer: "price" },
+      { token: "__STOCK__", label: "Үлдэгдлийн талбар", answer: "inStock" },
+    ],
+    output: {
+      element: "li",
+      lines: shopProducts.map(
+        (product) =>
+          `${product.name} — ${product.price} ₮ (${product.inStock ? "Бэлэн" : "Дууссан"})`,
+      ),
+      map: "products",
+    },
+    hints: [
+      "products.map((product) => (...)) гэж эхэл.",
+      "Мөр бүрийн key-д id, харуулах хэсэгт name, price, inStock ашигла.",
     ],
   },
 ];

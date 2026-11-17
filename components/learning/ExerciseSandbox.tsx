@@ -256,6 +256,9 @@ function Workspace({ exercise, draft, onDraft, onChecked, onMessage }: Props) {
   const template = exercise.starter[active];
   const relevantBlanks =
     exercise.blanks?.filter((blank) => template.includes(blank.token)) ?? [];
+  const output = exercise.output;
+  const OutputContainer = output?.element === "li" ? "ul" : "div";
+  const OutputLine = output?.element ?? "p";
   function fillBlank(token: string, value: string) {
     const answers = { ...draft.answers, [token]: value };
     const files = Object.fromEntries(
@@ -459,6 +462,13 @@ function Workspace({ exercise, draft, onDraft, onChecked, onMessage }: Props) {
                 >
                   {exercise.initialText}
                 </p>
+              )}
+              {output && (
+                <OutputContainer lang="mn">
+                  {output.lines.map((line) => (
+                    <OutputLine key={line}>{line}</OutputLine>
+                  ))}
+                </OutputContainer>
               )}
               {exercise.expectedCards
                 ? exercise.expectedCards.map((card, index) => (

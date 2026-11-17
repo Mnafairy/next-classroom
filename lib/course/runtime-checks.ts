@@ -32,6 +32,19 @@ export function validateRuntime(
     return [
       { label: "Render without errors", passed: false, detail: report.error },
     ];
+  if (exercise.output)
+    return [
+      {
+        label: "Хүлээсэн мөрүүдийг дарааллаар харуулах",
+        passed:
+          Array.isArray(report.output) &&
+          report.output.length === exercise.output.lines.length &&
+          exercise.output.lines.every(
+            (line, index) => report.output?.[index] === line,
+          ),
+        detail: "Preview хэсгийн Expected result-тэй тулгаж шалга.",
+      },
+    ];
   const expected = exercise.expected ?? [];
   const checks: CheckResult[] = [
     {

@@ -160,6 +160,40 @@ export function validateSources(
   const card = program.getSourceFile(base + CARD);
   const page = program.getSourceFile(base + PAGE);
   const checker = program.getTypeChecker();
+  if (exercise.output) {
+    const pageSymbol = page && checker.getSymbolAtLocation(page);
+    checks.push({
+      label: "page.tsx-ээс хуудсыг default export хийх",
+      passed:
+        !!pageSymbol &&
+        checker
+          .getExportsOfModule(pageSymbol)
+          .some((symbol) => symbol.name === "default"),
+    });
+    const array = exercise.output.map;
+    if (array && page) {
+      let hasArrowMap = false;
+      const visit = (node: ts.Node) => {
+        if (
+          ts.isCallExpression(node) &&
+          ts.isPropertyAccessExpression(node.expression) &&
+          node.expression.name.text === "map" &&
+          ts.isIdentifier(node.expression.expression) &&
+          node.expression.expression.text === array &&
+          node.arguments[0] &&
+          ts.isArrowFunction(node.arguments[0])
+        )
+          hasArrowMap = true;
+        ts.forEachChild(node, visit);
+      };
+      visit(page);
+      checks.push({
+        label: `${array}.map() дотор arrow function ашиглах`,
+        passed: hasArrowMap,
+      });
+    }
+    return checks;
+  }
   const buttonSymbol = button && checker.getSymbolAtLocation(button);
   const defaultExport =
     buttonSymbol &&

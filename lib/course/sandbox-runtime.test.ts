@@ -146,7 +146,7 @@ for (const exercise of exercises.filter(
           document.querySelectorAll("#root button"),
           (button) => button.textContent,
         ),
-        exercise.expected!.map((button) => button.label),
+        (exercise.expected ?? []).map((button) => button.label),
         "Checker clicks must leave the student's visible preview at its initial state",
       );
     });
@@ -156,6 +156,7 @@ for (const exercise of exercises.filter(
 const events = findExercise("event-props")!;
 const counter = findExercise("state-counter")!;
 const likes = findExercise("like-cards")!;
+const shopMap = findExercise("map-shop-list")!;
 const fails = (exercise: Exercise, files: Files) =>
   withPreview(exercise, files, (report) => {
     assert.ok(
@@ -164,6 +165,17 @@ const fails = (exercise: Exercise, files: Files) =>
       ),
     );
   });
+
+test("the shop list fails when its JSX shows incorrect stock labels", async () => {
+  const files = {
+    [PAGE]: shopMap.solution[PAGE].replace(
+      'product.inStock ? "Бэлэн" : "Дууссан"',
+      '"Бэлэн"',
+    ),
+  };
+  assert.ok(validateSources(shopMap, files).every((check) => check.passed));
+  await fails(shopMap, files);
+});
 
 test("a disconnected Button handler fails even with correct card text", async () => {
   await fails(events, {

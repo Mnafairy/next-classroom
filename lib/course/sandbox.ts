@@ -21,11 +21,11 @@ export function runnerCode(
   hasCard = false,
   exercise?: Exercise,
 ) {
-  return `import React from "react";
+  const render = `import React from "react";
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import Home from "./app/page";
-import Button from "./app/components/Button";
+${exercise?.output ? "" : 'import Button from "./app/components/Button";'}
 ${hasCard ? 'import Card from "./app/components/Card";' : ""}
 import "./preview.css";
 
@@ -56,6 +56,16 @@ class Boundary extends React.Component {
 }
 const root = document.getElementById("root");
 flushSync(() => createRoot(root).render(<Boundary><Home /></Boundary>));
+`;
+  if (exercise?.output) {
+    const selector = exercise.output.element === "li" ? "ul > li" : "p";
+    return `${render}
+const output = Array.from(root.querySelectorAll(${JSON.stringify(selector)}), (element) => element.textContent.trim().replace(/\\s+/g, " "));
+probing = false;
+send({ buttons: [], probes: [], output });
+`;
+  }
+  return `${render}
 const snapshot = (container) => Array.from(container.querySelectorAll("button")).map((button) => ({
   text: button.textContent.trim(), background: getComputedStyle(button).backgroundColor,
   color: getComputedStyle(button).color, padding: getComputedStyle(button).padding,
