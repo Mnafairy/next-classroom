@@ -1,4 +1,5 @@
-import { Check, ChevronDown, X } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Check, ChevronDown, List, X } from "lucide-react";
 import { useState } from "react";
 import { exercises, modules } from "@/lib/course/lessons";
 
@@ -39,6 +40,25 @@ export default function LessonNavigation({
         </button>
       </div>
       <nav aria-label="Course modules">
+        <div className="nav-module">
+          <Link
+            className="module-button"
+            href="/curriculum/11/shop-map"
+            prefetch={false}
+            target="_blank"
+            rel="noopener"
+            lang="mn"
+          >
+            <span className="module-index" aria-hidden="true">
+              <List size={16} />
+            </span>
+            <strong>11-р анги · map()</strong>
+            <ArrowUpRight size={15} aria-hidden="true" />
+            <span className="sr-only">
+              Барааны жагсаалт (шинэ табд нээгдэнэ)
+            </span>
+          </Link>
+        </div>
         {modules.map((module, moduleIndex) => {
           const items = exercises.filter(
             (exercise) => exercise.module === moduleIndex,
