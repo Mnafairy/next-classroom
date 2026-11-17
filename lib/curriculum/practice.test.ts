@@ -45,8 +45,8 @@ test("every source lesson, including reused lessons, has six distinct tasks and 
       questions++;
     }
   }
-  assert.equal(tasks, 498);
-  assert.equal(questions, 166);
+  assert.equal(tasks, 504);
+  assert.equal(questions, 168);
 });
 
 test("mixed tests represent all units, contain no duplicates, and prefer unused questions on retake", () => {

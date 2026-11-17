@@ -1,6 +1,9 @@
 import type { ExampleFile } from "./types";
 
-export function js(name: string, contents: string): ExampleFile {
+export function js(
+  name: string,
+  contents: string,
+): Extract<ExampleFile, { mode: "javascript" }> {
   return { mode: "javascript", name, contents };
 }
 

@@ -4,26 +4,41 @@ import { useEffect, useId, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Play, Pause, RotateCcw, SkipForward, ChevronLeft } from "lucide-react";
 import { curriculumFlow } from "@/lib/curriculum/flow";
+import { shopMapFlow, type ShopMapMode } from "@/lib/curriculum/shop-map-flow";
+import { shopNumbers, shopProducts } from "@/lib/curriculum/shop-map";
 import type { FlowMode } from "@/lib/python/flow";
 import styles from "../workbench.module.css";
 
 export default function FlowLab({
   initialMode = "if",
   language = "javascript",
+  mapMode,
 }: {
   initialMode?: FlowMode;
   language?: "javascript" | "python";
+  mapMode?: ShopMapMode;
 }) {
   const [mode, setMode] = useState(initialMode);
-  const [value, setValue] = useState(initialMode === "if" ? 15 : 3);
+  const max =
+    mapMode === "map-products" ? shopProducts.length : shopNumbers.length;
+  const [value, setValue] = useState(
+    mapMode ? max : initialMode === "if" ? 15 : 3,
+  );
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1000);
   const reduced = useReducedMotion();
   const id = useId();
-  const flow = curriculumFlow(mode, value, language);
+  const flow = mapMode
+    ? shopMapFlow(mapMode, value)
+    : curriculumFlow(mode, value, language);
   const frame = flow.frames[step];
   const last = step === flow.frames.length - 1;
+  const valueLabel = mapMode
+    ? "Элементийн тоо"
+    : mode === "if"
+      ? "Цэнэг"
+      : "Давтах тоо";
   useEffect(() => {
     if (!playing || last) return;
     const timer = setTimeout(() => setStep((current) => current + 1), speed);
@@ -36,42 +51,54 @@ export default function FlowLab({
   return (
     <section
       className={styles.flowLab}
-      id="flow-lab"
+      id={mapMode ?? "flow-lab"}
       aria-labelledby={`${id}-title`}
     >
       <div className={styles.labHeading}>
         <div>
           <span className={styles.eyebrow}>ХАРААД ОЙЛГО · ӨӨРЧЛӨӨД ТУРШ</span>
-          <h2 id={`${id}-title`}>Код аль замаар явах вэ?</h2>
-          <p>Утгаа сонгоод дараагийн алхмыг таа. Дараа нь ажиллуулж шалга.</p>
+          <h2 id={`${id}-title`}>
+            {mapMode ? flow.title : "Код аль замаар явах вэ?"}
+          </h2>
+          <p>
+            {mapMode
+              ? "«Алхах» товчоор параметрийн утга, буцаасан үр дүн, шинэ массив хэрхэн өөрчлөгдөхийг ажиглаарай."
+              : "Утгаа сонгоод дараагийн алхмыг таа. Дараа нь ажиллуулж шалга."}
+          </p>
         </div>
         <span className={styles.language}>
-          {language === "python" ? "Python" : "JavaScript"}
+          {mapMode === "map-products"
+            ? "JSX"
+            : language === "python"
+              ? "Python"
+              : "JavaScript"}
         </span>
       </div>
       <div className={styles.labTools}>
-        <div className={styles.modeButtons} aria-label="Урсгал сонгох">
-          {(["if", "for", "while"] as const).map((option) => (
-            <button
-              key={option}
-              aria-pressed={mode === option}
-              onClick={() => {
-                reset();
-                setMode(option);
-                setValue(option === "if" ? 15 : 3);
-              }}
-            >
-              {option === "if" ? "if / else" : option}
-            </button>
-          ))}
-        </div>
+        {!mapMode && (
+          <div className={styles.modeButtons} aria-label="Урсгал сонгох">
+            {(["if", "for", "while"] as const).map((option) => (
+              <button
+                key={option}
+                aria-pressed={mode === option}
+                onClick={() => {
+                  reset();
+                  setMode(option);
+                  setValue(option === "if" ? 15 : 3);
+                }}
+              >
+                {option === "if" ? "if / else" : option}
+              </button>
+            ))}
+          </div>
+        )}
         <label className={styles.valueControl}>
-          {mode === "if" ? "Цэнэг" : "Давтах тоо"}{" "}
+          {valueLabel}{" "}
           <input
-            aria-label={mode === "if" ? "Цэнэг" : "Давтах тоо"}
+            aria-label={valueLabel}
             type="range"
             min="0"
-            max={mode === "if" ? 100 : 6}
+            max={mapMode ? max : mode === "if" ? 100 : 6}
             value={value}
             onChange={(event) => {
               reset();
@@ -80,7 +107,7 @@ export default function FlowLab({
           />
           <strong>
             {value}
-            {mode === "if" ? "%" : ""}
+            {!mapMode && mode === "if" ? "%" : ""}
           </strong>
         </label>
       </div>
@@ -88,8 +115,11 @@ export default function FlowLab({
         <div className={styles.codePane}>
           <div className={styles.fileBar}>
             <span>
-              {mode === "if" ? "battery" : "count"}.
-              {language === "python" ? "py" : "js"}
+              {mapMode === "map-products"
+                ? "app/shop/page.tsx"
+                : mapMode
+                  ? "numbers.js"
+                  : `${mode === "if" ? "battery" : "count"}.${language === "python" ? "py" : "js"}`}
             </span>
             <span>КОД</span>
           </div>
@@ -115,11 +145,13 @@ export default function FlowLab({
             </code>
           </div>
           <div className={styles.console}>
-            <span>ГАРАЛТ</span>
+            <span>{mapMode ? "ШИНЭ МАССИВЫН ЭЛЕМЕНТҮҮД" : "ГАРАЛТ"}</span>
             <pre>
               {frame.output.length
                 ? frame.output.join("\n")
-                : "Одоогоор гаралт алга"}
+                : mapMode
+                  ? "[]"
+                  : "Одоогоор гаралт алга"}
             </pre>
           </div>
         </div>

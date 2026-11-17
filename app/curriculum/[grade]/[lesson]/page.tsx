@@ -13,6 +13,7 @@ import { lessonFlowMode } from "@/lib/curriculum/flow";
 import workspace from "../../workbench.module.css";
 import PracticeRunner from "../../_components/PracticeRunner";
 import PracticeLadder from "../../_components/PracticeLadder";
+import ShopMapLesson from "../../_components/ShopMapLesson";
 import {
   lessonPractice,
   practiceLanguage,
@@ -179,6 +180,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
                   ),
                 )}
               </section>
+
+              {entry.id === "shop-map" && <ShopMapLesson />}
 
               <section className={styles.block}>
                 <h2>Өөрөө туршаарай</h2>
